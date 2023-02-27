@@ -9,7 +9,7 @@ interface Court extends CreationDeletionInfo {
   stands: boolean;
   roof: boolean;
   double: boolean;
-  club: Club;
+  club: string;
 }
 
 class Court extends BaseEntity {}

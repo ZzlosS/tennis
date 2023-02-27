@@ -4,10 +4,10 @@ import { Court } from "./courts";
 import { Player } from "./player";
 
 interface Match extends CreationDeletionInfo {
-  firstTeam: Player[];
-  secondTeam: Player[];
+  firstTeam: string[];
+  secondTeam: string[];
   result: [number, number];
-  court: Court;
+  court: string;
   date: Date;
 }
 
