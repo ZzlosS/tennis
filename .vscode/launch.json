@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "command": "npm run watch-node",
+          "name": "Run npm watch",
+          "request": "launch",
+          "type": "node-terminal"
+      },
+  ]
+}
