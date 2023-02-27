@@ -1,5 +1,6 @@
 import CourtSurface from "../enums/courtSurface";
 import BaseEntity from "./baseEntity";
+import { Club } from "./club";
 import CreationDeletionInfo from "./interfaces/ICreationDeletionInfo";
 
 interface Court extends CreationDeletionInfo {
@@ -8,6 +9,7 @@ interface Court extends CreationDeletionInfo {
   stands: boolean;
   roof: boolean;
   double: boolean;
+  club: Club;
 }
 
 class Court extends BaseEntity {}

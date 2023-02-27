@@ -7,7 +7,7 @@ interface Club extends CreationDeletionInfo {
   address: string;
   city: string;
   country: string;
-  // courts: Courts[];
+  courts: number;
 }
 
 class Club extends BaseEntity {}
