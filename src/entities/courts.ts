@@ -10,6 +10,7 @@ interface Court extends CreationDeletionInfo {
   roof: boolean;
   double: boolean;
   club: string;
+  pricePerHour: number;
 }
 
 class Court extends BaseEntity {}
