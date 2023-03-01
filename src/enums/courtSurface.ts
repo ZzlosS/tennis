@@ -1,6 +1,6 @@
 enum CourtSurface {
-  GRASS,
-  CLAY,
-  HARD,
+  GRASS="GRASS",
+  CLAY="CLAY",
+  HARD="HARD",
 }
 export default CourtSurface;

@@ -1,8 +1,8 @@
 enum PlayerLevel {
-  NEWBIE,
-  BEGINNER,
-  INTERMEDIATE,
-  ADVANCED,
-  PRO,
+  NEWBIE = "NEWBIE",
+  BEGINNER = "BEGINNER",
+  INTERMEDIATE = "INTERMEDIATE",
+  ADVANCED = "ADVANCED",
+  PRO = "PRO",
 }
 export default PlayerLevel;

@@ -9,7 +9,7 @@ interface Player extends CreationDeletionInfo {
   email: string;
   nickname: string;
   level: PlayerLevel;
-  rackets: string[]; // change to Racket class
+  rackets: string[]; 
   address: string;
   city: string;
   country: string;

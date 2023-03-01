@@ -1,6 +1,6 @@
 enum RacketLevels {
-  JUNIOR,
-  RECREATIONAL,
-  PROFESSIONAL,
+  JUNIOR="JUNIOR",
+  RECREATIONAL="RECREATIONAL",
+  PROFESSIONAL="PROFESSIONAL",
 }
 export default RacketLevels;
