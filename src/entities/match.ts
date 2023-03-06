@@ -1,7 +1,7 @@
 import BaseEntity from "./baseEntity";
 import CreationDeletionInfo from "./interfaces/ICreationDeletionInfo";
 
-interface Match extends CreationDeletionInfo {
+interface Match {
   firstTeam: string[];
   secondTeam: string[];
   result: string[];

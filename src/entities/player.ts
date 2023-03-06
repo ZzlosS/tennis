@@ -1,15 +1,13 @@
 import PlayerLevel from "../enums/playerLevel";
 import BaseEntity from "./baseEntity";
-import CreationDeletionInfo from "./interfaces/ICreationDeletionInfo";
-import { Racket } from "./racket";
 
-interface Player extends CreationDeletionInfo {
+interface Player {
   firstName: string;
   lastName: string;
   email: string;
   nickname: string;
   level: PlayerLevel;
-  rackets: string[]; 
+  rackets: string[];
   address: string;
   city: string;
   country: string;

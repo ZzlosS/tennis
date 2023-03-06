@@ -1,8 +1,7 @@
 import RacketLevels from "../enums/racketLevels";
 import BaseEntity from "./baseEntity";
-import CreationDeletionInfo from "./interfaces/ICreationDeletionInfo";
 
-interface Racket extends CreationDeletionInfo {
+interface Racket {
   brand: string;
   model: string;
   year: number;

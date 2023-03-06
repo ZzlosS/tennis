@@ -14,4 +14,3 @@ interface Club extends CreationDeletionInfo {
 class Club extends BaseEntity {}
 
 export { Club };
- 

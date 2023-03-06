@@ -1,7 +1,7 @@
 import BookingType from "../enums/bookingType";
 import BaseEntity from "./baseEntity";
 
-interface Bookings extends CreationDeletionInfo {
+interface Booking extends CreationDeletionInfo {
   court: string;
   from: number;
   to: number;
@@ -10,5 +10,5 @@ interface Bookings extends CreationDeletionInfo {
   bookingType: BookingType;
 }
 
-class Bookings extends BaseEntity {}
-export { Bookings };
+class Booking extends BaseEntity {}
+export { Booking };
