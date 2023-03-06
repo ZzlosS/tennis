@@ -1,7 +1,7 @@
 
 export default interface CreationDeletionInfo {
-  uuid: string;
-  createdAt: number;
+  uuid: string | null;
+  createdAt: number | null;
   deleted: boolean;
-  deletedAt: number;
+  deletedAt: number | null;
 }
