@@ -1,4 +1,4 @@
-import PlayerDto from "../dto/playerDto";
+import PlayerDto from "../dtos/playerDto";
 import { Player } from "../entities/player";
 import PlayerLevel from "../enums/playerLevel";
 import { playerSchema } from "../schemas/playerSchema";
