@@ -1,7 +1,7 @@
 import BookingType from "../enums/bookingType";
 import BaseEntity from "./baseEntity";
 
-interface Booking extends CreationDeletionInfo {
+interface Booking {
   court: string;
   from: number;
   to: number;

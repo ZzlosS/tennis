@@ -1,8 +1,6 @@
-import CourtSurface from "../enums/courtSurface";
 import BaseEntity from "./baseEntity";
-import CreationDeletionInfo from "./interfaces/ICreationDeletionInfo";
 
-interface Club extends CreationDeletionInfo {
+interface Club {
   name: string;
   address: string;
   description: string;
