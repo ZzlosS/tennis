@@ -64,4 +64,9 @@ export default class BaseRepository<T extends BaseEntity> {
     e.createdAt = new Date().getTime();
     return e;
   }
+
+  async findAll() {
+    await this.initializeRepository();
+    return await this.repository.search().return.all();
+  }
 }

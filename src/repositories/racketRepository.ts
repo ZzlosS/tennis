@@ -30,6 +30,7 @@ export default class RacketRepository extends BaseRepository<Racket> {
 
   async createRacket(data: RacketDto) {
     const racket = await this.createEntity();
+
     racket.brand = data.brand;
     racket.model = data.model;
     racket.year = data.year;
@@ -39,7 +40,8 @@ export default class RacketRepository extends BaseRepository<Racket> {
     racket.balance = data.balance;
     racket.stringPattern = data.stringPattern;
     racket.recommendedStrings = data.recommendedStrings;
-    console.log('🚀 ~ RacketRepository ~ createRacket ~ racket:', racket);
+
     return await this.save(racket);
   }
+
 }
