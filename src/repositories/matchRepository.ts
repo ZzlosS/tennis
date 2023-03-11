@@ -12,6 +12,7 @@ export default class MatchRepository extends BaseRepository<Match> {
   async createMatch(dto: MatchDto) {
     const match = await this.createEntity();
 
+    match.bookingEntityID = dto.bookingEntityID;
     match.firstTeam = dto.firstTeam;
     match.secondTeam = dto.secondTeam;
     match.result = dto.result;
