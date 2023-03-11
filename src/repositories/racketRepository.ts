@@ -20,26 +20,26 @@ export default class RacketRepository extends BaseRepository<Racket> {
     return rackets;
   }
 
-  async getRacketsByBrand(brand: string) {
+  async findRacketsByBrand(brand: string) {
     return await this.findAllByField(brand, "brand");
   }
 
-  async getRacketsByLevel(level: RacketLevels) {
+  async findRacketsByLevel(level: RacketLevels) {
     return await this.findAllByField(level, "level");
   }
 
-  async createRacket(data: RacketDto) {
+  async createRacket(dto: RacketDto) {
     const racket = await this.createEntity();
 
-    racket.brand = data.brand;
-    racket.model = data.model;
-    racket.year = data.year;
-    racket.brand = data.brand;
-    racket.level = data.level;
-    racket.headSizeInch = data.headSizeInch;
-    racket.balance = data.balance;
-    racket.stringPattern = data.stringPattern;
-    racket.recommendedStrings = data.recommendedStrings;
+    racket.brand = dto.brand;
+    racket.model = dto.model;
+    racket.year = dto.year;
+    racket.brand = dto.brand;
+    racket.level = dto.level;
+    racket.headSizeInch = dto.headSizeInch;
+    racket.balance = dto.balance;
+    racket.stringPattern = dto.stringPattern;
+    racket.recommendedStrings = dto.recommendedStrings;
 
     return await this.save(racket);
   }

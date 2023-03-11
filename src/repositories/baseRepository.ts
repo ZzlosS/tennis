@@ -44,6 +44,11 @@ export default class BaseRepository<T extends BaseEntity> {
     return await this.repository.search().where(field).equal(value).return.all();
   }
 
+  async findAllByDate(value: Date | string | number, field: string) {
+    await this.initializeRepository();
+    return await this.repository.search().where(field).on(value).return.all();
+  }
+
   async findByUUID(uuid: string) {
     await this.initializeRepository();
     return this.findFirstByField(uuid, "uuid");
@@ -68,5 +73,20 @@ export default class BaseRepository<T extends BaseEntity> {
   async findAll() {
     await this.initializeRepository();
     return await this.repository.search().return.all();
+  }
+
+  async findByEntityID(entityID: string) {
+    await this.initializeRepository();
+    return await this.repository.fetch(entityID);
+  }
+
+  async deleteEntity(entityID: string) {
+    await this.initializeRepository();
+    const entity = await this.repository.fetch(entityID);
+
+    entity.deleted = true;
+    entity.deletedAt = new Date().getTime();
+
+    return await this.repository.save(entity);
   }
 }
