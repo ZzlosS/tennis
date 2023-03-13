@@ -9,6 +9,8 @@ interface Club {
   courts: number;
 }
 
-class Club extends BaseEntity {}
+class Club extends BaseEntity {
+  courts: number = 0;
+}
 
 export { Club };
