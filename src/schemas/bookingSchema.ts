@@ -1,7 +1,7 @@
 import { Schema } from "redis-om";
 import { Booking } from "../entities/booking";
 
-let courtSchema = new Schema(Booking, {
+let bookingSchema = new Schema(Booking, {
   uuid: { type: "string" },
   court: { type: "string" },
   from: { type: "number" },
@@ -13,3 +13,5 @@ let courtSchema = new Schema(Booking, {
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },
 });
+
+export { bookingSchema };
