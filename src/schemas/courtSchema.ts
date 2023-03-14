@@ -3,7 +3,7 @@ import { Court } from "../entities/court";
 
 let courtSchema = new Schema(Court, {
   uuid: { type: "string" },
-  name: { type: "boolean" },
+  name: { type: "string" },
   surface: { type: "string" },
   stands: { type: "boolean" },
   roof: { type: "boolean" },
