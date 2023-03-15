@@ -8,6 +8,7 @@ let bookingSchema = new Schema(Booking, {
   to: { type: "number" },
   totalPrice: { type: "number" },
   player: { type: "string" },
+  date: {type: "date"},
   bookingType: { type: "string" },
   createdAt: { type: "number" },
   deleted: { type: "boolean" },

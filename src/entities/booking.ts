@@ -8,6 +8,7 @@ interface Booking {
   totalPrice: number;
   player: string;
   bookingType: BookingType;
+  date: Date;
 }
 
 class Booking extends BaseEntity {}

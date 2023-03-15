@@ -7,4 +7,5 @@ export default interface BookingDto {
   totalPrice: number;
   player: string;
   bookingType: BookingType;
+  date: Date;
 }
