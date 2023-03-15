@@ -7,7 +7,6 @@ let matchSchema = new Schema(Match, {
   secondTeam: { type: "string[]" },
   result: { type: "string[]" },
   court: { type: "string" },
-  date: { type: "date" },
   createdAt: { type: "number" },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },
