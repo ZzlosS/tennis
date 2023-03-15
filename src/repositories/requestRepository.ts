@@ -3,7 +3,7 @@ import { EnemyRequest } from "../entities/requestEnemy";
 import { enemyRequestSchema } from "../schemas/enemyRequestSchema";
 import BaseRepository from "./baseRepository";
 
-export default class RequestRepository extends BaseRepository<EnemyRequest> {
+export default class RequestEnemyRepository extends BaseRepository<EnemyRequest> {
   constructor() {
     super(enemyRequestSchema);
   }
@@ -21,12 +21,16 @@ export default class RequestRepository extends BaseRepository<EnemyRequest> {
   }
 
   async enemyRequestAccepted(enemyRequestEntityID: string, playerEntityID: string) {
+    await this.initializeRepository();
     const enemyRequest = await this.repository.fetch(enemyRequestEntityID);
 
     enemyRequest.acceptedBy.push(playerEntityID);
+    
     if (enemyRequest.acceptedBy.length == enemyRequest.numberOfPlayersNeeded) {
       enemyRequest.active = true;
     }
+    
+    enemyRequest.acceptedBy = [...new Set(enemyRequest.acceptedBy)];
 
     return await this.repository.save(enemyRequest);
   }
