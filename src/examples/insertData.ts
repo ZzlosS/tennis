@@ -11,6 +11,11 @@ import CourtRepository from "../repositories/courtRepository";
 import CourtDto from "../dtos/courtDto";
 import CourtSurface from "../enums/courtSurface";
 import PlayerDto from "../dtos/playerDto";
+import BookingType from "../enums/bookingType";
+import BookingDto from "../dtos/bookingDTO";
+import { EnemyRequest } from "../entities/requestEnemy";
+import RequestEnemyRepository from "../repositories/requestRepository";
+import EnemyRequestDto from "../dtos/enemyRequestDto";
 
 function capitalizeFirstLetter(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -76,23 +81,54 @@ export async function insertPlayer(): Promise<string> {
 }
 
 export async function insertRacket(): Promise<string> {
-  // const dto: RacketDto = {
-  // };
+  const dto: RacketDto = {
+    brand: "Wilson",
+    model: "SixOne Team 95",
+    year: 2015,
+    weight: 308,
+    level: RacketLevels.RECREATIONAL,
+    headSizeInch: 95,
+    balance: 10,
+    stringPattern: "18x20",
+    recommendedStrings: "TF Red Code",
+  };
+  console.table(dto);
 
-  return "";
+  const repo = new RacketRepository();
+  const entityId = await repo.createRacket(dto);
+
+  return entityId;
 }
 export async function insertMatch(): Promise<string> {
   return "";
 }
+
 export async function insertRequest(): Promise<string> {
-  return "";
+  const requestRepo = new RequestEnemyRepository();
+  const dto: EnemyRequestDto = {
+    bookingEntityID: "01GVKN4YJH7Q6J9H34QYQ4S8RS",
+    playerEntityID: "01GVKB4S5JZRW4934ZFF4KD7HT",
+    numberOfPlayersNeeded: 1,
+    acceptedBy: [],
+    active: true
+  };
+  const entityId = await requestRepo.createEnemyRequest(dto);
+  return entityId;
 }
+
 export async function insertBooking(): Promise<string> {
-  return "";
-  // const bookingRepo = new BookingRepository();
-  // const dto = {
-  // } as BookingDto;
-  // const b = bookingRepo.createBooking();
+  const bookingRepo = new BookingRepository();
+  const dto: BookingDto = {
+    court: "01GVGWHR6FFK7WBKXY84QQQ3XT",
+    from: 15,
+    to: 17,
+    totalPrice: 1950 * 2,
+    player: "01GTSQTVPB5TJ0AWFP7YE6WVEN",
+    bookingType: BookingType.ONE_TIME,
+    date: new Date()
+  };
+  const entityId= bookingRepo.createBooking(dto);
+  return entityId;
 }
 
 async function assignUnassigned() {
