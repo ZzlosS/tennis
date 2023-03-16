@@ -32,6 +32,7 @@ export default class PlayerRepository extends BaseRepository<Player> {
     player.firstName = dto.firstName;
     player.lastName = dto.lastName;
     player.email = dto.email;
+    player.password = dto.password;
     player.nickname = dto.nickname;
     player.level = dto.level;
     player.address = dto.address;
