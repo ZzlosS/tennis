@@ -14,7 +14,7 @@ app.get("/", async (req: Request, res: Response) => {
   res.send("TS App is Running");
 });
 
-// app.use("/player", playerRouter);
+app.use("/player", playerRouter);
 
 // Error handlers
 app.use(errorLogger);

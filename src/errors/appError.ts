@@ -1,5 +1,5 @@
 // Error object used in error handling middleware function
-class AppError extends Error {
+export default class AppError extends Error {
   statusCode: number;
 
   constructor(statusCode: number, message: string) {

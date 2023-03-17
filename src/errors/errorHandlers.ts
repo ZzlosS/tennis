@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import AppError from "./appError";
 
 const errorLogger = (error: Error, request: Request, response: Response, next: NextFunction) => {
   console.log(`error ${error.message}`);
@@ -14,12 +15,12 @@ const errorResponder = (
   response.header("Content-Type", "application/json");
 
   const status = error.statusCode || 400;
-  response.status(status).send(error.message);
+  return response.json({ message: error.message }).status(status);
 };
 
 const invalidPathHandler = (request: Request, response: Response, next: NextFunction) => {
   response.status(404);
-  response.send("invalid path");
+  return response.json({ message: "invalid path" });
 };
 
 export { errorLogger, errorResponder, invalidPathHandler };
