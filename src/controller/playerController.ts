@@ -3,6 +3,7 @@ import PlayerRepository from "../repositories/playerRepository";
 const jwt = require("jsonwebtoken");
 import express, { Request, Response } from "express";
 import PlayerDto from "../dtos/playerDto";
+require("dotenv").config();
 
 export default class PlayerController {
   repository: PlayerRepository;
@@ -12,20 +13,21 @@ export default class PlayerController {
   }
 
   async register(req: Request, res: Response) {
+    console.log( process.env.TOKEN_KEY);
     try {
       const { firstName, lastName, email, password, address, city } = req.body as PlayerDto;
 
       // Validate user input
       if (!(email && password && firstName && lastName)) {
-        res.status(400).send("All input is required");
+        return res.status(400).json({ message: "All input is required" });
       }
 
       const existingUser = await this.repository.findByEmail(email);
       if (existingUser) {
-        return res.status(409).send("User already exist!");
+        return res.status(409).json({ message: "User already exist!" });
       }
 
-      const encryptedPassword = password;
+      const encryptedPassword = password; // ! Add encryption !
       const user = await this.repository.createAndSave({
         firstName: firstName,
         lastName: lastName,
