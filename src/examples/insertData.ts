@@ -12,7 +12,7 @@ import CourtDto from "../dtos/courtDto";
 import CourtSurface from "../enums/courtSurface";
 import PlayerDto from "../dtos/playerDto";
 import BookingType from "../enums/bookingType";
-import BookingDto from "../dtos/bookingDTO";
+import BookingDto from "../dtos/bookingDto";
 import { EnemyRequest } from "../entities/requestEnemy";
 import RequestEnemyRepository from "../repositories/requestRepository";
 import EnemyRequestDto from "../dtos/enemyRequestDto";
@@ -67,6 +67,7 @@ export async function insertPlayer(): Promise<string> {
   const dto: PlayerDto = {
     firstName: firstName,
     lastName: lastName,
+    password: faker.internet.password(),
     email: faker.internet.email(firstName, lastName).toLowerCase(),
     nickname: faker.internet.userName(firstName, lastName).toLowerCase(),
     level: faker.helpers.arrayElement(Object.values(PlayerLevel)),
@@ -157,11 +158,16 @@ async function assignUnassigned() {
 
 }
 
-
-async () => {
-  const playerRepository = new PlayerRepository();
+export default async function insert() {
+  // await insertCourt();
+  // await insertClub();
+  // await insertPlayer();
+}
+async function insertRackets ()  {
+  // const playerRepository = new PlayerRepository();
   const racketRepository = new RacketRepository();
-  const player = await playerRepository.findByEmail("test@test.com");
+  // const player = await playerRepository.findByEmail("test@test.com");
+  // console.log(player)
 
   const dto: RacketDto = {
     brand: "Head",
@@ -179,14 +185,14 @@ async () => {
   const head360 = await racketRepository.createRacket(dto);
   console.log("head ", head360);
 
-  const aero = await racketRepository.findByUUID("2293af3c-c139-4f65-a73e-375133e5ee5b");
-  console.log("aero.entityId ", aero.entityId);
+  // const aero = await racketRepository.findByUUID("2293af3c-c139-4f65-a73e-375133e5ee5b");
+  // console.log("aero.entityId ", aero.entityId);
 
-  const result1 = await playerRepository.assignRacketToPlayer(player, head360);
-  console.log("🚀 ~ result1:", result1);
+  // const result1 = await playerRepository.assignRacketToPlayer(player, head360);
+  // console.log("🚀 ~ result1:", result1);
 
-  const result2 = await playerRepository.assignRacketToPlayer(player, aero.entityId);
-  console.log("🚀 ~ result2:", result2);
+  // const result2 = await playerRepository.assignRacketToPlayer(player, aero.entityId);
+  // console.log("🚀 ~ result2:", result2);
 
   const dto2: RacketDto = {
     brand: "Wilson",
@@ -243,39 +249,39 @@ async () => {
   await racketRepository.save(drive);
   console.log("🚀 ~ drive.uuid:", drive.uuid);
 
-  const playerG = await playerRepository.createEntity();
-  console.log("EID:", player.entityId);
-  playerG.firstName = "Gocy";
-  playerG.lastName = "Stojadinovic";
-  playerG.email = "test@test.com";
-  playerG.nickname = "Goxy";
-  playerG.level = PlayerLevel.NEWBIE;
-  playerG.address = "Parikse Komune 61";
-  playerG.city = "NBGD";
-  playerG.city = "Serbia";
-  playerG.rackets = ["01GTSQC7WBNXM8WH21CMRQGNKP", "01GTSQBR5HZYVHDA8VJEXKQ8D4"];
-  playerRepository.save(playerG);
+  // const playerG = await playerRepository.createEntity();
+  // console.log("EID:", player.entityId);
+  // playerG.firstName = "Gocy";
+  // playerG.lastName = "Stojadinovic";
+  // playerG.email = "test@test.com";
+  // playerG.nickname = "Goxy";
+  // playerG.level = PlayerLevel.NEWBIE;
+  // playerG.address = "Parikse Komune 61";
+  // playerG.city = "NBGD";
+  // playerG.city = "Serbia";
+  // playerG.rackets = ["01GTSQC7WBNXM8WH21CMRQGNKP", "01GTSQBR5HZYVHDA8VJEXKQ8D4"];
+  // playerRepository.save(playerG);
 
-  const racketsData = await racketRepository.getUserRackets([
-    "01GTSQC7WBNXM8WH21CMRQGNKP",
-    "01GTSQBR5HZYVHDA8VJEXKQ8D4",
-  ]);
-  racketsData.forEach((e) => console.log(e.entityId));
+  // const racketsData = await racketRepository.getUserRackets([
+  //   "01GTSQC7WBNXM8WH21CMRQGNKP",
+  //   "01GTSQBR5HZYVHDA8VJEXKQ8D4",
+  // ]);
+  // racketsData.forEach((e) => console.log(e.entityId));
 };
 
 // const client = await new Client().open("redis://@127.0.0.1:6379");
 // console.log("🚀 ~ client.isOpen()", client.isOpen());
 // const repository: Repository<Users> = client.fetchRepository(usersSchema);
 // repository.createIndex();
-// // let u = await repository.createAndSave({
-// //   firstName: 'firstName',
-// //   lastName: 'lastName',
-// //   password: 'password',
-// //   email: 'email',
-// //   // city: 'city',
-// //   // address: 'address',
-// // });
-// // console.log('Entered: ', u.entityId);
+// let u = await repository.createAndSave({
+//   firstName: 'firstName',
+//   lastName: 'lastName',
+//   password: 'password',
+//   email: 'email',
+// city: 'city',
+// address: 'address',
+// });
+// console.log('Entered: ', u.entityId);
 
 // const repositoryItems: Repository<Items> = client.fetchRepository(itemsSchema);
 // repositoryItems.createIndex();

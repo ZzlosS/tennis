@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
       {
-          "command": "npm run watch-node",
+          "command": "npm run watch",
           "name": "Run npm watch",
           "request": "launch",
           "type": "node-terminal"
@@ -19,6 +19,27 @@
         ],
         "args": [
           "src/app.ts"
+        ],
+        "cwd": "${workspaceRoot}",
+        "internalConsoleOptions": "openOnSessionStart",
+        "skipFiles": [
+          "<node_internals>/**",
+          "node_modules/**"
+        ],
+        "env": {}
+      },
+      {
+        "name": "Insert",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "node",
+        "runtimeArgs": [
+          "--nolazy",
+          "-r",
+          "ts-node/register/transpile-only"
+        ],
+        "args": [
+          "src/examples/insertData.ts"
         ],
         "cwd": "${workspaceRoot}",
         "internalConsoleOptions": "openOnSessionStart",

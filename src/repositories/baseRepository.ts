@@ -15,7 +15,7 @@ export default class BaseRepository<T extends BaseEntity> {
 
   async openConnection() {
     if (!this.client.isOpen()) {
-      this.client = await this.client.open("redis://@127.0.0.1:6379");
+      this.client = await this.client.open("redis://localhost:6379");
     }
   }
 

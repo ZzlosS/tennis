@@ -1,5 +1,5 @@
 import { Search } from "redis-om";
-import BookingDto from "../dtos/bookingDTO";
+import BookingDto from "../dtos/bookingDto";
 import BookingFilterDto from "../dtos/bookingFilterDto";
 import { Booking } from "../entities/booking";
 import { bookingSchema } from "../schemas/bookingSchema";

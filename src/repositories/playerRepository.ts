@@ -15,7 +15,11 @@ export default class PlayerRepository extends BaseRepository<Player> {
   }
 
   async findPlayersByLevel(level: PlayerLevel): Promise<Player[]> {
-    return await this.findAllByField('level', level);
+    return await this.findAllByField(level, 'level');
+  }
+
+  async findPlayersByCity(city: string): Promise<Player[]> {
+    return await this.findAllByField(city, 'city');
   }
 
   async assignRacketToPlayer(player: Player, racketEID: string): Promise<string> {

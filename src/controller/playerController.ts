@@ -1,10 +1,24 @@
 import { Player } from "../entities/player";
 import PlayerRepository from "../repositories/playerRepository";
 const jwt = require("jsonwebtoken");
-import express, { Request, Response } from "express";
 import PlayerDto from "../dtos/playerDto";
+import ILoginRequest from "../requests/loginRequest";
+import {  Route, Get, Post, Body, Query, Path, ValidateError, Response } from "tsoa";
+import { registerSchema } from "class-validator";
+import IRegisterRequest from "../requests/registerRequest";
+import PlayerLevel from "../enums/playerLevel";
+import IPlayersResponse from "../responses/playersResponse";
+import AppError, { NotFoundError } from "../errors/appError";
+
 require("dotenv").config();
 
+
+interface DefaultResponse {
+  message: string;
+  data: object;
+}
+
+@Route("player")
 export default class PlayerController {
   repository: PlayerRepository;
 
@@ -12,79 +26,108 @@ export default class PlayerController {
     this.repository = new PlayerRepository();
   }
 
-  async register(req: Request, res: Response) {
-    console.log( process.env.TOKEN_KEY);
-    try {
-      const { firstName, lastName, email, password, address, city } = req.body as PlayerDto;
+  @Post("/register")
+  async register(@Body() registerRequest: IRegisterRequest): Promise<any> {
+    const { firstName, lastName, email, password, address, city } = registerRequest;
 
-      // Validate user input
-      if (!(email && password && firstName && lastName)) {
-        return res.status(400).json({ message: "All input is required" });
-      }
+    // Validate user input
+    if (!(email && password && firstName && lastName)) {
+      return { message: "All input is required", data: {} };
+    }
 
-      const existingUser = await this.repository.findByEmail(email);
-      if (existingUser) {
-        return res.status(409).json({ message: "User already exist!" });
-      }
+    const existingUser = await this.repository.findByEmail(email);
+    if (existingUser) {
+      return { message: "User already exist!", data: {} };
+    }
 
-      const encryptedPassword = password; // ! Add encryption !
-      const user = await this.repository.createAndSave({
-        firstName: firstName,
-        lastName: lastName,
-        password: encryptedPassword,
-        email: email,
-        city: city,
-        address: address,
-      });
+    // Todo: ! Add encryption !
+    const encryptedPassword = password; 
+    const user = await this.repository.createAndSave({
+      firstName: firstName,
+      lastName: lastName,
+      password: encryptedPassword,
+      email: email,
+      city: city,
+      address: address,
+    });
 
-      console.log(user.entityId);
+    // Create token
+    const token = jwt.sign({ user_id: user.entityId, email }, process.env.TOKEN_KEY, {
+      expiresIn: "2h",
+    });
 
-      // Create token
-      const token = jwt.sign({ user_id: user.entityId, email }, process.env.TOKEN_KEY, {
-        expiresIn: "2h",
-      });
-      console.log("🚀 ~ UserController ~ token", token);
-
-      return res.status(201).json({
-        token: token,
-        email: user.email,
-      });
-    } catch (error) {
-      console.log("error", error);
-      return res.status(404);
+    return {
+      token: token,
+      email: user.email,
     }
   }
-  async login(req: Request, res: Response) {
-    try {
-      const { email, password } = req.body;
 
-      // Validate user input
-      if (!(email && password)) {
-        res.status(400).send("All input is required");
-      }
 
-      const player = await this.repository.findByEmail(email);
+  @Get("/city/{city}")
+  async getPlayersByCity(@Path() city: string): Promise<IPlayersResponse[]>  {
+    const players = await this.repository.findPlayersByCity(city);
+    const data = players.map(player  => {
+        return {
+            firstName: player.firstName,
+            lastName: player.lastName,
+            nickname: player.nickname,
+            level: player.level,
+            city: player.city,
+            address: player.address,
+            country: player.country,
+        } as IPlayersResponse;
+    });
 
-      if (!player) {
-        return res.status(404);
-      }
+    return data;
+  }
 
-      if (player && password == player.password) {
-        // Create token
-        const token = jwt.sign({ user_id: player.entityId, email }, process.env.TOKEN_KEY, {
-          expiresIn: "2h",
-        });
 
-        return res.status(201).json({
-          token: token,
-          email: player.email,
-        });
-      } else {
-        res.status(400).send("Invalid Credentials");
-      }
-    } catch (error) {
-      console.log("error", error);
-      return res.status(404);
+  @Get("/level/{level}")
+  async getPlayersByLevel(@Path() level: PlayerLevel): Promise<IPlayersResponse[]> {
+    const players = await this.repository.findPlayersByLevel(level);
+    const data = players.map(player  => {
+        return {
+            firstName: player.firstName,
+            lastName: player.lastName,
+            nickname: player.nickname,
+            level: player.level,
+            city: player.city,
+            address: player.address,
+            country: player.country,
+        } as IPlayersResponse;
+    });
+
+    return data;
+  }
+
+  @Response<AppError>(400, "Validation Failed")
+  @Response<NotFoundError>(404, "User not found")
+  @Post("/login")
+  async login(@Body() loginRequest: ILoginRequest): Promise<IPlayersResponse | any> {
+    const { email, password } = loginRequest;
+
+    // Validate user input
+    if (!(email && password)) {
+      // raise ValidationError
+      throw new AppError(400, 'Email or password not found!');
+      return { message: "All input is required", data: {} };
+    }
+
+    const player = await this.repository.findByEmail(email);
+
+    if (!player) {
+      // raise NotFoundError
+      throw new NotFoundError('Player not found');
+    }
+
+    // Todo: ! Add encryption !
+    if (player && password == player.password) {
+      // Create token
+      const token = jwt.sign({ user_id: player.entityId, email }, process.env.TOKEN_KEY, {
+        expiresIn: "2h",
+      });
+
+      return token;
     }
   }
 }

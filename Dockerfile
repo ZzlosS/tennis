@@ -4,11 +4,14 @@ WORKDIR /usr
 
 COPY package.json ./
 COPY tsconfig.json ./
+COPY tsoa.json ./
 COPY src ./src
+COPY env ./env
 
 RUN ls -a
 
 RUN npm install
+RUN npm run build
 
 EXPOSE 4005
 

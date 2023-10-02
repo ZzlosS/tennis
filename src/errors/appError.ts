@@ -11,3 +11,9 @@ export default class AppError extends Error {
     Error.captureStackTrace(this);
   }
 }
+
+export class NotFoundError extends AppError {
+  constructor(message: string = 'Not Found') {
+    super(404, message);
+  }
+}
