@@ -1,5 +1,4 @@
 import { CreateRacketRequest } from "../controller/racketController";
-import RacketDto from "../dtos/racketDto";
 import { Racket } from "../entities/racket";
 import RacketLevels from "../enums/racketLevels";
 import { racketSchema } from "../schemas/racketSchema";
