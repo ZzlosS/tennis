@@ -1,5 +1,5 @@
-import ClubDto from "../dtos/clubDto";
 import { Club } from "../entities/club";
+import ClubCreateRequest from "../requests/clubCreateRequest";
 import { clubSchema } from "../schemas/clubSchema";
 import BaseRepository from "./baseRepository";
 
@@ -8,14 +8,14 @@ export default class ClubRepository extends BaseRepository<Club> {
     super(clubSchema)
   }
 
-  async createClub(dto: ClubDto) {
+  async createClub(createRequest: ClubCreateRequest) {
     const club = await this.createEntity();
     
-    club.name = dto.name;
-    club.address = dto.address;
-    club.description = dto.description;
-    club.city = dto.city;
-    club.country = dto.country;
+    club.name = createRequest.name;
+    club.address = createRequest.address;
+    club.description = createRequest.description;
+    club.city = createRequest.city;
+    club.country = createRequest.country;
 
     return await this.repository.save(club);
   }

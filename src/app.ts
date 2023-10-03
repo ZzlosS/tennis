@@ -6,6 +6,7 @@ import { errorLogger, errorResponder, invalidPathHandler, requestLogger } from "
 import swaggerUi from "swagger-ui-express";
 import insert from "./examples/insertData";
 import racketRouter from "./router/racketRouter";
+import clubRouter from "./router/clubRouter";
 
 require("dotenv").config();
 
@@ -37,6 +38,7 @@ app.get("/", async (req: Request, res: Response) => {
 
 app.use("/players", playerRouter);
 app.use("/rackets", racketRouter);
+app.use("/clubs", clubRouter);
 app.use("/", pingRouter);
 
 // Error handlers
