@@ -1,6 +1,5 @@
 import express from "express";
 import PingController from "../controller/ping";
-import { authenticateToken } from "../middleware/auth";
 
 const router = express.Router();
 

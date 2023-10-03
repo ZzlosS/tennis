@@ -1,3 +1,4 @@
+import { CreateRacketRequest } from "../controller/racketController";
 import RacketDto from "../dtos/racketDto";
 import { Racket } from "../entities/racket";
 import RacketLevels from "../enums/racketLevels";
@@ -20,15 +21,17 @@ export default class RacketRepository extends BaseRepository<Racket> {
     return rackets;
   }
 
+  // ?
   async findRacketsByBrand(brand: string) {
     return await this.findAllByField(brand, "brand");
   }
 
+  // ?
   async findRacketsByLevel(level: RacketLevels) {
     return await this.findAllByField(level, "level");
   }
 
-  async createRacket(dto: RacketDto) {
+  async createRacket(dto: CreateRacketRequest) {
     const racket = await this.createEntity();
 
     racket.brand = dto.brand;

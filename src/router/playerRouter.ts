@@ -17,10 +17,15 @@ playerRouter.post("/register", async (req: Request, res: Response) => {
   return res.send(response);
 });
 
-
 playerRouter.get("/level/:level", authenticateToken, async (req: Request, res: Response) => {
   const controller = new PlayerController();
   const response = await controller.getPlayersByLevel(req.params['level'] as PlayerLevel);
+  return res.send(response);
+});
+
+playerRouter.get("/city/:city", authenticateToken, async (req: Request, res: Response) => {
+  const controller = new PlayerController();
+  const response = await controller.getPlayersByCity(req.params['city']);
   return res.send(response);
 });
 

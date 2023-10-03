@@ -171,6 +171,126 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"RacketLevels": {
+				"enum": [
+					"JUNIOR",
+					"RECREATIONAL",
+					"PROFESSIONAL"
+				],
+				"type": "string"
+			},
+			"RacketResponse": {
+				"properties": {
+					"brand": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"year": {
+						"type": "number",
+						"format": "double"
+					},
+					"weight": {
+						"type": "number",
+						"format": "double"
+					},
+					"level": {
+						"$ref": "#/components/schemas/RacketLevels"
+					},
+					"headSizeInch": {
+						"type": "number",
+						"format": "double"
+					},
+					"balance": {
+						"type": "number",
+						"format": "double"
+					},
+					"stringPattern": {
+						"type": "string"
+					},
+					"recommendedStrings": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"brand",
+					"model",
+					"year",
+					"weight",
+					"level",
+					"headSizeInch",
+					"balance",
+					"stringPattern",
+					"recommendedStrings"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateRacketRequest": {
+				"properties": {
+					"brand": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"year": {
+						"type": "number",
+						"format": "double"
+					},
+					"weight": {
+						"type": "number",
+						"format": "double"
+					},
+					"level": {
+						"$ref": "#/components/schemas/RacketLevels"
+					},
+					"headSizeInch": {
+						"type": "number",
+						"format": "double"
+					},
+					"balance": {
+						"type": "number",
+						"format": "double"
+					},
+					"stringPattern": {
+						"type": "string"
+					},
+					"recommendedStrings": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"brand",
+					"model",
+					"year",
+					"weight",
+					"level",
+					"headSizeInch",
+					"balance",
+					"stringPattern",
+					"recommendedStrings"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AssignRequest": {
+				"properties": {
+					"playerEid": {
+						"type": "string"
+					},
+					"racketEid": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"playerEid",
+					"racketEid"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -185,7 +305,7 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/player/register": {
+		"/players/register": {
 			"post": {
 				"operationId": "Register",
 				"responses": {
@@ -198,6 +318,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Players"
+				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -212,7 +335,7 @@
 				}
 			}
 		},
-		"/player/city/{city}": {
+		"/players/city/{city}": {
 			"get": {
 				"operationId": "GetPlayersByCity",
 				"responses": {
@@ -230,6 +353,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Players"
+				],
 				"security": [],
 				"parameters": [
 					{
@@ -243,7 +369,7 @@
 				]
 			}
 		},
-		"/player/level/{level}": {
+		"/players/level/{level}": {
 			"get": {
 				"operationId": "GetPlayersByLevel",
 				"responses": {
@@ -261,6 +387,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Players"
+				],
 				"security": [],
 				"parameters": [
 					{
@@ -274,7 +403,7 @@
 				]
 			}
 		},
-		"/player/login": {
+		"/players/login": {
 			"post": {
 				"operationId": "Login",
 				"responses": {
@@ -314,6 +443,9 @@
 						}
 					}
 				},
+				"tags": [
+					"Players"
+				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -343,8 +475,123 @@
 						}
 					}
 				},
+				"tags": [
+					"Ping"
+				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/rackets": {
+			"get": {
+				"operationId": "GetRackets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/RacketResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Rackets"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateRacket",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Rackets"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateRacketRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/rackets/all": {
+			"get": {
+				"operationId": "GetAllRackets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/RacketResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Rackets"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/rackets/assign": {
+			"post": {
+				"operationId": "AssignRacketToPlayer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Rackets"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AssignRequest"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

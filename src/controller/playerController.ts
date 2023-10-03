@@ -1,10 +1,7 @@
-import { Player } from "../entities/player";
 import PlayerRepository from "../repositories/playerRepository";
 const jwt = require("jsonwebtoken");
-import PlayerDto from "../dtos/playerDto";
 import ILoginRequest from "../requests/loginRequest";
-import {  Route, Get, Post, Body, Query, Path, ValidateError, Response } from "tsoa";
-import { registerSchema } from "class-validator";
+import {  Route, Get, Post, Body, Path, Response, Tags} from "tsoa";
 import IRegisterRequest from "../requests/registerRequest";
 import PlayerLevel from "../enums/playerLevel";
 import IPlayersResponse from "../responses/playersResponse";
@@ -18,7 +15,8 @@ interface DefaultResponse {
   data: object;
 }
 
-@Route("player")
+@Tags('Players')
+@Route("players")
 export default class PlayerController {
   repository: PlayerRepository;
 
@@ -62,12 +60,12 @@ export default class PlayerController {
     }
   }
 
-
   @Get("/city/{city}")
   async getPlayersByCity(@Path() city: string): Promise<IPlayersResponse[]>  {
     const players = await this.repository.findPlayersByCity(city);
     const data = players.map(player  => {
         return {
+            entityId: player.entityId,
             firstName: player.firstName,
             lastName: player.lastName,
             nickname: player.nickname,
@@ -81,12 +79,12 @@ export default class PlayerController {
     return data;
   }
 
-
   @Get("/level/{level}")
   async getPlayersByLevel(@Path() level: PlayerLevel): Promise<IPlayersResponse[]> {
     const players = await this.repository.findPlayersByLevel(level);
-    const data = players.map(player  => {
+    const data = players.map(player => {
         return {
+            entityId: player.entityId,
             firstName: player.firstName,
             lastName: player.lastName,
             nickname: player.nickname,

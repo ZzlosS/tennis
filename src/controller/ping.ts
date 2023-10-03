@@ -1,9 +1,10 @@
-import { Get, Route } from "tsoa";
+import { Get, Route, Tags } from "tsoa";
 
 interface PingResponse {
   message: string;
 }
 
+@Tags("Ping")
 @Route("ping")
 export default class PingController {
   @Get("/")

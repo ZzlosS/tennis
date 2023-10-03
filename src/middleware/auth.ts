@@ -10,7 +10,7 @@ const EXPIRATION = '1h';
 declare global {
     namespace Express {
         interface Request {
-            player?: Player
+            user_id?: string
         }
     }
 }
@@ -23,7 +23,7 @@ export function authenticateToken(
     const token = req.header('Authorization')?.split(' ')[1];
 
     if (!token) {
-    return res.status(401).json({ message: 'Authentication failed' });
+        return res.status(401).json({ message: 'Authentication failed' });
     }
 
     jwt.verify(token, SECRET_KEY, (err: any, user: any) => {
@@ -32,7 +32,7 @@ export function authenticateToken(
         }
 
         // Attach the authenticated user to the request for further use in routes
-        req.player = user;
+        req.user_id = user.user_id;
         next();
     });
 }

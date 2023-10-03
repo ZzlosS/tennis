@@ -5,6 +5,7 @@ import pingRouter from "./router/pingRouter";
 import { errorLogger, errorResponder, invalidPathHandler, requestLogger } from "./errors/errorHandlers";
 import swaggerUi from "swagger-ui-express";
 import insert from "./examples/insertData";
+import racketRouter from "./router/racketRouter";
 
 require("dotenv").config();
 
@@ -34,7 +35,8 @@ app.get("/", async (req: Request, res: Response) => {
   res.send("TS App is Running");
 });
 
-app.use("/player", playerRouter);
+app.use("/players", playerRouter);
+app.use("/rackets", racketRouter);
 app.use("/", pingRouter);
 
 // Error handlers
