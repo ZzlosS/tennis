@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { authenticateToken } from "../middleware/auth";
-import RacketController, { AssignRequest, CreateRacketRequest } from "../controller/racketController";
+import RacketController, { AssignRacketRequest, CreateRacketRequest } from "../controller/racketController";
 
 const racketRouter = express.Router();
 
@@ -24,7 +24,7 @@ racketRouter.post("/", authenticateToken, async (req: Request, res: Response) =>
 
 racketRouter.post("/assign", authenticateToken, async (req: Request, res: Response) => {
     const controller = new RacketController(req.user_id || '');
-    const response = await controller.assignRacketToPlayer(req.body as AssignRequest );
+    const response = await controller.assignRacketToPlayer(req.body as AssignRacketRequest );
     return res.send(response);
 });
 

@@ -21,7 +21,7 @@ export default class ClubRepository extends BaseRepository<Club> {
   }
 
   async incrementClubCourtCount(clubEntityID: string) {
-    const club = await this.repository.fetch(clubEntityID);
+    const club = await this.findByEntityID(clubEntityID);
     club.courts++;
     return await this.repository.save(club);
   }

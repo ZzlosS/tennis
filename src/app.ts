@@ -1,12 +1,12 @@
 import express, { Application, Request, Response, NextFunction } from "express";
+import swaggerUi from "swagger-ui-express";
 import bodyParser from "body-parser";
 import playerRouter from "./router/playerRouter";
 import pingRouter from "./router/pingRouter";
-import { errorLogger, errorResponder, invalidPathHandler, requestLogger } from "./errors/errorHandlers";
-import swaggerUi from "swagger-ui-express";
-import insert from "./examples/insertData";
 import racketRouter from "./router/racketRouter";
 import clubRouter from "./router/clubRouter";
+import courtRouter from "./router/courtRouter";
+import { errorLogger, errorResponder, invalidPathHandler, requestLogger } from "./errors/errorHandlers";
 
 require("dotenv").config();
 
@@ -39,6 +39,7 @@ app.get("/", async (req: Request, res: Response) => {
 app.use("/players", playerRouter);
 app.use("/rackets", racketRouter);
 app.use("/clubs", clubRouter);
+app.use("/courts", courtRouter);
 app.use("/", pingRouter);
 
 // Error handlers

@@ -71,7 +71,7 @@ export default class ClubsController {
                 "stands": court.stands,
                 "roof": court.roof,
                 "double": court.double,
-                "club": court.club,
+                "clubId": court.club,
                 "pricePerHour": court.pricePerHour,
             } as CourtResponse
         });

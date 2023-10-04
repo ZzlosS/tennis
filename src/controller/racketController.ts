@@ -17,7 +17,7 @@ export interface CreateRacketRequest {
     recommendedStrings: string;
 }
 
-export interface AssignRequest {
+export interface AssignRacketRequest {
     playerEid: string;
     racketEid: string;
 }
@@ -106,7 +106,7 @@ export default class RacketController {
     }
 
     @Post("/assign")
-    async assignRacketToPlayer(@Body() assignRequest: AssignRequest): Promise<boolean>{
+    async assignRacketToPlayer(@Body() assignRequest: AssignRacketRequest): Promise<boolean>{
         let player = await this.playerRepository.findByEntityID(assignRequest.playerEid);
         let playerEID = await this.playerRepository.assignRacketToPlayer(player, assignRequest.racketEid);
 
