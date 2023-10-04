@@ -16,6 +16,7 @@ import BookingDto from "../dtos/bookingDto";
 import { EnemyRequest } from "../entities/requestEnemy";
 import RequestEnemyRepository from "../repositories/requestRepository";
 import EnemyRequestDto from "../dtos/enemyRequestDto";
+import BookingCreateRequest from "../requests/bookingCreateRequest";
 
 function capitalizeFirstLetter(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -119,14 +120,14 @@ export async function insertRequest(): Promise<string> {
 
 export async function insertBooking(): Promise<string> {
   const bookingRepo = new BookingRepository();
-  const dto: BookingDto = {
-    court: "01GVGWHR6FFK7WBKXY84QQQ3XT",
+  const dto: BookingCreateRequest = {
+    court: "01HBWM14MP0N1P6HHY4EZT8ZPH",
     from: 15,
     to: 17,
     totalPrice: 1950 * 2,
-    player: "01GTSQTVPB5TJ0AWFP7YE6WVEN",
+    player: "01HBRXA2H3A38GWP8JWZ5BX98A",
     bookingType: BookingType.ONE_TIME,
-    date: new Date()
+    date: (new Date()).toDateString()
   };
   const entityId= bookingRepo.createBooking(dto);
   return entityId;
@@ -162,6 +163,7 @@ export default async function insert() {
   // await insertCourt();
   // await insertClub();
   // await insertPlayer();
+  await insertBooking();
 }
 async function insertRackets ()  {
   // const playerRepository = new PlayerRepository();

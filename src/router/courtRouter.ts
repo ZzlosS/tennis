@@ -14,7 +14,6 @@ courtRouter.post("/", authenticateToken, async (req: Request, res: Response) => 
 });
 
 
-// query low=1250 high=2300
 courtRouter.get("/price", authenticateToken, async (req: Request, res: Response) => {
     const controller = new CourtController();
     

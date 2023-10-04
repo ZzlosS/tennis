@@ -4,25 +4,29 @@ import BookingFilterDto from "../dtos/bookingFilterDto";
 import { Booking } from "../entities/booking";
 import { bookingSchema } from "../schemas/bookingSchema";
 import BaseRepository from "./baseRepository";
+import BookingCreateRequest from "../requests/bookingCreateRequest";
+import BookingFilterRequest from "../requests/bookingFilterRequest";
 
 export default class BookingRepository extends BaseRepository<Booking> {
   constructor() {
     super(bookingSchema);
   }
-  async createBooking(dto: BookingDto) {
+  async createBooking(createRequest: BookingCreateRequest) {
     const booking = await this.createEntity();
 
-    booking.court = dto.court;
-    booking.from = dto.from;
-    booking.to = dto.to;
-    booking.totalPrice = dto.totalPrice;
-    booking.player = dto.player;
-    booking.bookingType = dto.bookingType;
+    booking.court = createRequest.court;
+    booking.from = createRequest.from;
+    booking.to = createRequest.to;
+    booking.player = createRequest.player;
+    booking.bookingType = createRequest.bookingType;
+    booking.totalPrice = createRequest.totalPrice || 1000;
+    booking.date = new Date(createRequest.date);
     
     return await this.save(booking);
   }
 
-  async findBookings(bookingFilterDto: BookingFilterDto) {
+  async findBookings(bookingFilterDto: BookingFilterRequest) {
+    await this.initializeRepository();
 
     let bookings = this.repository.search();
     
@@ -31,15 +35,19 @@ export default class BookingRepository extends BaseRepository<Booking> {
     }
 
     if (bookingFilterDto.from) {
-      bookings.where("from").onOrAfter(new Date(bookingFilterDto.from));
+      bookings.where("from").greaterThanOrEqualTo(bookingFilterDto.from);
     }
 
     if (bookingFilterDto.to) {
-      bookings.where("to").onOrBefore(new Date(bookingFilterDto.to));
+      bookings.where("to").lessThanOrEqualTo(bookingFilterDto.to);
     }
 
     if (bookingFilterDto.player) {
       bookings = bookings.where("player").equals(bookingFilterDto.player);
+    }
+
+    if (bookingFilterDto.date) {
+      bookings = bookings.where("date").equals(new Date(bookingFilterDto.date));
     }
 
     return bookings.return.all();

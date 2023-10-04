@@ -1,6 +1,6 @@
 import { Racket } from "../entities/racket";
 import RacketLevels from "../enums/racketLevels";
-import CreateRacketRequest from "../responses/createRacketRequest";
+import CreateRacketRequest from "../requests/createRacketRequest";
 import { racketSchema } from "../schemas/racketSchema";
 import BaseRepository from "./baseRepository";
 

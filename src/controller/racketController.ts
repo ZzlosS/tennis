@@ -4,8 +4,8 @@ import PlayerRepository from "../repositories/playerRepository";
 import RacketRepository from "../repositories/racketRepository";
 import { Route, Get, Post, Body, Tags} from "tsoa";
 import RacketResponse from "../responses/racketResponse";
-import AssignRacketRequest from "../responses/assignRacketRequest";
-import CreateRacketRequest from "../responses/createRacketRequest";
+import AssignRacketRequest from "../requests/assignRacketRequest";
+import CreateRacketRequest from "../requests/createRacketRequest";
 
 
 @Tags('Rackets')
