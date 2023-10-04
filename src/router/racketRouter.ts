@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import { authenticateToken } from "../middleware/auth";
-import RacketController, { AssignRacketRequest, CreateRacketRequest } from "../controller/racketController";
+import RacketController from "../controller/racketController";
+import AssignRacketRequest from "../responses/assignRacketRequest";
+import CreateRacketRequest from "../responses/createRacketRequest";
 
 const racketRouter = express.Router();
 

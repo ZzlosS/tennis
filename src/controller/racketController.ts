@@ -3,36 +3,10 @@ import { NotFoundError } from "../errors/appError";
 import PlayerRepository from "../repositories/playerRepository";
 import RacketRepository from "../repositories/racketRepository";
 import { Route, Get, Post, Body, Tags} from "tsoa";
+import RacketResponse from "../responses/racketResponse";
+import AssignRacketRequest from "../responses/assignRacketRequest";
+import CreateRacketRequest from "../responses/createRacketRequest";
 
-
-export interface CreateRacketRequest {
-    brand: string;
-    model: string;
-    year: number;
-    weight: number;
-    level: RacketLevels;
-    headSizeInch: number;
-    balance: number;
-    stringPattern: string;
-    recommendedStrings: string;
-}
-
-export interface AssignRacketRequest {
-    playerEid: string;
-    racketEid: string;
-}
-
-export interface RacketResponse{
-    brand: string;
-    model: string;
-    year: number;
-    weight: number;
-    level: RacketLevels;
-    headSizeInch: number;
-    balance: number;
-    stringPattern: string;
-    recommendedStrings: string;
-}
 
 @Tags('Rackets')
 @Route("rackets")
