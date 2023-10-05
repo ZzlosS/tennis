@@ -913,6 +913,37 @@
 				}
 			}
 		},
+		"/players/{entityId}": {
+			"delete": {
+				"operationId": "DeletePlayer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Players"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/ping": {
 			"get": {
 				"operationId": "GetMessage",
@@ -1047,6 +1078,37 @@
 				}
 			}
 		},
+		"/rackets/{entityId}": {
+			"delete": {
+				"operationId": "DeleteRacket",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Rackets"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/clubs": {
 			"post": {
 				"operationId": "CreateClub",
@@ -1167,6 +1229,35 @@
 						}
 					}
 				]
+			},
+			"delete": {
+				"operationId": "DeleteClub",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Clubs"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/courts/all": {
@@ -1204,6 +1295,35 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/CourtResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Courts"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteCourt",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
 								}
 							}
 						}
@@ -1456,6 +1576,37 @@
 				]
 			}
 		},
+		"/bookings/{entityId}": {
+			"delete": {
+				"operationId": "DeleteBooking",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Bookings"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/matches/all": {
 			"get": {
 				"operationId": "GetAllMatches",
@@ -1525,6 +1676,35 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/MatchResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Matches"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteMatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
 								}
 							}
 						}
@@ -1688,6 +1868,37 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/requests/{entityId}": {
+			"delete": {
+				"operationId": "DeleteEnemyRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Requests"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		}
 	},

@@ -49,5 +49,11 @@ courtRouter.get("/:entityId", authenticateToken, async (req: Request, res: Respo
     return res.send(response);
 });
 
+courtRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new CourtController();
+    const response = await controller.deleteCourt(req.params['entityId']);
+    return res.send(response);
+});
+
 
 export default courtRouter;

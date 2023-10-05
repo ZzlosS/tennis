@@ -2,7 +2,7 @@ import RacketLevels from "../enums/racketLevels";
 import { NotFoundError } from "../errors/appError";
 import PlayerRepository from "../repositories/playerRepository";
 import RacketRepository from "../repositories/racketRepository";
-import { Route, Get, Post, Body, Tags} from "tsoa";
+import { Route, Get, Post, Body, Tags, Delete, Path} from "tsoa";
 import RacketResponse from "../responses/racketResponse";
 import AssignRacketRequest from "../requests/assignRacketRequest";
 import CreateRacketRequest from "../requests/createRacketRequest";
@@ -85,5 +85,10 @@ export default class RacketController {
         let playerEID = await this.playerRepository.assignRacketToPlayer(player, assignRequest.racketEid);
 
         return true;
+    }
+
+    @Delete("/{entityId}")
+    async deleteRacket(@Path() entityId: string): Promise<string> {
+        return await this.repository.deleteEntity(entityId);
     }
 }

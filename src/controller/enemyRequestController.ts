@@ -3,7 +3,7 @@ import BookingRepository from "../repositories/bookingRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import EnemyRequestRepository from "../repositories/requestRepository";
 import CreateEnemyRequest from "../requests/createEnemyRequest";
-import { Tags, Route, Get, Path, Post, Body, Query } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Delete } from "tsoa";
 import EnemyRequestResponse from "../responses/enemyRequestResponse";
 import CourtRepository from "../repositories/courtRepository";
 import AcceptEnemyRequest from "../requests/acceptEnemyRequest";
@@ -81,4 +81,8 @@ export default class EnemyRequestController {
         } as EnemyRequestResponse;
     }
 
+    @Delete("/{entityId}")
+    async deleteEnemyRequest(@Path() entityId: string): Promise<string> {
+        return await this.repository.deleteEntity(entityId);
+    }
 }

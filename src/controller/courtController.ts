@@ -1,4 +1,4 @@
-import { Tags, Route, Get, Path, Post, Body, Query } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Query, Delete } from "tsoa";
 import CourtRepository from "../repositories/courtRepository";
 import CourtResponse from "../responses/courtResponse";
 import CourtCreateRequest from "../requests/courtCreateRequest";
@@ -115,5 +115,10 @@ export default class CourtController {
         });
             
         return data;
+    }
+
+    @Delete("/{entityId}")
+    async deleteCourt(@Path() entityId: string): Promise<string> {
+        return await this.repository.deleteEntity(entityId);
     }
 }

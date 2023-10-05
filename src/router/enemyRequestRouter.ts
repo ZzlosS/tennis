@@ -30,4 +30,12 @@ enemyRequestRouter.post("/accept", authenticateToken, async (req: Request, res: 
     return res.send(response);
 });
 
+enemyRequestRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new EnemyRequestController();
+    const response = await controller.deleteEnemyRequest(req.params['entityId']);
+    return res.send(response);
+});
+
+// TODO: add geting specfic
+
 export default enemyRequestRouter;

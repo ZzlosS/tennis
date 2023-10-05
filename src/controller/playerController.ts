@@ -1,7 +1,7 @@
 import PlayerRepository from "../repositories/playerRepository";
 const jwt = require("jsonwebtoken");
 import ILoginRequest from "../requests/loginRequest";
-import {  Route, Get, Post, Body, Path, Response, Tags} from "tsoa";
+import {  Route, Get, Post, Body, Path, Response, Tags, Delete} from "tsoa";
 import IRegisterRequest from "../requests/registerRequest";
 import PlayerLevel from "../enums/playerLevel";
 import IPlayersResponse from "../responses/playersResponse";
@@ -127,5 +127,10 @@ export default class PlayerController {
 
       return token;
     }
+  }
+
+  @Delete("/{entityId}")
+  async deletePlayer(@Path() entityId: string): Promise<string> {
+      return await this.repository.deleteEntity(entityId);
   }
 }

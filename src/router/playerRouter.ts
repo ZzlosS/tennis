@@ -29,4 +29,12 @@ playerRouter.get("/city/:city", authenticateToken, async (req: Request, res: Res
   return res.send(response);
 });
 
+playerRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+  const controller = new PlayerController();
+  const response = await controller.deletePlayer(req.params['entityId']);
+  return res.send(response);
+});
+
+// TODO: add geting specfic
+
 export default playerRouter;

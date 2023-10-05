@@ -1,4 +1,4 @@
-import { Tags, Route, Get, Path, Post, Body, Query } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Query, Delete} from "tsoa";
 import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import MatchRepository from "../repositories/matchRepository";
@@ -76,6 +76,11 @@ export default class MatchController {
             courtName: court.name,
             courtSurface: court.surface,
         } as MatchResponse;
+    }
+
+    @Delete("/{entityId}")
+    async deleteMatch(@Path() entityId: string): Promise<string> {
+        return await this.repository.deleteEntity(entityId);
     }
 
 }

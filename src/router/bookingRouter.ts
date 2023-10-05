@@ -24,5 +24,10 @@ bookingRouter.get("/", authenticateToken, async (req: Request, res: Response) =>
     return res.send(response);
 });
 
+bookingRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new BookiongController();
+    const response = await controller.deleteBooking(req.params['entityId']);
+    return res.send(response);
+});
 
 export default bookingRouter;

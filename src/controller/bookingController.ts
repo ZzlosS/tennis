@@ -1,4 +1,4 @@
-import { Tags, Route, Get, Path, Post, Body, Query } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Query, Delete } from "tsoa";
 import BookingRepository from "../repositories/bookingRepository";
 import BookingCreateRequest from "../requests/bookingCreateRequest";
 import CourtRepository from "../repositories/courtRepository";
@@ -70,5 +70,10 @@ export default class BookiongController {
         }
         
         return data;
+    }
+
+    @Delete("/{entityId}")
+    async deleteBooking(@Path() entityId: string): Promise<string> {
+        return await this.repository.deleteEntity(entityId);
     }
 }

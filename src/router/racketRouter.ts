@@ -6,9 +6,9 @@ import CreateRacketRequest from "../requests/createRacketRequest";
 
 const racketRouter = express.Router();
 
-racketRouter.get("/", authenticateToken, async (req: Request, res: Response) => {
+racketRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response) => {
     const controller = new RacketController(req.user_id || '');
-    const response = await controller.getRackets();
+    const response = await controller.deleteRacket(req.params['entityId']);
     return res.send(response);
 });
 

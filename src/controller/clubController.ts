@@ -1,4 +1,4 @@
-import { Route, Get, Post, Body, Tags, Path} from "tsoa";
+import { Route, Get, Post, Body, Tags, Path, Delete} from "tsoa";
 import ClubRepository from "../repositories/clubRepository";
 import ClubCreateRequest from "../requests/clubCreateRequest";
 import ClubResponse from "../responses/clubResponse";
@@ -85,5 +85,10 @@ export default class ClubsController {
             courtsNumber: club.courts,
             courts: courts
         } as ClubResponse;
+    }
+
+    @Delete("/{entityId}")
+    async deleteClub(@Path() entityId: string): Promise<string> {
+        return await this.repository.deleteEntity(entityId);
     }
 }

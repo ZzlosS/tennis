@@ -30,4 +30,10 @@ clubRouter.get("/:entityId", authenticateToken, async (req: Request, res: Respon
     return res.send(response);
 });
 
+clubRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new ClubsController();
+    const response = await controller.deleteClub(req.params['entityId']);
+    return res.send(response);
+});
+
 export default clubRouter;

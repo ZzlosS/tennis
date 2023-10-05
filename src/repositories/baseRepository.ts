@@ -72,7 +72,7 @@ export default class BaseRepository<T extends BaseEntity> {
 
   async findAll() {
     await this.initializeRepository();
-    return await this.repository.search().return.all();
+    return await this.repository.search().where("deleted").false().return.all();
   }
 
   async findByEntityID(entityID: string) {
