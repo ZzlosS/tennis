@@ -4,7 +4,7 @@ import CourtResponse from "../responses/courtResponse";
 import CourtCreateRequest from "../requests/courtCreateRequest";
 import ClubRepository from "../repositories/clubRepository";
 import ClubResponse from "../responses/clubResponse";
-import { AssignCourtRequest } from "../requests/assignCourtRequest";
+import AssignCourtRequest  from "../requests/assignCourtRequest";
 
 @Tags("Courts")
 @Route("courts")

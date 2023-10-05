@@ -5,6 +5,7 @@ interface Match {
   secondTeam: string[];
   result: string[];
   court: string;
+  date: Date;
 }
 
 class Match extends BaseEntity {}

@@ -8,6 +8,7 @@ import clubRouter from "./router/clubRouter";
 import courtRouter from "./router/courtRouter";
 import { errorLogger, errorResponder, invalidPathHandler, requestLogger } from "./errors/errorHandlers";
 import bookingRouter from "./router/bookingRouter";
+import matchRouter from "./router/matchRouter";
 
 require("dotenv").config();
 
@@ -42,6 +43,7 @@ app.use("/rackets", racketRouter);
 app.use("/clubs", clubRouter);
 app.use("/courts", courtRouter);
 app.use("/bookings", bookingRouter);
+app.use("/matches", matchRouter);
 app.use("/", pingRouter);
 
 // Error handlers

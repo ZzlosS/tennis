@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { authenticateToken } from "../middleware/auth";
 import CourtController from "../controller/courtController";
 import CourtCreateRequest from "../requests/courtCreateRequest";
-import { AssignCourtRequest } from "../requests/assignCourtRequest";
+import AssignCourtRequest  from "../requests/assignCourtRequest";
 
 
 const courtRouter = express.Router();

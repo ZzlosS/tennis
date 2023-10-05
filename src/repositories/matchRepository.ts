@@ -1,6 +1,6 @@
-import { Entity } from "redis-om";
 import MatchDto from "../dtos/matchDto";
 import { Match } from "../entities/match";
+import CreateMatchRequest from "../requests/createMatchRequest";
 import { matchSchema } from "../schemas/matchSchema";
 import BaseRepository from "./baseRepository";
 
@@ -9,13 +9,14 @@ export default class MatchRepository extends BaseRepository<Match> {
     super(matchSchema)
   }
 
-  async createMatch(dto: MatchDto) {
+  async createMatch(createMatchRequest: CreateMatchRequest) {
     const match = await this.createEntity();
 
-    match.firstTeam = dto.firstTeam;
-    match.secondTeam = dto.secondTeam;
-    match.result = dto.result;
-    match.court = dto.court;
+    match.firstTeam = createMatchRequest.firstTeam.split(',');
+    match.secondTeam = createMatchRequest.secondTeam.split(',');
+    match.result = createMatchRequest.result.split(',');
+    match.court = createMatchRequest.court;
+    match.date = new Date(createMatchRequest.date);
 
     return await this.save(match);
   }
@@ -24,11 +25,8 @@ export default class MatchRepository extends BaseRepository<Match> {
     return await this.findAllByField(courtEntityID, "court");
   }
 
-  async findMatchesByDate(date: Date | string | number) {
-    return await this.findAllByDate(date, "date");
-  }
-
   async findPlayerMatches(playerEntityID: string) {
+    await this.initializeRepository();
     return await this.repository.search()
                 .where('firstTeam').contains(playerEntityID)
                 .or('secondTeam').contains(playerEntityID).return.all();

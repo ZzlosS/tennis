@@ -52,7 +52,7 @@ export default class BookiongController {
             const player = await this.playerRepository.findByEntityID(booking.player);
             const club = await this.clubRepository.findByEntityID(court.club);
 
-             data.push({
+            data.push({
                 entityId: booking.entityId,
                 clubName: club.name,
                 clubAddress: club.address,

@@ -8,6 +8,7 @@ let matchSchema = new Schema(Match, {
   result: { type: "string[]" },
   court: { type: "string" },
   createdAt: { type: "number" },
+  date: {type: "date"},
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },
 });
