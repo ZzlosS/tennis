@@ -14,7 +14,7 @@ import PlayerDto from "../dtos/playerDto";
 import BookingType from "../enums/bookingType";
 import BookingDto from "../dtos/bookingDto";
 import { EnemyRequest } from "../entities/requestEnemy";
-import RequestEnemyRepository from "../repositories/requestRepository";
+import EnemyRequestRepository from "../repositories/requestRepository";
 import EnemyRequestDto from "../dtos/enemyRequestDto";
 import BookingCreateRequest from "../requests/bookingCreateRequest";
 
@@ -106,7 +106,7 @@ export async function insertMatch(): Promise<string> {
 }
 
 export async function insertRequest(): Promise<string> {
-  const requestRepo = new RequestEnemyRepository();
+  const requestRepo = new EnemyRequestRepository();
   const dto: EnemyRequestDto = {
     bookingEntityID: "01GVKN4YJH7Q6J9H34QYQ4S8RS",
     playerEntityID: "01GVKB4S5JZRW4934ZFF4KD7HT",

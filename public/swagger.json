@@ -455,6 +455,295 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"BookingType": {
+				"enum": [
+					"ONE_TIME",
+					"MONTH",
+					"SEASON"
+				],
+				"type": "string"
+			},
+			"BookingCreateRequest": {
+				"properties": {
+					"court": {
+						"type": "string"
+					},
+					"from": {
+						"type": "number",
+						"format": "double"
+					},
+					"to": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"player": {
+						"type": "string"
+					},
+					"bookingType": {
+						"$ref": "#/components/schemas/BookingType"
+					},
+					"date": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"court",
+					"from",
+					"to",
+					"player",
+					"bookingType",
+					"date"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BookingResponse": {
+				"properties": {
+					"entityId": {
+						"type": "string"
+					},
+					"clubName": {
+						"type": "string"
+					},
+					"clubAddress": {
+						"type": "string"
+					},
+					"clubCity": {
+						"type": "string"
+					},
+					"courtName": {
+						"type": "string"
+					},
+					"courtSurface": {
+						"type": "string"
+					},
+					"from": {
+						"type": "number",
+						"format": "double"
+					},
+					"to": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"playerFirstName": {
+						"type": "string"
+					},
+					"playerLastName": {
+						"type": "string"
+					},
+					"bookingType": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"entityId",
+					"clubName",
+					"clubAddress",
+					"clubCity",
+					"courtName",
+					"courtSurface",
+					"from",
+					"to",
+					"totalPrice",
+					"playerFirstName",
+					"playerLastName",
+					"bookingType",
+					"date"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MatchResponse": {
+				"properties": {
+					"entityId": {
+						"type": "string"
+					},
+					"firstTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"secondTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"result": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"date": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"clubName": {
+						"type": "string"
+					},
+					"courtName": {
+						"type": "string"
+					},
+					"courtSurface": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"entityId",
+					"firstTeam",
+					"secondTeam",
+					"result",
+					"date",
+					"clubName",
+					"courtName",
+					"courtSurface"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateMatchRequest": {
+				"properties": {
+					"firstTeam": {
+						"type": "string"
+					},
+					"secondTeam": {
+						"type": "string"
+					},
+					"result": {
+						"type": "string"
+					},
+					"court": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"firstTeam",
+					"secondTeam",
+					"result",
+					"court",
+					"date"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateEnemyRequest": {
+				"properties": {
+					"bookingEntityID": {
+						"type": "string"
+					},
+					"playerEntityID": {
+						"type": "string"
+					},
+					"numberOfPlayersNeeded": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"bookingEntityID",
+					"playerEntityID",
+					"numberOfPlayersNeeded"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AcceptEnemyRequest": {
+				"properties": {
+					"requestEntityID": {
+						"type": "string"
+					},
+					"playerEntityID": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"requestEntityID",
+					"playerEntityID"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EnemyRequestResponse": {
+				"properties": {
+					"bookingEntityID": {
+						"type": "string"
+					},
+					"courtEntityId": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"totalPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"from": {
+						"type": "number",
+						"format": "double"
+					},
+					"to": {
+						"type": "number",
+						"format": "double"
+					},
+					"playerNickname": {
+						"type": "string"
+					},
+					"numberOfPlayersNeeded": {
+						"type": "number",
+						"format": "double"
+					},
+					"acceptedPlayerNicnames": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"courtName": {
+						"type": "string"
+					},
+					"courtSurface": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"bookingEntityID",
+					"courtEntityId",
+					"date",
+					"totalPrice",
+					"from",
+					"to",
+					"playerNickname",
+					"numberOfPlayersNeeded",
+					"acceptedPlayerNicnames",
+					"active",
+					"courtName",
+					"courtSurface"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -1067,6 +1356,338 @@
 						}
 					}
 				]
+			}
+		},
+		"/bookings": {
+			"post": {
+				"operationId": "CreateBooking",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Bookings"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BookingCreateRequest"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "FilterBookings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/BookingResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Bookings"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "court",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "player",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "date",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/matches/all": {
+			"get": {
+				"operationId": "GetAllMatches",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/MatchResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Matches"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/matches/player/{entityId}": {
+			"get": {
+				"operationId": "GetPlayersMatches",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/MatchResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Matches"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/matches/{entityId}": {
+			"get": {
+				"operationId": "GetById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MatchResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Matches"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/matches": {
+			"post": {
+				"operationId": "CreateMatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Matches"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMatchRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/requests": {
+			"post": {
+				"operationId": "CreateRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Requests"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateEnemyRequest"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetActiveRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/EnemyRequestResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Requests"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/requests/accept": {
+			"post": {
+				"operationId": "AcceptRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Requests"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AcceptEnemyRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/requests/inactive": {
+			"get": {
+				"operationId": "GetInactiveRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/EnemyRequestResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Requests"
+				],
+				"security": [],
+				"parameters": []
 			}
 		}
 	},
