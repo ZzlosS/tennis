@@ -30,4 +30,16 @@ bookingRouter.delete("/:entityId", authenticateToken, async (req: Request, res: 
     return res.send(response);
 });
 
+bookingRouter.get("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new BookiongController();
+    const response = await controller.getByEntityId(req.params['entityId']);
+    return res.send(response);
+});
+
+bookingRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new BookiongController();
+    const response = await controller.updateBooking(req.body, req.params['entityId']);
+    return res.send(response);
+  });
+
 export default bookingRouter;

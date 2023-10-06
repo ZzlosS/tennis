@@ -6,6 +6,7 @@ import { bookingSchema } from "../schemas/bookingSchema";
 import BaseRepository from "./baseRepository";
 import BookingCreateRequest from "../requests/bookingCreateRequest";
 import BookingFilterRequest from "../requests/bookingFilterRequest";
+import UpdateBookingRequest from "../requests/updateBookingRequest";
 
 export default class BookingRepository extends BaseRepository<Booking> {
   constructor() {
@@ -51,6 +52,29 @@ export default class BookingRepository extends BaseRepository<Booking> {
     }
 
     return bookings.return.all();
+  }
+
+
+  async updateBooking(entityId: string, updateRequest: UpdateBookingRequest) {
+    const booking = await this.findByEntityID(entityId);
+
+    if(updateRequest.court){
+      booking.court = updateRequest.court;
+    }
+    if(updateRequest.from){
+      booking.from = updateRequest.from;
+    }
+    if(updateRequest.to){
+      booking.to = updateRequest.to;
+    }
+    if(updateRequest.totalPrice){
+      booking.totalPrice = updateRequest.totalPrice;
+    }
+    if(updateRequest.date){
+      booking.date = new Date(updateRequest.date);
+    }
+
+    return await this.save(booking);
   }
 
 }

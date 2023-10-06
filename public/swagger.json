@@ -708,6 +708,38 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"UpdateBookingRequest": {
+				"properties": {
+					"court": {
+						"type": "string"
+					},
+					"from": {
+						"type": "number",
+						"format": "double"
+					},
+					"to": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"date": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"court",
+					"from",
+					"to",
+					"totalPrice",
+					"date"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"MatchResponse": {
 				"properties": {
 					"entityId": {
@@ -1967,6 +1999,74 @@
 							"application/json": {
 								"schema": {
 									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Bookings"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateBooking",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Bookings"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateBookingRequest"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetByEntityId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BookingResponse"
 								}
 							}
 						}
