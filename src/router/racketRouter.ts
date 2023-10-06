@@ -30,5 +30,18 @@ racketRouter.post("/assign", authenticateToken, async (req: Request, res: Respon
     return res.send(response);
 });
 
+racketRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new RacketController(req.user_id || '');
+    const response = await controller.updateRacket(req.body, req.params['entityId']);
+    return res.send(response);
+});
+
+
+racketRouter.get("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new RacketController(req.user_id || '');
+    const response = await controller.getRacket(req.params['entityId']);
+    return res.send(response);
+});
+
 export default racketRouter;
 

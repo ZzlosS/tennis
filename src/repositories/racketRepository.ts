@@ -1,6 +1,7 @@
 import { Racket } from "../entities/racket";
 import RacketLevels from "../enums/racketLevels";
 import CreateRacketRequest from "../requests/createRacketRequest";
+import UpdateRacketRequest from "../requests/updateRacketRequest";
 import { racketSchema } from "../schemas/racketSchema";
 import BaseRepository from "./baseRepository";
 
@@ -20,16 +21,6 @@ export default class RacketRepository extends BaseRepository<Racket> {
     return rackets;
   }
 
-  // ?
-  async findRacketsByBrand(brand: string) {
-    return await this.findAllByField(brand, "brand");
-  }
-
-  // ?
-  async findRacketsByLevel(level: RacketLevels) {
-    return await this.findAllByField(level, "level");
-  }
-
   async createRacket(dto: CreateRacketRequest) {
     const racket = await this.createEntity();
 
@@ -46,4 +37,37 @@ export default class RacketRepository extends BaseRepository<Racket> {
     return await this.save(racket);
   }
 
+  async updateRacket(entityId: string, updateRequest: UpdateRacketRequest) {
+    const racket = await this.findByEntityID(entityId);
+
+    if(updateRequest.brand){
+      racket.brand = updateRequest.brand;
+    }
+    if(updateRequest.model){
+      racket.model = updateRequest.model;
+    }
+    if(updateRequest.level){
+      racket.level = updateRequest.level;
+    }
+    if(updateRequest.year){
+      racket.year = updateRequest.year;
+    }
+    if(updateRequest.weight){
+      racket.weight = updateRequest.weight;
+    }
+    if(updateRequest.headSizeInch){
+      racket.headSizeInch = updateRequest.headSizeInch;
+    }
+    if(updateRequest.balance){
+      racket.balance = updateRequest.balance;
+    }
+    if(updateRequest.stringPattern){
+      racket.stringPattern = updateRequest.stringPattern;
+    }
+    if(updateRequest.recommendedStrings){
+      racket.recommendedStrings = updateRequest.recommendedStrings;
+    }
+
+    return await this.save(racket);
+  }
 }

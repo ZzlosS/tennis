@@ -320,6 +320,54 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"UpdateRacketRequest": {
+				"properties": {
+					"brand": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					},
+					"year": {
+						"type": "number",
+						"format": "double"
+					},
+					"weight": {
+						"type": "number",
+						"format": "double"
+					},
+					"level": {
+						"$ref": "#/components/schemas/RacketLevels"
+					},
+					"headSizeInch": {
+						"type": "number",
+						"format": "double"
+					},
+					"balance": {
+						"type": "number",
+						"format": "double"
+					},
+					"stringPattern": {
+						"type": "string"
+					},
+					"recommendedStrings": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"brand",
+					"model",
+					"year",
+					"weight",
+					"level",
+					"headSizeInch",
+					"balance",
+					"stringPattern",
+					"recommendedStrings"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ClubCreateRequest": {
 				"properties": {
 					"name": {
@@ -1228,6 +1276,74 @@
 						}
 					}
 				]
+			},
+			"get": {
+				"operationId": "GetRacket",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RacketResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Rackets"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateRacket",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Rackets"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateRacketRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/clubs": {
