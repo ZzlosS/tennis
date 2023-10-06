@@ -118,7 +118,7 @@ export default class PlayerController {
     return await this.repository.updatePlayer(entityId, updateRequest);
   }
 
-  @Patch("/{entityId}")
+  @Get("/{entityId}")
   async getByEntityId(@Path()  entityId: string): Promise<PlayersResponse> {
     return await this.convertPlayerModelToResponse(await this.repository.findByEntityID(entityId));
   }
