@@ -956,6 +956,30 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"UpdateEnemyRequest": {
+				"properties": {
+					"bookingEntityID": {
+						"type": "string"
+					},
+					"numberOfPlayersNeeded": {
+						"type": "number",
+						"format": "double"
+					},
+					"acceptedBy": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"bookingEntityID",
+					"numberOfPlayersNeeded",
+					"acceptedBy"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -2457,6 +2481,74 @@
 						}
 					}
 				]
+			},
+			"get": {
+				"operationId": "GetEnemyRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/EnemyRequestResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Requests"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateEnemyRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Requests"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateEnemyRequest"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

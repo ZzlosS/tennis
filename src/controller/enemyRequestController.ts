@@ -3,10 +3,11 @@ import BookingRepository from "../repositories/bookingRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import EnemyRequestRepository from "../repositories/requestRepository";
 import CreateEnemyRequest from "../requests/createEnemyRequest";
-import { Tags, Route, Get, Path, Post, Body, Delete } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Delete, Patch } from "tsoa";
 import EnemyRequestResponse from "../responses/enemyRequestResponse";
 import CourtRepository from "../repositories/courtRepository";
 import AcceptEnemyRequest from "../requests/acceptEnemyRequest";
+import UpdateEnemyRequest from "../requests/updateEnemyRequest";
 
 
 @Tags("Requests")
@@ -84,5 +85,15 @@ export default class EnemyRequestController {
     @Delete("/{entityId}")
     async deleteEnemyRequest(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
+    }
+    
+    @Get("/{entityId}")
+    async getEnemyRequest(@Path() entityId: string): Promise<EnemyRequestResponse> {
+        return await this.convertMatchModelToResponse(await this.repository.findByEntityID(entityId));
+    }
+    
+    @Patch("/{entityId}")
+    async updateEnemyRequest(@Body() updateRequest: UpdateEnemyRequest, @Path()  entityId: string): Promise<string> {
+        return await this.repository.updateEnemyRequest(entityId, updateRequest);
     }
 }

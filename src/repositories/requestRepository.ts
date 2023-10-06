@@ -1,6 +1,7 @@
 import EnemyRequestDto from "../dtos/enemyRequestDto";
 import { EnemyRequest } from "../entities/requestEnemy";
 import CreateEnemyRequest from "../requests/createEnemyRequest";
+import UpdateEnemyRequest from "../requests/updateEnemyRequest";
 import { enemyRequestSchema } from "../schemas/enemyRequestSchema";
 import BaseRepository from "./baseRepository";
 
@@ -44,5 +45,21 @@ export default class EnemyRequestRepository extends BaseRepository<EnemyRequest>
   async allInactiveEnemyRequests() {
     await this.initializeRepository();
     return await this.repository.search().where("active").false().return.all();
+  }
+
+  async updateEnemyRequest(entityId: string, updateRequest: UpdateEnemyRequest) {
+    const player = await this.findByEntityID(entityId);
+
+    if(updateRequest.bookingEntityID){
+      player.bookingEntityID = updateRequest.bookingEntityID;
+    }
+    if(updateRequest.numberOfPlayersNeeded){
+      player.numberOfPlayersNeeded = updateRequest.numberOfPlayersNeeded;
+    }
+    if(updateRequest.acceptedBy){
+      player.acceptedBy = updateRequest.acceptedBy;
+    }
+
+    return await this.save(player);
   }
 }
