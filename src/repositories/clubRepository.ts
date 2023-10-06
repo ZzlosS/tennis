@@ -1,5 +1,6 @@
 import { Club } from "../entities/club";
 import ClubCreateRequest from "../requests/clubCreateRequest";
+import UpdateClubRequest from "../requests/updateClubRequest";
 import { clubSchema } from "../schemas/clubSchema";
 import BaseRepository from "./baseRepository";
 
@@ -29,4 +30,9 @@ export default class ClubRepository extends BaseRepository<Club> {
   async findClubsByCity(city: string) {
     return await this.findAllByField(city, "city");
   }
+  
+  async updateClub(entityId: string, updateRequest: UpdateClubRequest) {
+    return "";
+}
+
 }

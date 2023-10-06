@@ -1,10 +1,11 @@
-import { Route, Get, Post, Body, Tags, Path, Delete} from "tsoa";
+import { Route, Get, Post, Body, Tags, Path, Delete, Patch} from "tsoa";
 import ClubRepository from "../repositories/clubRepository";
 import ClubCreateRequest from "../requests/clubCreateRequest";
 import ClubResponse from "../responses/clubResponse";
 import CourtRepository from "../repositories/courtRepository";
 import CourtResponse from "../responses/courtResponse";
-import { Player } from "../entities/player";
+import { Club } from "../entities/club";
+import UpdateClubRequest from "../requests/updateClubRequest";
 
 
 @Tags("Clubs")
@@ -28,37 +29,21 @@ export default class ClubsController {
     @Get("/all")
     async getAllClubs(): Promise<ClubResponse[]>  {
         let clubs = await this.repository.findAll();
-        const data = clubs.map(club => {
-            return {
-                entityId: club.entityId,
-                name: club.name,
-                address: club.address,
-                description: club.description,
-                city: club.city,
-                country: club.country,
-                courtsNumber: club.courts,
-            } as ClubResponse;
+        const data = clubs.map(async club => {
+            return await this.convertClubModelToResponse(club);
         });
-            
-        return data;
+        
+        return await Promise.all(data);
     }
 
     @Get("/city/{city}")
     async getClubsByCity(@Path() city: string): Promise<ClubResponse[]>  {
         const clubs = await this.repository.findClubsByCity(city);
-        const data = clubs.map(club => {
-            return {
-                entityId: club.entityId,
-                name: club.name,
-                address: club.address,
-                description: club.description,
-                city: club.city,
-                country: club.country,
-                courtsNumber: club.courts
-            } as ClubResponse;
+        const data = clubs.map(async club => {
+            return await this.convertClubModelToResponse(club);
         });
-            
-        return data;
+
+        return await Promise.all(data);
     }
 
     @Get("/{entityId}")
@@ -93,4 +78,20 @@ export default class ClubsController {
         return await this.repository.deleteEntity(entityId);
     }
 
+    @Patch("/{entityId}")
+    async updateClub(@Body() updateRequest: UpdateClubRequest, @Path()  entityId: string): Promise<string> {
+        return await this.repository.updateClub(entityId, updateRequest);
+    }
+
+    private async convertClubModelToResponse(club: Club): Promise<ClubResponse>{
+        return {
+            entityId: club.entityId,
+            name: club.name,
+            address: club.address,
+            description: club.description,
+            city: club.city,
+            country: club.country,
+            courtsNumber: club.courts
+        } as ClubResponse;
+    }
 }
