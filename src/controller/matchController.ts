@@ -1,4 +1,4 @@
-import { Tags, Route, Get, Path, Post, Body, Query, Delete} from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Query, Delete, Patch} from "tsoa";
 import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import MatchRepository from "../repositories/matchRepository";
@@ -6,6 +6,7 @@ import MatchResponse from "../responses/matchResponse";
 import CreateMatchRequest from "../requests/createMatchRequest";
 import PlayerRepository from "../repositories/playerRepository";
 import { Match } from "../entities/match";
+import UpdateMatchRequest from "../requests/updateMatchRequest";
 
 
 @Tags("Matches")
@@ -46,7 +47,6 @@ export default class MatchController {
         return data;
     }
 
-
     @Get("/{entityId}")
     async getById(@Path() entityId: string): Promise<MatchResponse>  {
         const match = await this.repository.findByEntityID(entityId);
@@ -56,6 +56,16 @@ export default class MatchController {
     @Post("/")
     async createMatch(@Body() createMatch: CreateMatchRequest): Promise<string> {
         return await this.repository.createMatch(createMatch);
+    }
+
+    @Delete("/{entityId}")
+    async deleteMatch(@Path() entityId: string): Promise<string> {
+        return await this.repository.deleteEntity(entityId);
+    }
+
+    @Patch("/{entityId}")
+    async updateMatch(@Body() updateRequest: UpdateMatchRequest, @Path()  entityId: string): Promise<string> {
+        return await this.repository.updateMatch(entityId, updateRequest);
     }
 
     private async convertMatchModelToResponse(match: Match): Promise<MatchResponse>{
@@ -76,11 +86,6 @@ export default class MatchController {
             courtName: court.name,
             courtSurface: court.surface,
         } as MatchResponse;
-    }
-
-    @Delete("/{entityId}")
-    async deleteMatch(@Path() entityId: string): Promise<string> {
-        return await this.repository.deleteEntity(entityId);
     }
 
 }

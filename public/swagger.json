@@ -818,6 +818,44 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"UpdateMatchRequest": {
+				"properties": {
+					"firstTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"secondTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"result": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"court": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"firstTeam",
+					"secondTeam",
+					"result",
+					"court",
+					"date"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CreateEnemyRequest": {
 				"properties": {
 					"bookingEntityID": {
@@ -2205,6 +2243,45 @@
 						}
 					}
 				]
+			},
+			"patch": {
+				"operationId": "UpdateMatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Matches"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateMatchRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/matches": {

@@ -34,4 +34,11 @@ matchRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Re
     const response = await controller.deleteMatch(req.params['entityId']);
     return res.send(response);
 });
+
+matchRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+    const controller = new MatchController();
+    const response = await controller.updateMatch(req.body, req.params['entityId']);
+    return res.send(response);
+  });
+
 export default matchRouter;
