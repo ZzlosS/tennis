@@ -41,6 +41,12 @@ playerRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Re
   return res.send(response);
 });
 
+playerRouter.get("/", authenticateToken, async (req: Request, res: Response) => {
+  const controller = new PlayerController();
+  const response = await controller.getAll();
+  return res.send(response);
+});
+
 playerRouter.get("/:entityId", authenticateToken, async (req: Request, res: Response) => {
   const controller = new PlayerController();
   const response = await controller.getByEntityId(req.params['entityId']);

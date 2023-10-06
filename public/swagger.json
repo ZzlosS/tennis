@@ -60,7 +60,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IPlayersResponse": {
+			"PlayersResponse": {
 				"properties": {
 					"firstName": {
 						"type": "string"
@@ -77,6 +77,9 @@
 					"address": {
 						"type": "string"
 					},
+					"email": {
+						"type": "string"
+					},
 					"city": {
 						"type": "string"
 					},
@@ -90,6 +93,7 @@
 					"nickname",
 					"level",
 					"address",
+					"email",
 					"city",
 					"country"
 				],
@@ -812,74 +816,6 @@
 				}
 			}
 		},
-		"/players/city/{city}": {
-			"get": {
-				"operationId": "GetPlayersByCity",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/IPlayersResponse"
-									},
-									"type": "array"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Players"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "city",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/players/level/{level}": {
-			"get": {
-				"operationId": "GetPlayersByLevel",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/IPlayersResponse"
-									},
-									"type": "array"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Players"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "level",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/PlayerLevel"
-						}
-					}
-				]
-			}
-		},
 		"/players/login": {
 			"post": {
 				"operationId": "Login",
@@ -891,7 +827,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/IPlayersResponse"
+											"$ref": "#/components/schemas/PlayersResponse"
 										},
 										{}
 									]
@@ -937,7 +873,61 @@
 				}
 			}
 		},
+		"/players": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PlayersResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Players"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/players/{entityId}": {
+			"get": {
+				"operationId": "GetByEntityId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PlayersResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Players"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
 			"delete": {
 				"operationId": "DeletePlayer",
 				"responses": {
@@ -1005,6 +995,74 @@
 						}
 					}
 				}
+			}
+		},
+		"/players/city/{city}": {
+			"get": {
+				"operationId": "GetPlayersByCity",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PlayersResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Players"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "city",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/players/level/{level}": {
+			"get": {
+				"operationId": "GetPlayersByLevel",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PlayersResponse"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Players"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "level",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/PlayerLevel"
+						}
+					}
+				]
 			}
 		},
 		"/ping": {
