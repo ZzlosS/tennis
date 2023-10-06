@@ -1,6 +1,7 @@
 import { COURT_UNASSIGNED_CLUB } from "../consts";
 import { Court } from "../entities/court";
 import CourtCreateRequest from "../requests/courtCreateRequest";
+import UpdateCourtRequest from "../requests/updateCourtRequest";
 import { courtSchema } from "../schemas/courtSchema";
 import BaseRepository from "./baseRepository";
 
@@ -48,4 +49,30 @@ export default class CourtRepository extends BaseRepository<Court> {
     
     return await courts.return.all();
   }
+
+  async updateCourt(entityId: string, updateRequest: UpdateCourtRequest) {
+    const court = await this.findByEntityID(entityId);
+
+    if(updateRequest.name){
+      court.name = updateRequest.name;
+    }
+    if(updateRequest.surface){
+      court.surface = updateRequest.surface;
+    }
+    if(updateRequest.stands){
+      court.stands = updateRequest.stands;
+    }
+    if(updateRequest.roof){
+      court.roof = updateRequest.roof;
+    }
+    if(updateRequest.double){
+      court.double = updateRequest.double;
+    }
+    if(updateRequest.pricePerHour){
+      court.pricePerHour = updateRequest.pricePerHour;
+    }
+
+    return await this.save(court);
+  }
+
 }

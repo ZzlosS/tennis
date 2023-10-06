@@ -565,6 +565,39 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"UpdateCourtRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"surface": {
+						"$ref": "#/components/schemas/CourtSurface"
+					},
+					"stands": {
+						"type": "boolean"
+					},
+					"roof": {
+						"type": "boolean"
+					},
+					"double": {
+						"type": "boolean"
+					},
+					"pricePerHour": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"surface",
+					"stands",
+					"roof",
+					"double",
+					"pricePerHour"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"BookingType": {
 				"enum": [
 					"ONE_TIME",
@@ -1652,6 +1685,45 @@
 						}
 					}
 				]
+			},
+			"patch": {
+				"operationId": "UpdateCourt",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Courts"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateCourtRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/courts": {

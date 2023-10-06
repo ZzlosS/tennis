@@ -1,10 +1,12 @@
-import { Tags, Route, Get, Path, Post, Body, Query, Delete } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Query, Delete, Patch } from "tsoa";
 import CourtRepository from "../repositories/courtRepository";
 import CourtResponse from "../responses/courtResponse";
 import CourtCreateRequest from "../requests/courtCreateRequest";
 import ClubRepository from "../repositories/clubRepository";
 import ClubResponse from "../responses/clubResponse";
 import AssignCourtRequest  from "../requests/assignCourtRequest";
+import { Court } from "../entities/court";
+import UpdateCourtRequest from "../requests/updateCourtRequest";
 
 @Tags("Courts")
 @Route("courts")
@@ -20,20 +22,11 @@ export default class CourtController {
     @Get("/all")
     async getAllCourts(): Promise<CourtResponse[]>  {
         let courts = await this.repository.findAll();
-        const data = courts.map(court => {
-            return {
-                entityId: court.entityId,
-                name: court.name,
-                surface: court.surface,
-                stands: court.stands,
-                roof: court.roof,
-                double: court.double,
-                clubId: court.club,
-                pricePerHour: court.pricePerHour,
-            } as CourtResponse;
+        const data = courts.map(async courts => {
+            return await this.convertCourtModelToResponse(courts);
         });
-            
-        return data;
+    
+        return await Promise.all(data);
     }
 
     @Get("/{entityId}")
@@ -73,20 +66,11 @@ export default class CourtController {
     @Get("/unassigned")
     async getUnassignedCourts(): Promise<CourtResponse[]>  {
         let courts = await this.repository.findUnassignedCourts();
-        const data = courts.map(court => {
-            return {
-                entityId: court.entityId,
-                name: court.name,
-                surface: court.surface,
-                stands: court.stands,
-                roof: court.roof,
-                double: court.double,
-                clubId: court.club,
-                pricePerHour: court.pricePerHour,
-            } as CourtResponse;
+        const data = courts.map(async courts => {
+            return await this.convertCourtModelToResponse(courts);
         });
-            
-        return data;
+    
+        return await Promise.all(data);
     }
 
     @Post("/assign")
@@ -97,28 +81,37 @@ export default class CourtController {
         return true;
     }
 
-
     @Get("/price")
     async findByPrice(@Query() from: number, @Query() to: number): Promise<CourtResponse[]>{
         let courts = await this.repository.findByPrice(from, to);
-        const data = courts.map(court => {
-            return {
-                entityId: court.entityId,
-                name: court.name,
-                surface: court.surface,
-                stands: court.stands,
-                roof: court.roof,
-                double: court.double,
-                clubId: court.club,
-                pricePerHour: court.pricePerHour,
-            } as CourtResponse;
+        const data = courts.map(async courts => {
+            return await this.convertCourtModelToResponse(courts);
         });
-            
-        return data;
+    
+        return await Promise.all(data);
     }
 
     @Delete("/{entityId}")
     async deleteCourt(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
+    }
+
+
+  @Patch("/{entityId}")
+  async updateCourt(@Body() updateRequest: UpdateCourtRequest, @Path()  entityId: string): Promise<string> {
+    return await this.repository.updateCourt(entityId, updateRequest);
+  }
+
+    async convertCourtModelToResponse(court: Court): Promise<CourtResponse> {
+        return {
+            entityId: court.entityId,
+            name: court.name,
+            surface: court.surface,
+            stands: court.stands,
+            roof: court.roof,
+            double: court.double,
+            clubId: court.club,
+            pricePerHour: court.pricePerHour,
+        } as CourtResponse;
     }
 }
