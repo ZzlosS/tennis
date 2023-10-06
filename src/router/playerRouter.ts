@@ -35,6 +35,17 @@ playerRouter.delete("/:entityId", authenticateToken, async (req: Request, res: R
   return res.send(response);
 });
 
-// TODO: add geting specfic
+playerRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+  const controller = new PlayerController();
+  const response = await controller.updatePlayer(req.body, req.params['entityId']);
+  return res.send(response);
+});
+
+playerRouter.get("/:entityId", authenticateToken, async (req: Request, res: Response) => {
+  const controller = new PlayerController();
+  const response = await controller.getByEntityId(req.params['entityId']);
+  return res.send(response);
+});
+
 
 export default playerRouter;

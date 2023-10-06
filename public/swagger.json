@@ -160,6 +160,30 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"UpdatePlayerRequest": {
+				"properties": {
+					"firstName": {
+						"type": "string"
+					},
+					"lastName": {
+						"type": "string"
+					},
+					"level": {
+						"$ref": "#/components/schemas/PlayerLevel"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"PingResponse": {
 				"properties": {
 					"message": {
@@ -942,6 +966,45 @@
 						}
 					}
 				]
+			},
+			"patch": {
+				"operationId": "UpdatePlayer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Players"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "entityId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdatePlayerRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/ping": {

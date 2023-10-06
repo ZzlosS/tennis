@@ -4,6 +4,7 @@ import ClubCreateRequest from "../requests/clubCreateRequest";
 import ClubResponse from "../responses/clubResponse";
 import CourtRepository from "../repositories/courtRepository";
 import CourtResponse from "../responses/courtResponse";
+import { Player } from "../entities/player";
 
 
 @Tags("Clubs")
@@ -91,4 +92,5 @@ export default class ClubsController {
     async deleteClub(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
     }
+
 }
