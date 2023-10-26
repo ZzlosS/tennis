@@ -39,7 +39,7 @@ export default class BookiongController {
 
     @Security("jwt")
     @Get("/")
-    async filterBookings(@Query() court: string, @Query() from: number, @Query() to: number, @Query() player: string, @Query() date: string): Promise<BookingResponse[]> {
+    async filterBookings(@Query() court?: string, @Query() from?: number, @Query() to?: number, @Query() player?: string, @Query() date?: string): Promise<BookingResponse[]> {
         const bookings = await this.repository.findBookings({ 
             from: from,
             to: to,

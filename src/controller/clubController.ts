@@ -21,10 +21,10 @@ export default class ClubsController {
 
     @Security("jwt")
     @Post("/")
-    async createClub(@Body() createClub: ClubCreateRequest): Promise<string>{
+    async createClub(@Body() createClub: ClubCreateRequest): Promise<any>{
         let clubEID = await this.repository.createClub(createClub);
         
-        return clubEID;
+        return {"entityId": clubEID};
     }
 
     @Security("jwt")

@@ -60,10 +60,10 @@ export default class CourtController {
 
     @Security("jwt")
     @Post("/")
-    async createCourt(@Body() createCourt: CourtCreateRequest): Promise<string>{
+    async createCourt(@Body() createCourt: CourtCreateRequest): Promise<any>{
         let courtEntityID = await this.repository.createCourt(createCourt);
         
-        return courtEntityID;
+        return {"entityId": courtEntityID};
     }
 
     @Security("jwt")

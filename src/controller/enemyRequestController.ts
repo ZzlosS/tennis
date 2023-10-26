@@ -71,6 +71,7 @@ export default class EnemyRequestController {
         const acceptedPlayerNicnames = await Promise.all(enemyRequest.acceptedBy.map(async playerEntityID => (await this.playerRepository.findByEntityID(playerEntityID)).nickname));
 
         return {
+            entityId: enemyRequest.entityId,
             bookingEntityID: enemyRequest.bookingEntityID,
             courtEntityId: booking.court,
             date: booking.date,

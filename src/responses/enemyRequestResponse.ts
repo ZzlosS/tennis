@@ -1,6 +1,7 @@
 
 
 export default interface EnemyRequestResponse {
+    entityId: string;
     bookingEntityID: string;
     courtEntityId: string;
     date: Date;

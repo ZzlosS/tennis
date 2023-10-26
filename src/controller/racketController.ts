@@ -37,8 +37,8 @@ export default class RacketController {
         } as RacketResponse;
     }
 
-    @Get("/")
     @Security("jwt")
+    @Get("/")
     async getRackets(): Promise<RacketResponse[]> {
         let player = await this.playerRepository.findByEntityID(this.userId);
 
@@ -82,11 +82,11 @@ export default class RacketController {
 
     @Post("/assign")
     @Security("jwt")
-    async assignRacketToPlayer(@Body() assignRequest: AssignRacketRequest): Promise<boolean>{
+    async assignRacketToPlayer(@Body() assignRequest: AssignRacketRequest): Promise<any>{
         let player = await this.playerRepository.findByEntityID(assignRequest.playerEid);
         let playerEID = await this.playerRepository.assignRacketToPlayer(player, assignRequest.racketEid);
 
-        return true;
+        return {assigned: true};
     }
 
     @Delete("/{entityId}")

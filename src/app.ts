@@ -43,7 +43,7 @@ app.use("/clubs", clubRouter);
 app.use("/courts", courtRouter);
 app.use("/bookings", bookingRouter);
 app.use("/matches", matchRouter);
-app.use("/enemy-requests", enemyRequestRouter);
+app.use("/requests", enemyRequestRouter);
 app.use("/", pingRouter);
 
 // Error handlers
@@ -52,7 +52,6 @@ app.use(errorResponder);
 app.use(invalidPathHandler);
 
 app.listen(PORT, async () => {
-  console.log(process.env.TOKEN_KEY);
   console.log(`Server is running on PORT ${PORT} 🚀 `);
 });
 
