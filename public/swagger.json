@@ -16,7 +16,7 @@
 				],
 				"type": "string"
 			},
-			"IRegisterRequest": {
+			"RegisterRequest": {
 				"properties": {
 					"firstName": {
 						"type": "string"
@@ -982,7 +982,13 @@
 				"additionalProperties": false
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"jwt": {
+				"type": "apiKey",
+				"name": "Authorization",
+				"in": "header"
+			}
+		}
 	},
 	"info": {
 		"title": "tennis",
@@ -1017,7 +1023,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IRegisterRequest"
+								"$ref": "#/components/schemas/RegisterRequest"
 							}
 						}
 					}
@@ -1102,7 +1108,11 @@
 				"tags": [
 					"Players"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -1124,7 +1134,11 @@
 				"tags": [
 					"Players"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1153,7 +1167,11 @@
 				"tags": [
 					"Players"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1182,7 +1200,11 @@
 				"tags": [
 					"Players"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1226,7 +1248,11 @@
 				"tags": [
 					"Players"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1260,7 +1286,11 @@
 				"tags": [
 					"Players"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1291,7 +1321,11 @@
 				"tags": [
 					"Ping"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			}
 		},

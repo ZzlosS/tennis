@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import AppError from "./appError";
+import AppError, { NotFoundError } from "./appError";
 
 
 
@@ -21,17 +21,16 @@ const errorResponder = (
 ) => {
   res.header("Content-Type", "application/json");
 
-  // const status = error.statusCode || 400;
-  // return response.json({ message: error.message }).status(status);
-
-
+  if(err instanceof NotFoundError) {
+    return res.status(404).json({error: err.message})
+  }
   if (err instanceof AppError) {
     // Handle known application errors (e.g., validation errors)
-    res.status(err.statusCode).json({ error: err.message });
+    return res.status(err.statusCode).json({ error: err.message });
   } else {
     // Handle unexpected errors (e.g., unhandled exceptions)
     console.error(err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 

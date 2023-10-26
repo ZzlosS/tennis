@@ -1,6 +1,7 @@
 import PlayerDto from "../dtos/playerDto";
 import { Player } from "../entities/player";
 import PlayerLevel from "../enums/playerLevel";
+import RegisterRequest from "../requests/registerRequest";
 import UpdatePlayerRequest from "../requests/updatePlayerRequest";
 import { playerSchema } from "../schemas/playerSchema";
 import BaseRepository from "./baseRepository";
@@ -35,18 +36,19 @@ export default class PlayerRepository extends BaseRepository<Player> {
     return await this.save(player);
   }
 
-  async createPlayer(dto: PlayerDto) {
+  async createPlayer(registerRequest: RegisterRequest): Promise<string> {
     const player = await this.createEntity();
 
-    player.firstName = dto.firstName;
-    player.lastName = dto.lastName;
-    player.email = dto.email;
-    player.password = dto.password;
-    player.nickname = dto.nickname;
-    player.level = dto.level;
-    player.address = dto.address;
-    player.city = dto.city;
-    player.country = dto.country;
+    player.firstName = registerRequest.firstName;
+    player.lastName = registerRequest.lastName;
+    player.email = registerRequest.email;
+    player.password = registerRequest.password;
+    player.nickname = registerRequest.nickname;
+    player.level = registerRequest.level;
+    player.address = registerRequest.address;
+    player.city = registerRequest.city;
+    player.country = registerRequest.country;
+    player.deleted = false;
     
     return await this.save(player);
   }

@@ -1,6 +1,6 @@
 import PlayerLevel from "../enums/playerLevel";
 
-export default interface IRegisterRequest {
+export default interface RegisterRequest {
     firstName: string;
     lastName: string;
     email: string;

@@ -6,7 +6,7 @@ import pingRouter from "./router/pingRouter";
 import racketRouter from "./router/racketRouter";
 import clubRouter from "./router/clubRouter";
 import courtRouter from "./router/courtRouter";
-import { errorLogger, errorResponder, invalidPathHandler, requestLogger } from "./errors/errorHandlers";
+import { errorLogger, errorResponder, invalidPathHandler } from "./errors/errorHandlers";
 import bookingRouter from "./router/bookingRouter";
 import matchRouter from "./router/matchRouter";
 import enemyRequestRouter from "./router/enemyRequestRouter";
@@ -19,10 +19,8 @@ const PORT = 8787;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(requestLogger);
 
 app.use(express.json());
-// app.use(morgan("tiny"));
 app.use(express.static("public"));
 
 app.use(
@@ -57,3 +55,4 @@ app.listen(PORT, async () => {
   console.log(process.env.TOKEN_KEY);
   console.log(`Server is running on PORT ${PORT} 🚀 `);
 });
+

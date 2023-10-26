@@ -10,7 +10,7 @@ const EXPIRATION = '1h';
 declare global {
     namespace Express {
         interface Request {
-            user_id?: string
+            entityId?: string
         }
     }
 }
@@ -32,7 +32,18 @@ export function authenticateToken(
         }
 
         // Attach the authenticated user to the request for further use in routes
-        req.user_id = user.user_id;
+        req.entityId = user.entityId;
         next();
     });
 }
+
+
+const auth = (request: Request, response: Response, next: NextFunction) => {
+    // console.log('🚀 ~ REQUEST ~ ', request);
+    const token = request.headers.authorization || '';
+    if (!token) {
+      response.status(400).json({ error: 'Auth rip!' });
+      return;
+    }
+    next();
+  };

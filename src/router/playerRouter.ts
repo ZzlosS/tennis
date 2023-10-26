@@ -1,14 +1,18 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import PlayerController from "../controller/playerController";
 import PlayerLevel from "../enums/playerLevel";
 import { authenticateToken } from "../middleware/auth";
 
 const playerRouter = express.Router();
 
-playerRouter.post("/login", async (req: Request, res: Response) => {
-  const controller = new PlayerController();
-  const response = await controller.login(req.body);
-  return res.send(response);
+playerRouter.post("/login", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const controller = new PlayerController();
+    const response = await controller.login(req.body);
+    return res.send(response);
+  } catch (error) {
+    next(error)
+  }
 });
 
 playerRouter.post("/register", async (req: Request, res: Response) => {
