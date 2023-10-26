@@ -3,7 +3,7 @@ import BookingRepository from "../repositories/bookingRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import EnemyRequestRepository from "../repositories/requestRepository";
 import CreateEnemyRequest from "../requests/createEnemyRequest";
-import { Tags, Route, Get, Path, Post, Body, Delete, Patch } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Delete, Patch, Security} from "tsoa";
 import EnemyRequestResponse from "../responses/enemyRequestResponse";
 import CourtRepository from "../repositories/courtRepository";
 import AcceptEnemyRequest from "../requests/acceptEnemyRequest";
@@ -27,16 +27,19 @@ export default class EnemyRequestController {
     }
 
     @Post("/")
+    @Security("jwt")
     async createRequest(@Body() createRequest: CreateEnemyRequest){
         return await this.repository.createEnemyRequest(createRequest);
     }
 
     @Post("/accept")
+    @Security("jwt")
     async acceptRequest(@Body() acceptRequest: AcceptEnemyRequest){
         return await this.repository.enemyRequestAccepted(acceptRequest.requestEntityID, acceptRequest.playerEntityID);
     }
 
     @Get("/")
+    @Security("jwt")
     async getActiveRequests(){
         const requests = await this.repository.allActiveEnemyRequests();
         let data: EnemyRequestResponse[] = [];
@@ -49,6 +52,7 @@ export default class EnemyRequestController {
     }
 
     @Get("/inactive")
+    @Security("jwt")
     async getInactiveRequests(){
         const requests = await this.repository.allInactiveEnemyRequests();
         let data: EnemyRequestResponse[] = [];
@@ -83,16 +87,19 @@ export default class EnemyRequestController {
     }
 
     @Delete("/{entityId}")
+    @Security("jwt")
     async deleteEnemyRequest(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
     }
     
     @Get("/{entityId}")
+    @Security("jwt")
     async getEnemyRequest(@Path() entityId: string): Promise<EnemyRequestResponse> {
         return await this.convertMatchModelToResponse(await this.repository.findByEntityID(entityId));
     }
     
     @Patch("/{entityId}")
+    @Security("jwt")
     async updateEnemyRequest(@Body() updateRequest: UpdateEnemyRequest, @Path()  entityId: string): Promise<string> {
         return await this.repository.updateEnemyRequest(entityId, updateRequest);
     }

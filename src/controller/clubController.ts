@@ -1,4 +1,4 @@
-import { Route, Get, Post, Body, Tags, Path, Delete, Patch} from "tsoa";
+import { Route, Get, Post, Body, Tags, Path, Delete, Patch, Security } from "tsoa";
 import ClubRepository from "../repositories/clubRepository";
 import ClubCreateRequest from "../requests/clubCreateRequest";
 import ClubResponse from "../responses/clubResponse";
@@ -19,6 +19,7 @@ export default class ClubsController {
         this.courtRepository = new CourtRepository();
     }
 
+    @Security("jwt")
     @Post("/")
     async createClub(@Body() createClub: ClubCreateRequest): Promise<string>{
         let clubEID = await this.repository.createClub(createClub);
@@ -26,6 +27,7 @@ export default class ClubsController {
         return clubEID;
     }
 
+    @Security("jwt")
     @Get("/all")
     async getAllClubs(): Promise<ClubResponse[]>  {
         let clubs = await this.repository.findAll();
@@ -36,6 +38,7 @@ export default class ClubsController {
         return await Promise.all(data);
     }
 
+    @Security("jwt")
     @Get("/city/{city}")
     async getClubsByCity(@Path() city: string): Promise<ClubResponse[]>  {
         const clubs = await this.repository.findClubsByCity(city);
@@ -46,6 +49,7 @@ export default class ClubsController {
         return await Promise.all(data);
     }
 
+    @Security("jwt")
     @Get("/{entityId}")
     async getById(@Path() entityId: string): Promise<ClubResponse>  {
         const club = await this.repository.findByEntityID(entityId);
@@ -73,11 +77,13 @@ export default class ClubsController {
         } as ClubResponse;
     }
 
+    @Security("jwt")
     @Delete("/{entityId}")
     async deleteClub(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
     }
 
+    @Security("jwt")
     @Patch("/{entityId}")
     async updateClub(@Body() updateRequest: UpdateClubRequest, @Path()  entityId: string): Promise<string> {
         return await this.repository.updateClub(entityId, updateRequest);

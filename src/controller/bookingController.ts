@@ -1,4 +1,4 @@
-import { Tags, Route, Get, Path, Post, Body, Query, Delete, Patch } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Query, Delete, Patch, Security } from "tsoa";
 import BookingRepository from "../repositories/bookingRepository";
 import BookingCreateRequest from "../requests/bookingCreateRequest";
 import CourtRepository from "../repositories/courtRepository";
@@ -24,6 +24,7 @@ export default class BookiongController {
         this.playerRepository = new PlayerRepository();
     }
 
+    @Security("jwt")
     @Post("/")
     async createBooking(@Body() createBooking: BookingCreateRequest): Promise<string>{
         
@@ -36,6 +37,7 @@ export default class BookiongController {
         return bookingEntityID;
     }
 
+    @Security("jwt")
     @Get("/")
     async filterBookings(@Query() court: string, @Query() from: number, @Query() to: number, @Query() player: string, @Query() date: string): Promise<BookingResponse[]> {
         const bookings = await this.repository.findBookings({ 
@@ -56,16 +58,19 @@ export default class BookiongController {
         return await Promise.all(data);
     }
 
+    @Security("jwt")
     @Delete("/{entityId}")
     async deleteBooking(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
     }
 
+    @Security("jwt")
     @Patch("/{entityId}")
     async updateBooking(@Body() updateRequest: UpdateBookingRequest, @Path()  entityId: string): Promise<string> {
         return await this.repository.updateBooking(entityId, updateRequest);
     }
 
+    @Security("jwt")
     @Get('/{entityId}')
     async getByEntityId(@Path()  entityId: string): Promise<BookingResponse>{
         return await this.convertBookingModelToResponse( await this.repository.findByEntityID(entityId));

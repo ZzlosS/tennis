@@ -1,7 +1,7 @@
 import { NotFoundError } from "../errors/appError";
 import PlayerRepository from "../repositories/playerRepository";
 import RacketRepository from "../repositories/racketRepository";
-import { Route, Get, Post, Body, Tags, Delete, Path, Patch} from "tsoa";
+import { Route, Get, Post, Body, Tags, Delete, Path, Patch, Security} from "tsoa";
 import RacketResponse from "../responses/racketResponse";
 import AssignRacketRequest from "../requests/assignRacketRequest";
 import CreateRacketRequest from "../requests/createRacketRequest";
@@ -38,6 +38,7 @@ export default class RacketController {
     }
 
     @Get("/")
+    @Security("jwt")
     async getRackets(): Promise<RacketResponse[]> {
         let player = await this.playerRepository.findByEntityID(this.userId);
 
@@ -56,6 +57,7 @@ export default class RacketController {
 
 
     @Get("/all")
+    @Security("jwt")
     async getAllRackets(): Promise<RacketResponse[]>  {
         let rackets = await this.repository.findAll();
 
@@ -71,6 +73,7 @@ export default class RacketController {
     }
 
     @Post("/")
+    @Security("jwt")
     async createRacket(@Body() createRacket: CreateRacketRequest): Promise<string>{
         let racketEID = await this.repository.createRacket(createRacket)
         
@@ -78,6 +81,7 @@ export default class RacketController {
     }
 
     @Post("/assign")
+    @Security("jwt")
     async assignRacketToPlayer(@Body() assignRequest: AssignRacketRequest): Promise<boolean>{
         let player = await this.playerRepository.findByEntityID(assignRequest.playerEid);
         let playerEID = await this.playerRepository.assignRacketToPlayer(player, assignRequest.racketEid);
@@ -86,16 +90,19 @@ export default class RacketController {
     }
 
     @Delete("/{entityId}")
+    @Security("jwt")
     async deleteRacket(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
     }
 
     @Get("/{entityId}")
+    @Security("jwt")
     async getRacket(@Path() entityId: string): Promise<RacketResponse> {
         return await this.convertPlayerModelToResponse(await this.repository.findByEntityID(entityId));
     }
 
     @Patch("/{entityId}")
+    @Security("jwt")
     async updateRacket(@Body() updateRequest: UpdateRacketRequest, @Path()  entityId: string): Promise<string> {
         return await this.repository.updateRacket(entityId, updateRequest);
     }

@@ -1,4 +1,4 @@
-import { Tags, Route, Get, Path, Post, Body, Query, Delete, Patch } from "tsoa";
+import { Tags, Route, Get, Path, Post, Body, Query, Delete, Patch, Security } from "tsoa";
 import CourtRepository from "../repositories/courtRepository";
 import CourtResponse from "../responses/courtResponse";
 import CourtCreateRequest from "../requests/courtCreateRequest";
@@ -19,6 +19,7 @@ export default class CourtController {
         this.clubRepository = new ClubRepository();
     }
 
+    @Security("jwt")
     @Get("/all")
     async getAllCourts(): Promise<CourtResponse[]>  {
         let courts = await this.repository.findAll();
@@ -29,6 +30,7 @@ export default class CourtController {
         return await Promise.all(data);
     }
 
+    @Security("jwt")
     @Get("/{entityId}")
     async getById(@Path() entityId: string): Promise<CourtResponse>  {
         const court = await this.repository.findByEntityID(entityId);
@@ -56,6 +58,7 @@ export default class CourtController {
         } as CourtResponse;
     }
 
+    @Security("jwt")
     @Post("/")
     async createCourt(@Body() createCourt: CourtCreateRequest): Promise<string>{
         let courtEntityID = await this.repository.createCourt(createCourt);
@@ -63,6 +66,7 @@ export default class CourtController {
         return courtEntityID;
     }
 
+    @Security("jwt")
     @Get("/unassigned")
     async getUnassignedCourts(): Promise<CourtResponse[]>  {
         let courts = await this.repository.findUnassignedCourts();
@@ -73,6 +77,7 @@ export default class CourtController {
         return await Promise.all(data);
     }
 
+    @Security("jwt")
     @Post("/assign")
     async assignCourtToClub(@Body() assignRequest: AssignCourtRequest): Promise<boolean>{
         await this.repository.assignToClub(assignRequest.courtEntityID, assignRequest.clubEntityID);
@@ -81,6 +86,7 @@ export default class CourtController {
         return true;
     }
 
+    @Security("jwt")
     @Get("/price")
     async findByPrice(@Query() from: number, @Query() to: number): Promise<CourtResponse[]>{
         let courts = await this.repository.findByPrice(from, to);
@@ -91,16 +97,18 @@ export default class CourtController {
         return await Promise.all(data);
     }
 
+    @Security("jwt")
     @Delete("/{entityId}")
     async deleteCourt(@Path() entityId: string): Promise<string> {
         return await this.repository.deleteEntity(entityId);
     }
 
 
-  @Patch("/{entityId}")
-  async updateCourt(@Body() updateRequest: UpdateCourtRequest, @Path()  entityId: string): Promise<string> {
-    return await this.repository.updateCourt(entityId, updateRequest);
-  }
+    @Security("jwt")
+    @Patch("/{entityId}")
+    async updateCourt(@Body() updateRequest: UpdateCourtRequest, @Path()  entityId: string): Promise<string> {
+        return await this.repository.updateCourt(entityId, updateRequest);
+    }
 
     async convertCourtModelToResponse(court: Court): Promise<CourtResponse> {
         return {
