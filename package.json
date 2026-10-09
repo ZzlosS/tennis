@@ -41,6 +41,7 @@
     "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.1",
     "tsoa": "^6.6.0",
+    "ulid": "^2.4.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

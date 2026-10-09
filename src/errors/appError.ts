@@ -45,7 +45,16 @@ export class ForbiddenError extends AppError {
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string = "Conflict", code: ErrorCode = ErrorCode.CONFLICT) {
-    super(409, code, message);
+  constructor(message: string = "Conflict", code: ErrorCode = ErrorCode.CONFLICT, fields?: FieldErrors) {
+    super(409, code, message, fields);
   }
+}
+
+export class TooManyRequestsError extends AppError {
+  constructor(message: string = "Too many requests", retryAfterSeconds?: number) {
+    super(429, ErrorCode.RATE_LIMITED, message);
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+
+  retryAfterSeconds?: number;
 }

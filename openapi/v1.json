@@ -18,7 +18,18 @@
 					"NOT_FOUND",
 					"EMAIL_TAKEN",
 					"CONFLICT",
-					"INTERNAL"
+					"INTERNAL",
+					"SLOT_TAKEN",
+					"OUTSIDE_OPENING_HOURS",
+					"COURT_CLOSED",
+					"BOOKING_IN_PAST",
+					"CANCEL_TOO_LATE",
+					"REQUEST_FULL",
+					"ALREADY_JOINED",
+					"MATCH_NOT_PENDING",
+					"HANDOVER_PENDING",
+					"RATE_LIMITED",
+					"TOKEN_INVALID"
 				]
 			},
 			"ErrorBody": {
