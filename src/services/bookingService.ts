@@ -18,6 +18,8 @@ import SlotRepository, { makeHolder, ParsedHolder, SlotRef } from "../repositori
 import BookingCreateRequest from "../requests/bookingCreateRequest";
 import UpdateBookingRequest from "../requests/updateBookingRequest";
 import { isAdmin, isClubAdmin } from "./access";
+import Notifier from "./notifier";
+import ReminderService from "./reminderService";
 import { now } from "./clock";
 import { CourtSchedule, scheduleOf } from "./courtSchedule";
 import { addLocalDays, HOUR_MS, isOpenAt, localDate, localDayRange, localParts, utcHours } from "./time";
@@ -56,6 +58,8 @@ export default class BookingService {
   private slots = new SlotRepository();
   private partnerRequests = new PartnerRequestRepository();
   private blocks = new CourtBlockRepository();
+  private reminders = new ReminderService();
+  private notifier = new Notifier();
 
   async clubOf(court: Court): Promise<Club | null> {
     if (!court.club || court.club === COURT_NO_CLUB) {
@@ -197,6 +201,7 @@ export default class BookingService {
     try {
       for (const booking of pending) {
         await this.bookings.confirm(booking);
+        await this.reminders.schedule(booking);
       }
     } catch (error) {
       await this.slots.release(claims);
@@ -257,6 +262,7 @@ export default class BookingService {
       throw error;
     }
     await this.partnerRequests.moveForBooking(booking.entityId, next.startsAt);
+    await this.reminders.schedule(booking);
     return booking;
   }
 
@@ -303,6 +309,22 @@ export default class BookingService {
       await this.bookings.markCancelled(target, actor.id);
       await this.slots.release(this.refs(target.court, target, target.entityId));
       await this.partnerRequests.deleteForBooking(target.entityId);
+      await this.reminders.cancel(target.entityId);
+    }
+    // The player hears about it when somebody else (the club) cancels their booking.
+    if (actor.id !== booking.player) {
+      const club = await this.clubOf(court);
+      await this.notifier.notify(
+        [booking.player],
+        "BOOKING_CANCELLED",
+        {
+          court: court.name,
+          club: club?.name,
+          startsAt: booking.startsAt,
+          timeZone: scheduleOf(court, club).timeZone,
+        },
+        { bookingId: booking.entityId }
+      );
     }
     return booking;
   }
@@ -312,6 +334,7 @@ export default class BookingService {
     await this.bookings.deleteEntity(booking.entityId);
     await this.slots.release(this.refs(booking.court, booking, booking.entityId));
     await this.partnerRequests.deleteForBooking(booking.entityId);
+    await this.reminders.cancel(booking.entityId);
   }
 
   // Each hour of one local day of a court, as a player sees it.

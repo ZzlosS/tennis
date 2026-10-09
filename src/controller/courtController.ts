@@ -46,6 +46,7 @@ import CourtResponse from "../responses/courtResponse";
 import { assertClubAdmin, assertSelfOrAdmin, isAdmin } from "../services/access";
 import BookingService from "../services/bookingService";
 import Mapper from "../services/mappers";
+import Notifier from "../services/notifier";
 import { isIsoDate } from "../services/time";
 import { AuthUser } from "../services/tokenService";
 import { assignCourtBody, createStandaloneCourtBody, updateCourtBody } from "../validation/clubs";
@@ -66,6 +67,7 @@ export class CourtController {
   private mapper = new Mapper();
   private bookingService = new BookingService();
   private handovers = new CourtHandoverRepository();
+  private notifier = new Notifier();
 
   /**
    * Courts of every kind, oldest first.
@@ -183,6 +185,13 @@ export class CourtController {
       throw new ConflictError("This court already has a handover waiting for an answer", ErrorCode.HANDOVER_PENDING);
     }
     const handoverId = await this.handovers.createHandover(id, request.clubId, user.id);
+    const club = await this.clubRepository.findByIdOrThrow(request.clubId, "Club");
+    await this.notifier.notify(
+      club.admins ?? [],
+      "HANDOVER_REQUESTED",
+      { who: (await this.mapper.playerSummary(user.id)).nickname, court: court.name, club: club.name },
+      { handoverId }
+    );
     return await this.mapper.handover(await this.handovers.findByIdOrThrow(handoverId, "Handover"));
   }
 

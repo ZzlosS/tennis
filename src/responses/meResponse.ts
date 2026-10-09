@@ -7,4 +7,6 @@ export default interface MeResponse extends PlayerResponse {
   role: Role;
   // True once the player has confirmed the email address through the emailed link.
   emailVerified: boolean;
+  // Language of emails and notifications: "en" or "sr".
+  language: "en" | "sr";
 }

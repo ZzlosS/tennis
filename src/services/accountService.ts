@@ -4,6 +4,7 @@ import CourtRepository from "../repositories/courtRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import BookingService from "./bookingService";
 import { now } from "./clock";
+import { forgetDevicesOf } from "./deviceService";
 import { PlaceIndex } from "./geo";
 import { revokeAllRefreshTokens } from "./tokenService";
 
@@ -27,6 +28,7 @@ export default class AccountService {
       await PlaceIndex.remove("COURT", court.entityId);
     }
     await revokeAllRefreshTokens(playerId);
+    await forgetDevicesOf(playerId);
     await this.players.deletePlayer(playerId);
   }
 }

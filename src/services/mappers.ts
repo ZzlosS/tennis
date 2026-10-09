@@ -71,6 +71,11 @@ export default class Mapper {
     };
   }
 
+  // The time zone a court's times are told in: its club's, or its own.
+  async timeZoneOf(court: Court): Promise<string> {
+    return scheduleOf(court, await this.clubOf(court)).timeZone;
+  }
+
   async court(court: Court): Promise<CourtResponse> {
     const club = await this.clubOf(court);
     const schedule = scheduleOf(court, club);
@@ -136,6 +141,7 @@ export default class Mapper {
       email: player.email,
       role: player.role,
       emailVerified: Boolean(player.emailVerifiedAt),
+      language: player.language === "sr" ? "sr" : "en",
     };
   }
 

@@ -169,6 +169,7 @@ const models: TsoaRoute.Models = {
             "lastName": {"dataType":"string"},
             "nickname": {"dataType":"string"},
             "level": {"ref":"PlayerLevel"},
+            "language": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["en"]},{"dataType":"enum","enums":["sr"]}]},
             "address": {"dataType":"string"},
             "city": {"dataType":"string"},
             "country": {"dataType":"string"},
@@ -322,6 +323,7 @@ const models: TsoaRoute.Models = {
             "country": {"dataType":"string","required":true},
             "role": {"ref":"Role","required":true},
             "emailVerified": {"dataType":"boolean","required":true},
+            "language": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["en"]},{"dataType":"enum","enums":["sr"]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -454,6 +456,14 @@ const models: TsoaRoute.Models = {
         "properties": {
             "items": {"dataType":"array","array":{"dataType":"refObject","ref":"ClubResponse"},"required":true},
             "nextCursor": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DeviceRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "token": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -1843,6 +1853,70 @@ export function RegisterRoutes(app: Router) {
                 next,
                 validatedArgs,
                 successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsMeController_registerDevice: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                request: {"in":"body","name":"request","required":true,"ref":"DeviceRequest"},
+        };
+        app.post('/v1/me/devices',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(MeController)),
+            ...(fetchMiddlewares<RequestHandler>(MeController.prototype.registerDevice)),
+
+            async function MeController_registerDevice(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsMeController_registerDevice, request, response });
+
+                const controller = new MeController();
+
+              await templateService.apiHandler({
+                methodName: 'registerDevice',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 204,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsMeController_unregisterDevice: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                request: {"in":"body","name":"request","required":true,"ref":"DeviceRequest"},
+        };
+        app.delete('/v1/me/devices',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(MeController)),
+            ...(fetchMiddlewares<RequestHandler>(MeController.prototype.unregisterDevice)),
+
+            async function MeController_unregisterDevice(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsMeController_unregisterDevice, request, response });
+
+                const controller = new MeController();
+
+              await templateService.apiHandler({
+                methodName: 'unregisterDevice',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 204,
               });
             } catch (err) {
                 return next(err);

@@ -33,6 +33,7 @@ import { ErrorBody } from "../responses/common";
 import MatchResponse from "../responses/matchResponse";
 import { isAdmin } from "../services/access";
 import Mapper from "../services/mappers";
+import Notifier from "../services/notifier";
 import StatsService from "../services/statsService";
 import { AuthUser } from "../services/tokenService";
 import { createMatchBody, updateMatchBody } from "../validation/matches";
@@ -51,6 +52,7 @@ export class MatchController {
   private playerRepository = new PlayerRepository();
   private mapper = new Mapper();
   private stats = new StatsService();
+  private notifier = new Notifier();
 
   /**
    * Matches, oldest first.
@@ -110,6 +112,13 @@ export class MatchController {
     const match = await this.repository.findByIdOrThrow(id, "Match");
     if (confirmedByAdmin) {
       await this.stats.apply(match, 1);
+    } else {
+      await this.notifier.notify(
+        this.otherTeam(match, user.id),
+        "MATCH_TO_CONFIRM",
+        { who: (await this.mapper.playerSummary(user.id)).nickname },
+        { matchId: id }
+      );
     }
     return await this.mapper.match(match);
   }
@@ -176,6 +185,12 @@ export class MatchController {
     }
     const confirmed = await this.repository.findByIdOrThrow(id, "Match");
     await this.stats.apply(confirmed, 1);
+    await this.notifier.notify(
+      [confirmed.createdBy],
+      "MATCH_CONFIRMED",
+      { who: (await this.mapper.playerSummary(currentUser(req).id)).nickname },
+      { matchId: id }
+    );
     return await this.mapper.match(confirmed);
   }
 
@@ -189,6 +204,12 @@ export class MatchController {
     if (!(await this.repository.moveStatus(id, MatchStatus.PENDING, MatchStatus.DISPUTED))) {
       throw new ConflictError("This match is not waiting for an answer", ErrorCode.MATCH_NOT_PENDING);
     }
+    await this.notifier.notify(
+      [match.createdBy],
+      "MATCH_DISPUTED",
+      { who: (await this.mapper.playerSummary(currentUser(req).id)).nickname },
+      { matchId: id }
+    );
     return await this.mapper.match(await this.repository.findByIdOrThrow(id, "Match"));
   }
 
@@ -206,6 +227,11 @@ export class MatchController {
       await this.stats.apply(match, -1);
     }
     await this.repository.deleteEntity(id);
+  }
+
+  // The players on the team that did not enter the score.
+  private otherTeam(match: Match, enteredBy: string): string[] {
+    return (match.firstTeam ?? []).includes(enteredBy) ? (match.secondTeam ?? []) : (match.firstTeam ?? []);
   }
 
   // Only a player of the team that did not enter the score can confirm or dispute it.

@@ -20,6 +20,10 @@ const schema = z.object({
   // Sending email goes through Resend. Without a key, emails are only written to the log.
   RESEND_API_KEY: z.string().optional(),
   MAIL_FROM: z.string().default("Tennis <onboarding@resend.dev>"),
+  // Push notifications go through Expo. The access token is only needed if "enhanced push security" is on for the project.
+  EXPO_ACCESS_TOKEN: z.string().optional(),
+  // How long before a booking starts the player gets a reminder.
+  REMINDER_HOURS_BEFORE: numberFromEnv(2),
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(15).default(12),
   CORS_ORIGINS: z
     .string()

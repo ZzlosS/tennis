@@ -1,5 +1,6 @@
 import { z } from "zod";
 import PlayerLevel from "../enums/playerLevel";
+import { isExpoToken } from "../services/pushClient";
 import { email, optionalText, text } from "./common";
 
 const language = z.enum(["en", "sr"]);
@@ -32,6 +33,7 @@ export const updatePlayerBody = z.object({
   lastName: text(100).optional(),
   nickname: text(50).optional(),
   level: z.nativeEnum(PlayerLevel).optional(),
+  language: language.optional(),
   address: z.string().trim().max(200).optional(),
   city: z.string().trim().max(100).optional(),
   country: z.string().trim().max(100).optional(),
@@ -58,4 +60,8 @@ export const resetPasswordBody = z.object({
 
 export const tokenBody = z.object({
   token: z.string().min(1).max(200),
+});
+
+export const deviceBody = z.object({
+  token: z.string().refine(isExpoToken, { message: "Must be an Expo push token such as ExponentPushToken[...]" }),
 });

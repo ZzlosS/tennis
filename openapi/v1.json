@@ -368,6 +368,13 @@
 					"level": {
 						"$ref": "#/components/schemas/PlayerLevel"
 					},
+					"language": {
+						"type": "string",
+						"enum": [
+							"en",
+							"sr"
+						]
+					},
 					"address": {
 						"type": "string"
 					},
@@ -718,6 +725,13 @@
 					},
 					"emailVerified": {
 						"type": "boolean"
+					},
+					"language": {
+						"type": "string",
+						"enum": [
+							"en",
+							"sr"
+						]
 					}
 				},
 				"required": [
@@ -731,7 +745,8 @@
 					"country",
 					"email",
 					"role",
-					"emailVerified"
+					"emailVerified",
+					"language"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1083,6 +1098,18 @@
 				"required": [
 					"items",
 					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DeviceRequest": {
+				"properties": {
+					"token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -4646,6 +4673,7 @@
 											"email": "marko@example.com",
 											"role": "PLAYER",
 											"emailVerified": true,
+											"language": "en",
 											"address": "Knez Mihailova 5",
 											"city": "Belgrade",
 											"country": "Serbia"
@@ -4727,6 +4755,7 @@
 											"email": "marko@example.com",
 											"role": "PLAYER",
 											"emailVerified": true,
+											"language": "en",
 											"address": "Knez Mihailova 5",
 											"city": "Belgrade",
 											"country": "Serbia"
@@ -5338,6 +5367,144 @@
 						}
 					}
 				]
+			}
+		},
+		"/me/devices": {
+			"post": {
+				"operationId": "RegisterDevice",
+				"responses": {
+					"204": {
+						"description": "Registered"
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Registers this phone for push notifications. Call it every time the app starts, since Expo can change the\ntoken. A phone belongs to one player at a time: signing in on it as someone else moves it to them.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeviceRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "UnregisterDevice",
+				"responses": {
+					"204": {
+						"description": "Removed"
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Stops notifications to this phone, for example when the player logs out.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeviceRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/me/court-handovers": {

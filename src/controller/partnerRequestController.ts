@@ -26,6 +26,7 @@ import { ErrorCode } from "../errors/codes";
 import { Page } from "../http/pagination";
 import { currentUser } from "../middleware/auth";
 import { validate } from "../middleware/validate";
+import CourtRepository from "../repositories/courtRepository";
 import BookingRepository from "../repositories/bookingRepository";
 import PartnerRequestRepository from "../repositories/partnerRequestRepository";
 import CreatePartnerRequest from "../requests/createPartnerRequest";
@@ -35,6 +36,7 @@ import PartnerRequestResponse from "../responses/partnerRequestResponse";
 import { assertSelfOrAdmin } from "../services/access";
 import { now } from "../services/clock";
 import Mapper from "../services/mappers";
+import Notifier from "../services/notifier";
 import { AuthUser } from "../services/tokenService";
 import { createPartnerRequestBody, updatePartnerRequestBody } from "../validation/requests";
 
@@ -51,6 +53,8 @@ export class PartnerRequestController {
   private repository = new PartnerRequestRepository();
   private bookingRepository = new BookingRepository();
   private mapper = new Mapper();
+  private courtRepository = new CourtRepository();
+  private notifier = new Notifier();
 
   @Example(partnerRequestExample)
   @Response<ErrorBody>(409, "CONFLICT")
@@ -151,7 +155,19 @@ export class PartnerRequestController {
       throw new AppError(409, ErrorCode.BOOKING_IN_PAST, "This booking has already started");
     }
     await this.repository.join(id, user.id);
-    return await this.toResponse(await this.repository.findByIdOrThrow(id, "Request"));
+    const joined = await this.toResponse(await this.repository.findByIdOrThrow(id, "Request"));
+    const booking = await this.bookingRepository.findByEntityID(request.bookingId);
+    await this.notifier.notify(
+      [request.playerId],
+      "PARTNER_JOINED",
+      {
+        who: (await this.mapper.playerSummary(user.id)).nickname,
+        startsAt: booking.startsAt,
+        timeZone: await this.mapper.timeZoneOf(await this.courtRepository.findByEntityID(booking.court)),
+      },
+      { requestId: id }
+    );
+    return joined;
   }
 
   // Gives the place back, so someone else can take it.

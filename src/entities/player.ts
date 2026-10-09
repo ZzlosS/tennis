@@ -16,6 +16,8 @@ type Player = BaseEntity & {
   country: string;
   // When the player confirmed their email through the emailed link, in ms. 0 when not confirmed.
   emailVerifiedAt: number;
+  // Language of emails and notifications: "en" or "sr".
+  language: string;
 };
 
 export { Player };

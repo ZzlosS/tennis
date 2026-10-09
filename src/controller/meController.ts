@@ -59,7 +59,9 @@ import StatsService from "../services/statsService";
 import { hashPassword, verifyPassword } from "../services/passwordService";
 import { issueSession } from "../services/sessionService";
 import { revokeAllRefreshTokens } from "../services/tokenService";
-import { changePasswordBody, deleteAccountBody, updatePlayerBody } from "../validation/auth";
+import { changePasswordBody, deleteAccountBody, deviceBody, updatePlayerBody } from "../validation/auth";
+import DeviceRequest from "../requests/deviceRequest";
+import { registerDevice, unregisterDevice } from "../services/deviceService";
 
 // Everything about the logged-in player. The player always comes from the token.
 @Tags("Me")
@@ -108,7 +110,7 @@ export class MeController {
     if (player.emailVerifiedAt) {
       throw new ConflictError("This email address is already confirmed");
     }
-    await this.emails.sendVerification(player, language ?? "en", true);
+    await this.emails.sendVerification(player, language ?? (player.language === "sr" ? "sr" : "en"), true);
   }
 
   /**
@@ -177,6 +179,25 @@ export class MeController {
   ): Promise<Page<ClubResponse>> {
     const { entities, nextCursor } = await this.clubs.findClubsPageByAdmin(currentUser(req).id, { limit, cursor });
     return { items: await Promise.all(entities.map((club) => this.mapper.club(club))), nextCursor };
+  }
+
+  /**
+   * Registers this phone for push notifications. Call it every time the app starts, since Expo can change the
+   * token. A phone belongs to one player at a time: signing in on it as someone else moves it to them.
+   */
+  @SuccessResponse(204, "Registered")
+  @Middlewares(validate({ body: deviceBody }))
+  @Post("/devices")
+  async registerDevice(@Request() req: ExRequest, @Body() request: DeviceRequest): Promise<void> {
+    await registerDevice(currentUser(req).id, request.token);
+  }
+
+  /** Stops notifications to this phone, for example when the player logs out. */
+  @SuccessResponse(204, "Removed")
+  @Middlewares(validate({ body: deviceBody }))
+  @Delete("/devices")
+  async unregisterDevice(@Request() req: ExRequest, @Body() request: DeviceRequest): Promise<void> {
+    await unregisterDevice(currentUser(req).id, request.token);
   }
 
   /**

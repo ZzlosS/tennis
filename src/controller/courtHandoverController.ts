@@ -13,6 +13,7 @@ import { ErrorBody } from "../responses/common";
 import HandoverResponse from "../responses/handoverResponse";
 import { isAdmin, isClubAdmin } from "../services/access";
 import Mapper from "../services/mappers";
+import Notifier from "../services/notifier";
 import { AuthUser } from "../services/tokenService";
 
 // A club's answer to "please take over this court". Ask for one with POST /courts/{id}/handover.
@@ -29,6 +30,7 @@ export class CourtHandoverController {
   private courts = new CourtRepository();
   private clubs = new ClubRepository();
   private mapper = new Mapper();
+  private notifier = new Notifier();
 
   @Example(handoverExample)
   @Get("/{id}")
@@ -58,6 +60,7 @@ export class CourtHandoverController {
     }
     await this.answer(id, HandoverStatus.ACCEPTED, user);
     await this.courts.assignToClub(court.entityId, club);
+    await this.tell(handover, court.name, club.name, "ACCEPTED");
     return await this.mapper.handover(await this.handovers.findByIdOrThrow(id, "Handover"));
   }
 
@@ -68,10 +71,12 @@ export class CourtHandoverController {
   async decline(@Request() req: ExRequest, @Path() id: string): Promise<HandoverResponse> {
     const user = currentUser(req);
     const handover = await this.handovers.findByIdOrThrow(id, "Handover");
-    if (!isClubAdmin(user, await this.clubs.findByIdOrThrow(handover.club, "Club"))) {
+    const club = await this.clubs.findByIdOrThrow(handover.club, "Club");
+    if (!isClubAdmin(user, club)) {
       throw new ForbiddenError();
     }
     await this.answer(id, HandoverStatus.DECLINED, user);
+    await this.tell(handover, (await this.courts.findByEntityID(handover.court)).name, club.name, "DECLINED");
     return await this.mapper.handover(await this.handovers.findByIdOrThrow(id, "Handover"));
   }
 
@@ -87,6 +92,16 @@ export class CourtHandoverController {
     }
     await this.answer(id, HandoverStatus.CANCELLED, user);
     return await this.mapper.handover(await this.handovers.findByIdOrThrow(id, "Handover"));
+  }
+
+  // Tells the player who asked what the club decided.
+  private async tell(handover: CourtHandover, court: string, club: string, answer: "ACCEPTED" | "DECLINED") {
+    await this.notifier.notify(
+      [handover.requestedBy],
+      "HANDOVER_ANSWERED",
+      { court, club, answer },
+      { handoverId: handover.entityId }
+    );
   }
 
   // Only a pending request can be answered, and only once.

@@ -113,7 +113,7 @@ export class AuthController {
   async forgotPassword(@Body() request: ForgotPasswordRequest): Promise<void> {
     const player = await this.repository.findByEmail(request.email);
     if (player) {
-      await this.emails.sendPasswordReset(player, request.language ?? "en");
+      await this.emails.sendPasswordReset(player, request.language ?? (player.language === "sr" ? "sr" : "en"));
     }
   }
 

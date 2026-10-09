@@ -95,6 +95,7 @@ export default class PlayerRepository extends BaseRepository<Player> {
     player.city = registerRequest.city;
     player.country = registerRequest.country;
     player.emailVerifiedAt = 0;
+    player.language = registerRequest.language ?? "en";
     player.deleted = false;
 
     return await this.save(player);
@@ -141,6 +142,9 @@ export default class PlayerRepository extends BaseRepository<Player> {
     }
     if (updateRequest.country) {
       player.country = updateRequest.country;
+    }
+    if (updateRequest.language) {
+      player.language = updateRequest.language;
     }
 
     return await this.save(player);
