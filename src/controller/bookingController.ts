@@ -74,7 +74,7 @@ export class BookingController {
   }
 
   /**
-   * Players see their own bookings, club admins also see their clubs' bookings, ADMINs see all. Oldest first.
+   * Players see their own bookings, club admins also see their clubs' bookings, ADMINs see all. Soonest first.
    * Cancelled bookings are left out unless `status` is CANCELLED.
    * @param seriesId Only the bookings made together by one weekly repeat.
    * @param from Only bookings that start at or after this time.

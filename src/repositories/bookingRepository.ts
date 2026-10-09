@@ -113,13 +113,20 @@ export default class BookingRepository extends BaseRepository<Booking> {
     };
   }
 
-  async findBookingsPage(filters: BookingFilters, query: PageQuery, sort?: Sort) {
+  // Soonest first unless told otherwise: bookings made together are created in the same moment, so their creation time
+  // cannot put them in order.
+  async findBookingsPage(
+    filters: BookingFilters,
+    query: PageQuery,
+    sort: Sort = { field: "startsAt", descending: false }
+  ) {
     return await this.findPage(this.matching(filters), query, sort);
   }
 
   // For callers that drop bookings in code before paging.
   async findBookings(filters: BookingFilters) {
-    return await this.findAllMatching(this.matching(filters));
+    const found = await this.findAllMatching(this.matching(filters));
+    return found.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
   }
 
   async updateBooking(
