@@ -501,7 +501,10 @@ describe("matches", () => {
         .send(matchBody([w.playerA.id], [w.playerB.id], w.courtA))
         .expect(201)
     ).body.id;
-    const sets = [{ firstTeam: 0, secondTeam: 6 }];
+    const sets = [
+      { firstTeam: 0, secondTeam: 6 },
+      { firstTeam: 1, secondTeam: 6 },
+    ];
     await api().patch(`/matches/${match}`).set(bearer(third.accessToken)).send({ sets }).expect(403);
     await api().delete(`/matches/${match}`).set(bearer(third.accessToken)).expect(403);
     const updated = await api().patch(`/matches/${match}`).set(bearer(w.playerB.token)).send({ sets }).expect(200);

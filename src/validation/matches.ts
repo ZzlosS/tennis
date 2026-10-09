@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { SetScore } from "../responses/matchResponse";
+import { scoreProblem } from "../services/tennisScore";
 import { id, isoDateTime } from "./common";
 
 const team = z.array(id).min(1).max(2);
@@ -18,6 +20,14 @@ const noSharedPlayers = (match: { firstTeam?: string[]; secondTeam?: string[] },
   }
 };
 
+// The sets have to add up to a real, finished tennis match.
+const realScore = (match: { sets?: SetScore[] }, context: z.RefinementCtx) => {
+  const problem = match.sets ? scoreProblem(match.sets) : null;
+  if (problem) {
+    context.addIssue({ code: "custom", path: ["sets"], message: problem });
+  }
+};
+
 export const createMatchBody = z
   .object({
     firstTeam: team,
@@ -26,7 +36,8 @@ export const createMatchBody = z
     courtId: id,
     playedAt: isoDateTime,
   })
-  .superRefine(noSharedPlayers);
+  .superRefine(noSharedPlayers)
+  .superRefine(realScore);
 
 export const updateMatchBody = z
   .object({
@@ -36,4 +47,5 @@ export const updateMatchBody = z
     courtId: id.optional(),
     playedAt: isoDateTime.optional(),
   })
-  .superRefine(noSharedPlayers);
+  .superRefine(noSharedPlayers)
+  .superRefine(realScore);

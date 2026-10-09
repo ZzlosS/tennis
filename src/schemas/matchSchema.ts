@@ -6,6 +6,8 @@ const matchSchema = new Schema("Match", {
   secondTeam: { type: "string[]" },
   sets: { type: "string" },
   court: { type: "string" },
+  status: { type: "string" },
+  createdBy: { type: "string" },
   createdAt: { type: "number", sortable: true },
   playedAt: { type: "date" },
   deleted: { type: "boolean" },

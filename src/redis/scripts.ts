@@ -94,6 +94,19 @@ redis.call('JSON.SET', KEYS[1], '$.active', 'true')
 return 'OK'
 `);
 
+// Moves a match from one status to another, only if it is still in the first one, so two players answering at
+// the same moment cannot both win. KEYS[1]: the match's JSON key. ARGV: from status, to status.
+// Replies "OK", "WRONG_STATUS" or "MISSING".
+export const moveMatchStatus = define(`
+local raw = redis.call('JSON.GET', KEYS[1], '$')
+if not raw then return 'MISSING' end
+local doc = cjson.decode(raw)[1]
+if doc.deleted then return 'MISSING' end
+if doc.status ~= ARGV[1] then return 'WRONG_STATUS' end
+redis.call('JSON.SET', KEYS[1], '$.status', cjson.encode(ARGV[2]))
+return 'OK'
+`);
+
 // Runs a script by its hash and falls back to sending the whole text when Redis does not know it yet.
 export async function runScript(script: Script, keys: string[], args: (string | number)[]): Promise<unknown> {
   try {

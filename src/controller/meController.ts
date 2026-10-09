@@ -15,16 +15,26 @@ import {
   SuccessResponse,
   Tags,
 } from "tsoa";
-import { authExample, bookingPageExample, clubPageExample, courtPageExample, meExample } from "../http/examples";
+import {
+  authExample,
+  bookingPageExample,
+  clubPageExample,
+  courtPageExample,
+  matchPageExample,
+  meExample,
+  statsExample,
+} from "../http/examples";
 import BookingWhen from "../enums/bookingWhen";
 import AppError from "../errors/appError";
 import { ErrorCode } from "../errors/codes";
-import { Page } from "../http/pagination";
+import MatchStatus from "../enums/matchStatus";
+import { Page, pageOfArray } from "../http/pagination";
 import { currentUser } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import BookingRepository from "../repositories/bookingRepository";
 import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
+import MatchRepository from "../repositories/matchRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import ChangePasswordRequest from "../requests/changePasswordRequest";
 import DeleteAccountRequest from "../requests/deleteAccountRequest";
@@ -34,10 +44,13 @@ import BookingResponse from "../responses/bookingResponse";
 import ClubResponse from "../responses/clubResponse";
 import { ErrorBody } from "../responses/common";
 import CourtResponse from "../responses/courtResponse";
+import MatchResponse from "../responses/matchResponse";
 import MeResponse from "../responses/meResponse";
+import StatsResponse from "../responses/statsResponse";
 import AccountService from "../services/accountService";
 import { now } from "../services/clock";
 import Mapper from "../services/mappers";
+import StatsService from "../services/statsService";
 import { hashPassword, verifyPassword } from "../services/passwordService";
 import { issueSession } from "../services/sessionService";
 import { revokeAllRefreshTokens } from "../services/tokenService";
@@ -56,6 +69,8 @@ export class MeController {
   private courts = new CourtRepository();
   private clubs = new ClubRepository();
   private accounts = new AccountService();
+  private matches = new MatchRepository();
+  private stats = new StatsService();
   private mapper = new Mapper();
 
   @Example(meExample)
@@ -139,6 +154,31 @@ export class MeController {
   ): Promise<Page<ClubResponse>> {
     const { entities, nextCursor } = await this.clubs.findClubsPageByAdmin(currentUser(req).id, { limit, cursor });
     return { items: await Promise.all(entities.map((club) => this.mapper.club(club))), nextCursor };
+  }
+
+  /**
+   * Matches the player took part in, newest first, including those waiting for an answer.
+   * @param status Only matches in this status.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(matchPageExample)
+  @Get("/matches")
+  async getMyMatches(
+    @Request() req: ExRequest,
+    @Query() status?: MatchStatus,
+    @Query() limit?: number,
+    @Query() cursor?: string
+  ): Promise<Page<MatchResponse>> {
+    const matches = await this.matches.findPlayerMatches(currentUser(req).id, { status, newestFirst: true });
+    return await pageOfArray(matches, { limit, cursor }, (match) => this.mapper.match(match));
+  }
+
+  /** Wins, losses, sets and games over the player's confirmed matches. */
+  @Example(statsExample)
+  @Get("/stats")
+  async getMyStats(@Request() req: ExRequest): Promise<StatsResponse> {
+    return await this.stats.get(currentUser(req).id);
   }
 
   /**

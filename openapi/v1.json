@@ -305,6 +305,55 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"StatsResponse": {
+				"properties": {
+					"matches": {
+						"type": "number",
+						"format": "double"
+					},
+					"wins": {
+						"type": "number",
+						"format": "double"
+					},
+					"losses": {
+						"type": "number",
+						"format": "double"
+					},
+					"winRate": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"setsWon": {
+						"type": "number",
+						"format": "double"
+					},
+					"setsLost": {
+						"type": "number",
+						"format": "double"
+					},
+					"gamesWon": {
+						"type": "number",
+						"format": "double"
+					},
+					"gamesLost": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"matches",
+					"wins",
+					"losses",
+					"winRate",
+					"setsWon",
+					"setsLost",
+					"gamesWon",
+					"gamesLost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UpdatePlayerRequest": {
 				"properties": {
 					"firstName": {
@@ -1034,6 +1083,110 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"SetScore": {
+				"properties": {
+					"firstTeam": {
+						"type": "number",
+						"format": "double"
+					},
+					"secondTeam": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"firstTeam",
+					"secondTeam"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MatchStatus": {
+				"enum": [
+					"PENDING",
+					"CONFIRMED",
+					"DISPUTED"
+				],
+				"type": "string"
+			},
+			"MatchResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"firstTeam": {
+						"items": {
+							"$ref": "#/components/schemas/PlayerSummary"
+						},
+						"type": "array"
+					},
+					"secondTeam": {
+						"items": {
+							"$ref": "#/components/schemas/PlayerSummary"
+						},
+						"type": "array"
+					},
+					"sets": {
+						"items": {
+							"$ref": "#/components/schemas/SetScore"
+						},
+						"type": "array"
+					},
+					"status": {
+						"$ref": "#/components/schemas/MatchStatus"
+					},
+					"createdBy": {
+						"$ref": "#/components/schemas/PlayerSummary"
+					},
+					"playedAt": {
+						"type": "string"
+					},
+					"court": {
+						"$ref": "#/components/schemas/CourtSummary"
+					},
+					"club": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ClubSummary"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"firstTeam",
+					"secondTeam",
+					"sets",
+					"status",
+					"createdBy",
+					"playedAt",
+					"court",
+					"club"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Page_MatchResponse_": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/MatchResponse"
+						},
+						"type": "array"
+					},
+					"nextCursor": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"items",
+					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"BookingType": {
 				"enum": [
 					"ONE_TIME",
@@ -1140,94 +1293,6 @@
 					"past"
 				],
 				"type": "string"
-			},
-			"SetScore": {
-				"properties": {
-					"firstTeam": {
-						"type": "number",
-						"format": "double"
-					},
-					"secondTeam": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"firstTeam",
-					"secondTeam"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"MatchResponse": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"firstTeam": {
-						"items": {
-							"$ref": "#/components/schemas/PlayerSummary"
-						},
-						"type": "array"
-					},
-					"secondTeam": {
-						"items": {
-							"$ref": "#/components/schemas/PlayerSummary"
-						},
-						"type": "array"
-					},
-					"sets": {
-						"items": {
-							"$ref": "#/components/schemas/SetScore"
-						},
-						"type": "array"
-					},
-					"playedAt": {
-						"type": "string"
-					},
-					"court": {
-						"$ref": "#/components/schemas/CourtSummary"
-					},
-					"club": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ClubSummary"
-							}
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"id",
-					"firstTeam",
-					"secondTeam",
-					"sets",
-					"playedAt",
-					"court",
-					"club"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Page_MatchResponse_": {
-				"properties": {
-					"items": {
-						"items": {
-							"$ref": "#/components/schemas/MatchResponse"
-						},
-						"type": "array"
-					},
-					"nextCursor": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"required": [
-					"items",
-					"nextCursor"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"CreateMatchRequest": {
 				"properties": {
@@ -2700,6 +2765,96 @@
 						"in": "query",
 						"name": "cursor",
 						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/players/{id}/stats": {
+			"get": {
+				"operationId": "GetPlayerStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StatsResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"matches": 12,
+											"wins": 7,
+											"losses": 5,
+											"winRate": 0.5833,
+											"setsWon": 16,
+											"setsLost": 13,
+											"gamesWon": 121,
+											"gamesLost": 108
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Wins, losses, sets and games over the player's confirmed matches.",
+				"tags": [
+					"Players"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
 						"schema": {
 							"type": "string"
 						}
@@ -4501,6 +4656,221 @@
 				]
 			}
 		},
+		"/me/matches": {
+			"get": {
+				"operationId": "GetMyMatches",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Page_MatchResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"items": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZOP",
+													"firstTeam": [
+														{
+															"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+															"nickname": "marko",
+															"level": "INTERMEDIATE"
+														}
+													],
+													"secondTeam": [
+														{
+															"id": "01JBX3K7M2Q8N5R4T6V9W0YZQR",
+															"nickname": "ana",
+															"level": "ADVANCED"
+														}
+													],
+													"sets": [
+														{
+															"firstTeam": 6,
+															"secondTeam": 4
+														},
+														{
+															"firstTeam": 3,
+															"secondTeam": 6
+														},
+														{
+															"firstTeam": 7,
+															"secondTeam": 5
+														}
+													],
+													"playedAt": "2026-10-25T09:00:00.000Z",
+													"status": "CONFIRMED",
+													"createdBy": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+														"nickname": "marko",
+														"level": "INTERMEDIATE"
+													},
+													"court": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+														"name": "Court 1",
+														"surface": "CLAY",
+														"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+													},
+													"club": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+														"name": "TK Banjica",
+														"city": "Belgrade"
+													}
+												}
+											],
+											"nextCursor": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Matches the player took part in, newest first, including those waiting for an answer.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "Only matches in this status.",
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/MatchStatus"
+						}
+					},
+					{
+						"description": "Page size, 1 to 100. Default 20.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The nextCursor of the previous page.",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/me/stats": {
+			"get": {
+				"operationId": "GetMyStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StatsResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"matches": 12,
+											"wins": 7,
+											"losses": 5,
+											"winRate": 0.5833,
+											"setsWon": 16,
+											"setsLost": 13,
+											"gamesWon": 121,
+											"gamesLost": 108
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Wins, losses, sets and games over the player's confirmed matches.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/me/bookings": {
 			"get": {
 				"operationId": "GetMyBookings",
@@ -4680,6 +5050,12 @@
 														}
 													],
 													"playedAt": "2026-10-25T09:00:00.000Z",
+													"status": "CONFIRMED",
+													"createdBy": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+														"nickname": "marko",
+														"level": "INTERMEDIATE"
+													},
 													"court": {
 														"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
 														"name": "Court 1",
@@ -4761,6 +5137,15 @@
 						}
 					},
 					{
+						"description": "Only matches in this status.",
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/MatchStatus"
+						}
+					},
+					{
 						"description": "Page size, 1 to 100. Default 20.",
 						"in": "query",
 						"name": "limit",
@@ -4824,6 +5209,12 @@
 												}
 											],
 											"playedAt": "2026-10-25T09:00:00.000Z",
+											"status": "CONFIRMED",
+											"createdBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
 											"court": {
 												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
 												"name": "Court 1",
@@ -4882,6 +5273,7 @@
 						}
 					}
 				},
+				"description": "Records a match. The other team has to confirm the score before it counts; an ADMIN who did not play can\nrecord a match as already confirmed.",
 				"tags": [
 					"Matches"
 				],
@@ -4947,6 +5339,12 @@
 												}
 											],
 											"playedAt": "2026-10-25T09:00:00.000Z",
+											"status": "CONFIRMED",
+											"createdBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
 											"court": {
 												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
 												"name": "Court 1",
@@ -5067,6 +5465,12 @@
 												}
 											],
 											"playedAt": "2026-10-25T09:00:00.000Z",
+											"status": "CONFIRMED",
+											"createdBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
 											"court": {
 												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
 												"name": "Court 1",
@@ -5123,8 +5527,19 @@
 								}
 							}
 						}
+					},
+					"409": {
+						"description": "MATCH_NOT_PENDING",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
 					}
 				},
+				"description": "Changes a match. The score then needs the other team's confirmation again. A confirmed match can only be\nchanged by an ADMIN.",
 				"tags": [
 					"Matches"
 				],
@@ -5199,8 +5614,297 @@
 								}
 							}
 						}
+					},
+					"409": {
+						"description": "MATCH_NOT_PENDING",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
 					}
 				},
+				"description": "A confirmed match can only be removed by an ADMIN, and then it no longer counts for the stats.",
+				"tags": [
+					"Matches"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/matches/{id}/confirm": {
+			"post": {
+				"operationId": "ConfirmMatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MatchResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZOP",
+											"firstTeam": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+													"nickname": "marko",
+													"level": "INTERMEDIATE"
+												}
+											],
+											"secondTeam": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZQR",
+													"nickname": "ana",
+													"level": "ADVANCED"
+												}
+											],
+											"sets": [
+												{
+													"firstTeam": 6,
+													"secondTeam": 4
+												},
+												{
+													"firstTeam": 3,
+													"secondTeam": 6
+												},
+												{
+													"firstTeam": 7,
+													"secondTeam": 5
+												}
+											],
+											"playedAt": "2026-10-25T09:00:00.000Z",
+											"status": "CONFIRMED",
+											"createdBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+												"name": "Court 1",
+												"surface": "CLAY",
+												"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "MATCH_NOT_PENDING",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "The other team agrees with the score; from now on the match counts for the stats.",
+				"tags": [
+					"Matches"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/matches/{id}/dispute": {
+			"post": {
+				"operationId": "DisputeMatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MatchResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZOP",
+											"firstTeam": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+													"nickname": "marko",
+													"level": "INTERMEDIATE"
+												}
+											],
+											"secondTeam": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZQR",
+													"nickname": "ana",
+													"level": "ADVANCED"
+												}
+											],
+											"sets": [
+												{
+													"firstTeam": 6,
+													"secondTeam": 4
+												},
+												{
+													"firstTeam": 3,
+													"secondTeam": 6
+												},
+												{
+													"firstTeam": 7,
+													"secondTeam": 5
+												}
+											],
+											"playedAt": "2026-10-25T09:00:00.000Z",
+											"status": "CONFIRMED",
+											"createdBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+												"name": "Court 1",
+												"surface": "CLAY",
+												"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "MATCH_NOT_PENDING",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "The other team does not agree with the score. The player who entered it can correct it, which asks again.",
 				"tags": [
 					"Matches"
 				],

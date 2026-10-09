@@ -6,6 +6,7 @@ import { Booking } from "../entities/booking";
 import { PartnerRequest } from "../entities/partnerRequest";
 import { Player } from "../entities/player";
 import { Racket } from "../entities/racket";
+import MatchStatus from "../enums/matchStatus";
 import PlayerLevel from "../enums/playerLevel";
 import RequestStatus from "../enums/requestStatus";
 import { toMoney } from "../http/money";
@@ -172,6 +173,8 @@ export default class Mapper {
       firstTeam: await Promise.all(match.firstTeam.map((id) => this.playerSummary(id))),
       secondTeam: await Promise.all(match.secondTeam.map((id) => this.playerSummary(id))),
       sets: parseSets(match),
+      status: match.status ?? MatchStatus.CONFIRMED,
+      createdBy: await this.playerSummary(match.createdBy),
       playedAt: match.playedAt.toISOString(),
       court: this.courtSummary(court),
       club: this.clubSummary(await this.clubOf(court)),

@@ -17,6 +17,7 @@
     "build": "tsc",
     "dev": "concurrently \"nodemon src/server.ts\" \"nodemon -x tsoa spec-and-routes\"",
     "grant-role": "ts-node src/scripts/grantRole.ts",
+    "rebuild-stats": "ts-node src/scripts/rebuildStats.ts",
     "spec": "tsoa spec-and-routes",
     "pretest": "npm run spec",
     "pretypecheck": "npm run spec",

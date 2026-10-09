@@ -322,6 +322,12 @@ export const matchExample = {
     },
   ],
   playedAt: "2026-10-25T09:00:00.000Z",
+  status: "CONFIRMED",
+  createdBy: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+    nickname: "marko",
+    level: "INTERMEDIATE",
+  },
   court: {
     id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
     name: "Court 1",
@@ -368,6 +374,12 @@ export const matchPageExample = {
         },
       ],
       playedAt: "2026-10-25T09:00:00.000Z",
+      status: "CONFIRMED",
+      createdBy: {
+        id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+        nickname: "marko",
+        level: "INTERMEDIATE",
+      },
       court: {
         id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
         name: "Court 1",
@@ -647,4 +659,15 @@ export const placePageExample = {
     },
   ],
   nextCursor: null,
+};
+
+export const statsExample = {
+  matches: 12,
+  wins: 7,
+  losses: 5,
+  winRate: 0.5833,
+  setsWon: 16,
+  setsLost: 13,
+  gamesWon: 121,
+  gamesLost: 108,
 };
