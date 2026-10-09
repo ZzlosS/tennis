@@ -1,3 +1,5 @@
+import { OpeningHours } from "../responses/common";
+
 export default interface UpdateClubRequest {
   name?: string;
   address?: string;
@@ -5,4 +7,12 @@ export default interface UpdateClubRequest {
   city?: string;
   country?: string;
   currency?: string;
+  timeZone?: string;
+  openingHours?: OpeningHours;
+  cancelCutoffHours?: number;
+  // An empty string clears it.
+  seasonEndsOn?: string;
+  // Where it is on the map. Give both or neither.
+  latitude?: number;
+  longitude?: number;
 }

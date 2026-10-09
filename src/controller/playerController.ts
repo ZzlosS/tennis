@@ -14,7 +14,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { playerExample, playerPageExample } from "../http/examples";
+import { playerExample, playerPageExample, statsExample } from "../http/examples";
 import PlayerLevel from "../enums/playerLevel";
 import { Page } from "../http/pagination";
 import { currentUser } from "../middleware/auth";
@@ -23,20 +23,25 @@ import PlayerRepository from "../repositories/playerRepository";
 import UpdatePlayerRequest from "../requests/updatePlayerRequest";
 import { ErrorBody } from "../responses/common";
 import PlayerResponse from "../responses/playerResponse";
+import StatsResponse from "../responses/statsResponse";
 import { assertSelfOrAdmin } from "../services/access";
+import AccountService from "../services/accountService";
 import Mapper from "../services/mappers";
+import StatsService from "../services/statsService";
 import { updatePlayerBody } from "../validation/auth";
 
 @Tags("Players")
 @Route("players")
 @Security("jwt")
 @Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(429, "RATE_LIMITED")
 @Response<ErrorBody>(401, "UNAUTHENTICATED")
 @Response<ErrorBody>(403, "FORBIDDEN")
 @Response<ErrorBody>(404, "NOT_FOUND")
 export class PlayerController {
   private repository = new PlayerRepository();
   private mapper = new Mapper();
+  private accountService = new AccountService();
 
   /**
    * Players, oldest first.
@@ -55,6 +60,14 @@ export class PlayerController {
     const user = currentUser(req);
     const { entities, nextCursor } = await this.repository.findPlayersPage({ city, level }, { limit, cursor });
     return { items: entities.map((player) => this.mapper.player(player, user)), nextCursor };
+  }
+
+  /** Wins, losses, sets and games over the player's confirmed matches. */
+  @Example(statsExample)
+  @Get("/{id}/stats")
+  async getPlayerStats(@Path() id: string): Promise<StatsResponse> {
+    await this.repository.findByIdOrThrow(id, "Player");
+    return await new StatsService().get(id);
   }
 
   @Example(playerExample)
@@ -80,6 +93,6 @@ export class PlayerController {
   @Delete("/{id}")
   async deletePlayer(@Request() req: ExRequest, @Path() id: string): Promise<void> {
     assertSelfOrAdmin(currentUser(req), id);
-    await this.repository.deletePlayer(id);
+    await this.accountService.deleteAccount(id);
   }
 }

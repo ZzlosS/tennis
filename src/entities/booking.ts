@@ -1,3 +1,4 @@
+import BookingStatus from "../enums/bookingStatus";
 import BookingType from "../enums/bookingType";
 import BaseEntity from "./baseEntity";
 
@@ -10,6 +11,14 @@ type Booking = BaseEntity & {
   currency: string;
   player: string;
   bookingType: BookingType;
+  status: BookingStatus;
+  // Shared by the bookings made together by a weekly repeat. Empty for a single booking.
+  seriesId: string;
+  // When a club admin marked it as paid at the club, in ms. 0 when not marked.
+  paidAt: number;
+  cancelledAt: number;
+  // The player who cancelled it.
+  cancelledBy: string;
 };
 
 export { Booking };

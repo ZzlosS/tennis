@@ -1,3 +1,4 @@
+import { OpeningHours } from "../responses/common";
 import CourtSurface from "../enums/courtSurface";
 
 export default interface UpdateCourtRequest {
@@ -12,4 +13,15 @@ export default interface UpdateCourtRequest {
   city?: string;
   country?: string;
   currency?: string;
+  // Only a court without a club has its own time zone.
+  timeZone?: string;
+  // A closed court cannot be booked; existing bookings stay.
+  active?: boolean;
+  // The court's own hours, Monday first.
+  openingHours?: OpeningHours;
+  // True removes the court's own hours, so a club court follows its club again.
+  followClubHours?: boolean;
+  // Where it is on the map. Give both or neither.
+  latitude?: number;
+  longitude?: number;
 }

@@ -10,4 +10,6 @@ export default interface RegisterRequest {
   address: string;
   city: string;
   country: string;
+  // Language of the emails sent to the player: "en" (default) or "sr".
+  language?: "en" | "sr";
 }

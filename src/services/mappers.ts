@@ -1,11 +1,14 @@
 import { COURT_NO_CLUB } from "../consts";
 import { Club } from "../entities/club";
 import { Court } from "../entities/court";
+import { CourtHandover } from "../entities/courtHandover";
+import { CourtBlock } from "../entities/courtBlock";
 import { Match } from "../entities/match";
 import { Booking } from "../entities/booking";
 import { PartnerRequest } from "../entities/partnerRequest";
 import { Player } from "../entities/player";
 import { Racket } from "../entities/racket";
+import MatchStatus from "../enums/matchStatus";
 import PlayerLevel from "../enums/playerLevel";
 import RequestStatus from "../enums/requestStatus";
 import { toMoney } from "../http/money";
@@ -13,16 +16,28 @@ import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import { parseSets } from "../repositories/matchRepository";
 import PlayerRepository from "../repositories/playerRepository";
+import HandoverResponse from "../responses/handoverResponse";
+import BlockResponse from "../responses/blockResponse";
 import BookingResponse from "../responses/bookingResponse";
 import ClubResponse from "../responses/clubResponse";
 import { ClubSummary, CourtSummary, PlayerSummary } from "../responses/common";
 import CourtResponse from "../responses/courtResponse";
 import MatchResponse from "../responses/matchResponse";
 import PartnerRequestResponse from "../responses/partnerRequestResponse";
+import MeResponse from "../responses/meResponse";
 import PlayerResponse from "../responses/playerResponse";
 import RacketResponse from "../responses/racketResponse";
+import BookingStatus from "../enums/bookingStatus";
+import { parseLocation } from "./geo";
+import { DEFAULT_CANCEL_CUTOFF_HOURS, scheduleOf } from "./courtSchedule";
+import { DEFAULT_TIME_ZONE } from "./time";
 import { AuthUser } from "./tokenService";
 import { isAdmin } from "./access";
+
+function coordinatesOf(location: string | undefined) {
+  const place = parseLocation(location);
+  return { latitude: place?.latitude ?? null, longitude: place?.longitude ?? null };
+}
 
 // Turns stored records into API responses, looking up the players, clubs and courts they mention.
 export default class Mapper {
@@ -56,8 +71,14 @@ export default class Mapper {
     };
   }
 
+  // The time zone a court's times are told in: its club's, or its own.
+  async timeZoneOf(court: Court): Promise<string> {
+    return scheduleOf(court, await this.clubOf(court)).timeZone;
+  }
+
   async court(court: Court): Promise<CourtResponse> {
     const club = await this.clubOf(court);
+    const schedule = scheduleOf(court, club);
     return {
       id: court.entityId,
       name: court.name,
@@ -72,6 +93,10 @@ export default class Mapper {
       city: court.city ?? "",
       country: court.country ?? "",
       pricePerHour: toMoney(court.pricePerHourMinor, court.currency),
+      active: schedule.active,
+      timeZone: schedule.timeZone,
+      openingHours: schedule.openingHours,
+      ...coordinatesOf(club ? club.location : court.location),
     };
   }
 
@@ -85,6 +110,11 @@ export default class Mapper {
       country: club.country,
       currency: club.currency,
       courtCount: await this.courts.countClubCourts(club.entityId),
+      timeZone: club.timeZone || DEFAULT_TIME_ZONE,
+      openingHours: scheduleOf({} as Court, club).openingHours,
+      cancelCutoffHours: club.cancelCutoffHours ?? DEFAULT_CANCEL_CUTOFF_HOURS,
+      seasonEndsOn: club.seasonEndsOn || null,
+      ...coordinatesOf(club.location),
     };
   }
 
@@ -101,6 +131,17 @@ export default class Mapper {
       city: player.city,
       address: player.address,
       country: player.country,
+    };
+  }
+
+  // The logged-in player's own view of themselves.
+  me(player: Player): MeResponse {
+    return {
+      ...this.player(player, { id: player.entityId, role: player.role }),
+      email: player.email,
+      role: player.role,
+      emailVerified: Boolean(player.emailVerifiedAt),
+      language: player.language === "sr" ? "sr" : "en",
     };
   }
 
@@ -130,6 +171,9 @@ export default class Mapper {
       player: await this.playerSummary(booking.player),
       totalPrice: toMoney(booking.totalPriceMinor, booking.currency),
       bookingType: booking.bookingType,
+      status: booking.status ?? BookingStatus.CONFIRMED,
+      seriesId: booking.seriesId || null,
+      paidAt: booking.paidAt ? new Date(booking.paidAt).toISOString() : null,
     };
   }
 
@@ -140,9 +184,37 @@ export default class Mapper {
       firstTeam: await Promise.all(match.firstTeam.map((id) => this.playerSummary(id))),
       secondTeam: await Promise.all(match.secondTeam.map((id) => this.playerSummary(id))),
       sets: parseSets(match),
+      status: match.status ?? MatchStatus.CONFIRMED,
+      createdBy: await this.playerSummary(match.createdBy),
       playedAt: match.playedAt.toISOString(),
       court: this.courtSummary(court),
       club: this.clubSummary(await this.clubOf(court)),
+    };
+  }
+
+  async handover(handover: CourtHandover): Promise<HandoverResponse> {
+    const court = await this.courts.findByEntityID(handover.court);
+    const club = await this.clubs.findByEntityID(handover.club);
+    return {
+      id: handover.entityId,
+      court: this.courtSummary(court),
+      club: { id: club.entityId, name: club.name, city: club.city },
+      requestedBy: await this.playerSummary(handover.requestedBy),
+      status: handover.status,
+      createdAt: new Date(handover.createdAt ?? 0).toISOString(),
+      decidedAt: handover.decidedAt ? new Date(handover.decidedAt).toISOString() : null,
+    };
+  }
+
+  async block(block: CourtBlock): Promise<BlockResponse> {
+    const court = await this.courts.findByEntityID(block.court);
+    return {
+      id: block.entityId,
+      court: this.courtSummary(court),
+      startsAt: block.startsAt.toISOString(),
+      endsAt: block.endsAt.toISOString(),
+      reason: block.reason ?? "",
+      createdBy: await this.playerSummary(block.createdBy),
     };
   }
 
@@ -159,6 +231,8 @@ export default class Mapper {
       },
       createdBy: await this.playerSummary(request.playerId),
       playersNeeded: request.playersNeeded,
+      level: request.level && request.level !== "ANY" ? (request.level as PlayerLevel) : null,
+      spotsLeft: Math.max(0, request.playersNeeded - (request.joinedBy ?? []).length),
       joined: await Promise.all((request.joinedBy ?? []).map((id) => this.playerSummary(id))),
       status: request.active ? RequestStatus.OPEN : RequestStatus.CLOSED,
     };

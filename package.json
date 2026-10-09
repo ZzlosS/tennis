@@ -17,6 +17,7 @@
     "build": "tsc",
     "dev": "concurrently \"nodemon src/server.ts\" \"nodemon -x tsoa spec-and-routes\"",
     "grant-role": "ts-node src/scripts/grantRole.ts",
+    "rebuild-stats": "ts-node src/scripts/rebuildStats.ts",
     "spec": "tsoa spec-and-routes",
     "pretest": "npm run spec",
     "pretypecheck": "npm run spec",
@@ -36,11 +37,14 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "nodemon": "^2.0.20",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
     "redis": "^4.7.1",
     "redis-om": "^0.4.7",
     "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.1",
     "tsoa": "^6.6.0",
+    "ulid": "^2.4.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

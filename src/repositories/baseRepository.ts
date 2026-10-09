@@ -5,6 +5,12 @@ import BaseEntity from "../entities/baseEntity";
 import { NotFoundError } from "../errors/appError";
 import { closePage, PageOfEntities, PageQuery, readPageQuery } from "../http/pagination";
 
+// A sortable field of the schema and the direction. Lists default to oldest first.
+export interface Sort {
+  field: string;
+  descending: boolean;
+}
+
 export default class BaseRepository<T extends BaseEntity> {
   protected repository!: Repository<T>;
   protected schema: Schema;
@@ -16,7 +22,14 @@ export default class BaseRepository<T extends BaseEntity> {
 
   async initializeRepository() {
     this.repository = new Repository(this.schema as unknown as Schema<T>, await RedisClient.connect());
-    await this.repository.createIndex();
+    try {
+      await this.repository.createIndex();
+    } catch (error) {
+      // Two requests that arrive together can both see no index and both create it; the second one is not a problem.
+      if (!(error instanceof Error) || !/index already exists/i.test(error.message)) {
+        throw error;
+      }
+    }
   }
 
   // redis-om keeps a record's id under a symbol. Copy it to a plain property so callers can read `entityId`.
@@ -68,14 +81,21 @@ export default class BaseRepository<T extends BaseEntity> {
   }
 
   // One page of a search, oldest first. `filter` adds the where clauses; soft-deleted records are always left out.
-  async findPage(filter: (search: Search<T>) => Search<T>, query: PageQuery): Promise<PageOfEntities<T>> {
+  async findPage(
+    filter: (search: Search<T>) => Search<T>,
+    query: PageQuery,
+    sort: Sort = { field: "createdAt", descending: false }
+  ): Promise<PageOfEntities<T>> {
     const { limit, offset } = readPageQuery(query);
     await this.initializeRepository();
     const search = filter(this.repository.search())
       .and("deleted" as never)
       .false();
     // One extra row tells whether there is a next page.
-    const rows = await search.sortAscending("createdAt" as never).return.page(offset, limit + 1);
+    const sorted = sort.descending
+      ? search.sortDescending(sort.field as never)
+      : search.sortAscending(sort.field as never);
+    const rows = await sorted.return.page(offset, limit + 1);
     return closePage(this.withIds(rows), limit, offset);
   }
 

@@ -10,12 +10,16 @@ import CourtCreateRequest from "../requests/courtCreateRequest";
 import StandaloneCourtCreateRequest from "../requests/standaloneCourtCreateRequest";
 import UpdateCourtRequest from "../requests/updateCourtRequest";
 import { courtSchema } from "../schemas/courtSchema";
+import { formatLocation, PlaceIndex } from "../services/geo";
+import { DEFAULT_TIME_ZONE } from "../services/time";
 import BaseRepository from "./baseRepository";
 
 export interface CourtFilters {
   // A club id, or COURT_NO_CLUB for courts that have none.
   club?: string;
   kind?: CourtKind;
+  // The player who owns a court without a club.
+  ownerId?: string;
   city?: string;
   surface?: CourtSurface;
   minPrice?: number;
@@ -34,6 +38,7 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.roof = request.roof;
     court.double = request.double;
     court.pricePerHourMinor = request.pricePerHourMinor ?? 0;
+    court.active = true;
   }
 
   // A club court copies the club's place, so courts can be searched by city without looking up their club.
@@ -47,6 +52,10 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.city = club.city;
     court.country = club.country;
     court.currency = club.currency;
+    // A club court follows its club's zone and hours until it is given hours of its own.
+    court.timeZone = "";
+    court.openingHours = "";
+    court.location = "";
     return await this.save(court);
   }
 
@@ -60,7 +69,27 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.city = request.city;
     court.country = request.country;
     court.currency = request.currency ?? DEFAULT_CURRENCY;
-    return await this.save(court);
+    court.timeZone = request.timeZone ?? DEFAULT_TIME_ZONE;
+    court.openingHours = request.openingHours ? JSON.stringify(request.openingHours) : "";
+    court.location =
+      request.latitude !== undefined && request.longitude !== undefined
+        ? formatLocation(request.latitude, request.longitude)
+        : "";
+    return await this.saveAndIndex(court);
+  }
+
+  // A court without a club is on the map while it is open for booking; a club court is on the map as its club.
+  private async saveAndIndex(court: Court) {
+    const id = await this.save(court);
+    const standalone = court.club === COURT_NO_CLUB;
+    await PlaceIndex.sync("COURT", id, court.location, standalone && court.active !== false);
+    return id;
+  }
+
+  async deleteEntity(entityID: string) {
+    const id = await super.deleteEntity(entityID);
+    await PlaceIndex.remove("COURT", entityID);
+    return id;
   }
 
   private matching(filters: CourtFilters) {
@@ -70,6 +99,9 @@ export default class CourtRepository extends BaseRepository<Court> {
       }
       if (filters.kind) {
         search = search.where("kind").equals(filters.kind);
+      }
+      if (filters.ownerId) {
+        search = search.where("ownerId").equals(filters.ownerId);
       }
       if (filters.city) {
         search = search.where("city").equals(filters.city);
@@ -95,6 +127,10 @@ export default class CourtRepository extends BaseRepository<Court> {
     return await this.findAllMatching(this.matching({ club: clubId }));
   }
 
+  async findOwnedCourts(ownerId: string) {
+    return await this.findAllMatching(this.matching({ ownerId }));
+  }
+
   async countClubCourts(clubId: string) {
     return await this.count(this.matching({ club: clubId }));
   }
@@ -109,7 +145,14 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.city = club.city;
     court.country = club.country;
     court.currency = club.currency;
-    return await this.save(court);
+    // From now on the club's zone and hours apply.
+    court.timeZone = "";
+    court.openingHours = "";
+    // On the map from now on as part of the club.
+    court.location = "";
+    const id = await this.save(court);
+    await PlaceIndex.remove("COURT", courtId);
+    return id;
   }
 
   // Keeps the copied place and currency of a club's courts in step when the club changes them.
@@ -156,7 +199,22 @@ export default class CourtRepository extends BaseRepository<Court> {
     if (updateRequest.currency) {
       court.currency = updateRequest.currency;
     }
+    if (updateRequest.timeZone) {
+      court.timeZone = updateRequest.timeZone;
+    }
+    if (updateRequest.active !== undefined) {
+      court.active = updateRequest.active;
+    }
+    if (updateRequest.openingHours) {
+      court.openingHours = JSON.stringify(updateRequest.openingHours);
+    }
+    if (updateRequest.followClubHours) {
+      court.openingHours = "";
+    }
+    if (updateRequest.latitude !== undefined && updateRequest.longitude !== undefined) {
+      court.location = formatLocation(updateRequest.latitude, updateRequest.longitude);
+    }
 
-    return await this.save(court);
+    return await this.saveAndIndex(court);
   }
 }

@@ -68,10 +68,23 @@ describe("the OpenAPI contract", () => {
     }
   });
 
+  // GET routes that return one thing, not a list.
+  const notCollections = [
+    "/me",
+    "/me/stats",
+    "/players/{id}/stats",
+    "/courts/{id}/availability",
+    "/clubs/{id}/schedule",
+  ];
+
   it("paginates every collection route the same way", () => {
     const collections = operations.filter(
       ({ path, method }) =>
-        method === "get" && !path.endsWith("}") && !path.startsWith("/auth") && !/\/(\{\w+\})$/.test(path)
+        method === "get" &&
+        !path.endsWith("}") &&
+        !path.startsWith("/auth") &&
+        !/\/(\{\w+\})$/.test(path) &&
+        !notCollections.includes(path)
     );
     expect(collections.length).toBeGreaterThan(5);
     for (const { path, operation } of collections) {
@@ -116,6 +129,12 @@ describe("the response checker", () => {
     country: "Serbia",
     currency: "RSD",
     courtCount: 0,
+    timeZone: "Europe/Belgrade",
+    openingHours: [null, null, null, null, null, null, null],
+    cancelCutoffHours: 24,
+    seasonEndsOn: null,
+    latitude: null,
+    longitude: null,
   };
   const page = (item: object) => ({ items: [item], nextCursor: null });
 
@@ -142,6 +161,9 @@ describe("the response checker", () => {
       player: { id: "p", nickname: "n", level: "PRO" },
       totalPrice: null,
       bookingType: "ONE_TIME",
+      status: "CONFIRMED",
+      seriesId: null,
+      paidAt: null,
     };
     checkResponse("get", "/v1/bookings/1", 200, booking, "{}");
     expect(violations.splice(0)).toEqual([]);

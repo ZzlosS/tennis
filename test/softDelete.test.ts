@@ -107,7 +107,10 @@ describe("soft delete", () => {
         .send({
           firstTeam: [player.id],
           secondTeam: [other.id],
-          sets: [{ firstTeam: 6, secondTeam: 0 }],
+          sets: [
+            { firstTeam: 6, secondTeam: 0 },
+            { firstTeam: 6, secondTeam: 1 },
+          ],
           courtId: court,
           playedAt: "2026-11-01T10:00:00Z",
         })

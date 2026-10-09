@@ -44,6 +44,9 @@ export const bookingExample = {
     currency: "RSD",
   },
   bookingType: "ONE_TIME",
+  status: "CONFIRMED",
+  seriesId: null,
+  paidAt: null,
 };
 
 export const bookingPageExample = {
@@ -73,6 +76,9 @@ export const bookingPageExample = {
         currency: "RSD",
       },
       bookingType: "ONE_TIME",
+      status: "CONFIRMED",
+      seriesId: null,
+      paidAt: null,
     },
   ],
   nextCursor: null,
@@ -87,6 +93,20 @@ export const clubDetailExample = {
   country: "Serbia",
   currency: "RSD",
   courtCount: 6,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
+  cancelCutoffHours: 24,
+  seasonEndsOn: null,
+  latitude: 44.7616,
+  longitude: 20.4647,
   courts: [
     {
       id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
@@ -109,6 +129,19 @@ export const clubDetailExample = {
         amountMinor: 180000,
         currency: "RSD",
       },
+      active: true,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
 };
@@ -122,6 +155,20 @@ export const clubExample = {
   country: "Serbia",
   currency: "RSD",
   courtCount: 6,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
+  cancelCutoffHours: 24,
+  seasonEndsOn: null,
+  latitude: 44.7616,
+  longitude: 20.4647,
 };
 
 export const clubPageExample = {
@@ -135,6 +182,20 @@ export const clubPageExample = {
       country: "Serbia",
       currency: "RSD",
       courtCount: 6,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
+      cancelCutoffHours: 24,
+      seasonEndsOn: null,
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
   nextCursor: null,
@@ -167,6 +228,19 @@ export const courtExample = {
     amountMinor: 180000,
     currency: "RSD",
   },
+  active: true,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
+  latitude: 44.7616,
+  longitude: 20.4647,
 };
 
 export const courtPageExample = {
@@ -192,6 +266,19 @@ export const courtPageExample = {
         amountMinor: 180000,
         currency: "RSD",
       },
+      active: true,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
   nextCursor: null,
@@ -235,6 +322,12 @@ export const matchExample = {
     },
   ],
   playedAt: "2026-10-25T09:00:00.000Z",
+  status: "CONFIRMED",
+  createdBy: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+    nickname: "marko",
+    level: "INTERMEDIATE",
+  },
   court: {
     id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
     name: "Court 1",
@@ -281,6 +374,12 @@ export const matchPageExample = {
         },
       ],
       playedAt: "2026-10-25T09:00:00.000Z",
+      status: "CONFIRMED",
+      createdBy: {
+        id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+        nickname: "marko",
+        level: "INTERMEDIATE",
+      },
       court: {
         id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
         name: "Court 1",
@@ -321,6 +420,8 @@ export const partnerRequestExample = {
     level: "INTERMEDIATE",
   },
   playersNeeded: 1,
+  level: "INTERMEDIATE",
+  spotsLeft: 1,
   joined: [],
   status: "OPEN",
 };
@@ -351,6 +452,8 @@ export const partnerRequestPageExample = {
         level: "INTERMEDIATE",
       },
       playersNeeded: 1,
+      level: "INTERMEDIATE",
+      spotsLeft: 1,
       joined: [],
       status: "OPEN",
     },
@@ -407,6 +510,19 @@ export const publicCourtExample = {
   city: "Belgrade",
   country: "Serbia",
   pricePerHour: null,
+  active: true,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
+  latitude: 44.7616,
+  longitude: 20.4647,
 };
 
 export const publicCourtPageExample = {
@@ -425,6 +541,19 @@ export const publicCourtPageExample = {
       city: "Belgrade",
       country: "Serbia",
       pricePerHour: null,
+      active: true,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
   nextCursor: null,
@@ -458,5 +587,184 @@ export const racketPageExample = {
       recommendedStrings: "Luxilon Alu Power",
     },
   ],
+  nextCursor: null,
+};
+
+export const availabilityExample = {
+  courtId: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+  date: "2026-11-01",
+  timeZone: "Europe/Belgrade",
+  pricePerHour: {
+    amountMinor: 180000,
+    currency: "RSD",
+  },
+  slots: [
+    {
+      startsAt: "2026-11-01T04:00:00.000Z",
+      endsAt: "2026-11-01T05:00:00.000Z",
+      localTime: "05:00",
+      status: "CLOSED",
+    },
+    {
+      startsAt: "2026-11-01T16:00:00.000Z",
+      endsAt: "2026-11-01T17:00:00.000Z",
+      localTime: "17:00",
+      status: "BOOKED",
+    },
+    {
+      startsAt: "2026-11-01T17:00:00.000Z",
+      endsAt: "2026-11-01T18:00:00.000Z",
+      localTime: "18:00",
+      status: "FREE",
+    },
+  ],
+};
+
+export const meExample = {
+  id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+  firstName: "Marko",
+  lastName: "Petrovic",
+  nickname: "marko",
+  level: "INTERMEDIATE",
+  email: "marko@example.com",
+  role: "PLAYER",
+  emailVerified: true,
+  language: "en",
+  address: "Knez Mihailova 5",
+  city: "Belgrade",
+  country: "Serbia",
+};
+
+export const placePageExample = {
+  items: [
+    {
+      id: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+      kind: "CLUB",
+      name: "TK Banjica",
+      address: "Banjicka 1",
+      city: "Belgrade",
+      latitude: 44.7616,
+      longitude: 20.4647,
+      distanceKm: 1.3,
+      courtCount: 6,
+    },
+    {
+      id: "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+      kind: "PUBLIC",
+      name: "Kalemegdan park court",
+      address: "Kalemegdan",
+      city: "Belgrade",
+      latitude: 44.8231,
+      longitude: 20.4505,
+      distanceKm: 8.4,
+      courtCount: 1,
+    },
+  ],
+  nextCursor: null,
+};
+
+export const statsExample = {
+  matches: 12,
+  wins: 7,
+  losses: 5,
+  winRate: 0.5833,
+  setsWon: 16,
+  setsLost: 13,
+  gamesWon: 121,
+  gamesLost: 108,
+};
+
+export const blockExample = {
+  id: "01JBX3K7M2Q8N5R4T6V9W0YZBL",
+  court: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+    name: "Court 1",
+    surface: "CLAY",
+    clubId: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+  },
+  startsAt: "2026-11-07T08:00:00.000Z",
+  endsAt: "2026-11-07T16:00:00.000Z",
+  reason: "Club tournament",
+  createdBy: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+    nickname: "marko",
+    level: "INTERMEDIATE",
+  },
+};
+
+export const blockPageExample = {
+  items: [blockExample],
+  nextCursor: null,
+};
+
+export const clubScheduleExample = {
+  clubId: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+  date: "2026-11-07",
+  timeZone: "Europe/Belgrade",
+  courts: [
+    {
+      court: {
+        id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+        name: "Court 1",
+        surface: "CLAY",
+        clubId: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+      },
+      active: true,
+      slots: [
+        {
+          startsAt: "2026-11-07T16:00:00.000Z",
+          endsAt: "2026-11-07T17:00:00.000Z",
+          localTime: "17:00",
+          status: "BOOKED",
+          booking: {
+            id: "01JBX3K7M2Q8N5R4T6V9W0YZBK",
+            player: {
+              id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+              nickname: "marko",
+              level: "INTERMEDIATE",
+            },
+            paidAt: null,
+            seriesId: null,
+          },
+          block: null,
+        },
+        {
+          startsAt: "2026-11-07T17:00:00.000Z",
+          endsAt: "2026-11-07T18:00:00.000Z",
+          localTime: "18:00",
+          status: "FREE",
+          booking: null,
+          block: null,
+        },
+      ],
+    },
+  ],
+};
+
+export const handoverExample = {
+  id: "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+  court: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+    name: "Kalemegdan park court",
+    surface: "HARD",
+    clubId: null,
+  },
+  club: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+    name: "TK Banjica",
+    city: "Belgrade",
+  },
+  requestedBy: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+    nickname: "marko",
+    level: "INTERMEDIATE",
+  },
+  status: "PENDING",
+  createdAt: "2026-10-09T08:00:00.000Z",
+  decidedAt: null,
+};
+
+export const handoverPageExample = {
+  items: [handoverExample],
   nextCursor: null,
 };

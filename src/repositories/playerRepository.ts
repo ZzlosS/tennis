@@ -94,8 +94,22 @@ export default class PlayerRepository extends BaseRepository<Player> {
     player.address = registerRequest.address;
     player.city = registerRequest.city;
     player.country = registerRequest.country;
+    player.emailVerifiedAt = 0;
+    player.language = registerRequest.language ?? "en";
     player.deleted = false;
 
+    return await this.save(player);
+  }
+
+  async setPassword(playerId: string, passwordHash: string) {
+    const player = await this.findByIdOrThrow(playerId, "Player");
+    player.password = passwordHash;
+    return await this.save(player);
+  }
+
+  async markEmailVerified(playerId: string, at: number) {
+    const player = await this.findByIdOrThrow(playerId, "Player");
+    player.emailVerifiedAt = at;
     return await this.save(player);
   }
 
@@ -114,6 +128,9 @@ export default class PlayerRepository extends BaseRepository<Player> {
     if (updateRequest.lastName) {
       player.lastName = updateRequest.lastName;
     }
+    if (updateRequest.nickname) {
+      player.nickname = updateRequest.nickname;
+    }
     if (updateRequest.level) {
       player.level = updateRequest.level;
     }
@@ -125,6 +142,9 @@ export default class PlayerRepository extends BaseRepository<Player> {
     }
     if (updateRequest.country) {
       player.country = updateRequest.country;
+    }
+    if (updateRequest.language) {
+      player.language = updateRequest.language;
     }
 
     return await this.save(player);
