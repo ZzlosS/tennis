@@ -1,7 +1,6 @@
 import { Schema } from "redis-om";
-import { EnemyRequest } from "../entities/requestEnemy";
 
-let enemyRequestSchema = new Schema(EnemyRequest, {
+const enemyRequestSchema = new Schema("EnemyRequest", {
   bookingEntityID: { type: "string" },
   playerEntityID: { type: "string" },
   numberOfPlayersNeeded: { type: "number" },

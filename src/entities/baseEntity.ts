@@ -1,9 +1,11 @@
-import { Entity } from "redis-om";
-import CreationDeletionInfo from "./interfaces/ICreationDeletionInfo";
+// Fields every stored record has. `entityId` is not stored: the repositories copy it from
+// redis-om's EntityId symbol when they load a record, so the rest of the code can read a plain property.
+type BaseEntity = {
+  entityId: string;
+  uuid: string | null;
+  createdAt: number | null;
+  deleted: boolean;
+  deletedAt: number | null;
+};
 
-export default class BaseEntity extends Entity implements CreationDeletionInfo {
-  uuid: string | null = null;
-  createdAt: number | null = null;
-  deleted: boolean = false;
-  deletedAt: number | null = null;
-}
+export default BaseEntity;

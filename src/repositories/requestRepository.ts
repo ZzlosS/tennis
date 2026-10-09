@@ -19,7 +19,7 @@ export default class EnemyRequestRepository extends BaseRepository<EnemyRequest>
     enemyRequest.active = true;
     enemyRequest.acceptedBy = [];
 
-    return await this.repository.save(enemyRequest);
+    return await this.save(enemyRequest);
   }
 
   async enemyRequestAccepted(requestEntityID: string, playerEntityID: string) {
@@ -35,17 +35,17 @@ export default class EnemyRequestRepository extends BaseRepository<EnemyRequest>
       enemyRequest.active = false;
     }
 
-    return await this.repository.save(enemyRequest);
+    return await this.save(enemyRequest);
   }
 
   async allActiveEnemyRequests() {
     await this.initializeRepository();
-    return await this.repository.search().where("active").true().and("deleted").false().return.all();
+    return this.withIds(await this.repository.search().where("active").true().and("deleted").false().return.all());
   }
 
   async allInactiveEnemyRequests() {
     await this.initializeRepository();
-    return await this.repository.search().where("active").false().and("deleted").false().return.all();
+    return this.withIds(await this.repository.search().where("active").false().and("deleted").false().return.all());
   }
 
   async updateEnemyRequest(entityId: string, updateRequest: UpdateEnemyRequest) {

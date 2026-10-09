@@ -18,28 +18,29 @@ export default class ClubRepository extends BaseRepository<Club> {
     club.city = createRequest.city;
     club.country = createRequest.country;
     club.admins = [];
+    club.courts = 0;
 
-    return await this.repository.save(club);
+    return await this.save(club);
   }
 
   async incrementClubCourtCount(clubEntityID: string) {
     const club = await this.findByIdOrThrow(clubEntityID, "Club");
-    club.courts++;
-    return await this.repository.save(club);
+    club.courts = (club.courts ?? 0) + 1;
+    return await this.save(club);
   }
 
   async decrementClubCourtCount(clubEntityID: string) {
     const club = await this.findByEntityID(clubEntityID);
-    if (club.uuid != null && club.courts > 0) {
+    if (club.uuid != null && (club.courts ?? 0) > 0) {
       club.courts--;
-      return await this.repository.save(club);
+      return await this.save(club);
     }
   }
 
   async addAdmin(clubEntityID: string, playerEntityID: string) {
     const club = await this.findByIdOrThrow(clubEntityID, "Club");
     club.admins = [...new Set([...(club.admins ?? []), playerEntityID])];
-    return await this.repository.save(club);
+    return await this.save(club);
   }
 
   async findClubsByCity(city: string) {
@@ -65,6 +66,6 @@ export default class ClubRepository extends BaseRepository<Club> {
       club.country = updateRequest.country;
     }
 
-    return await this.repository.save(club);
+    return await this.save(club);
   }
 }

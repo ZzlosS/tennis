@@ -14,7 +14,7 @@ export default class RacketRepository extends BaseRepository<Racket> {
     let rackets: Racket[] = [];
     try {
       await this.initializeRepository();
-      rackets = await this.repository.fetch(racketsArray);
+      rackets = this.withIds(await this.repository.fetch(racketsArray));
     } catch (error) {
       console.log("🚀 ~ RacketRepository ~ getUserRackets ~ error:", error);
     }

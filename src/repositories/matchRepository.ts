@@ -43,7 +43,7 @@ export default class MatchRepository extends BaseRepository<Match> {
       .or("secondTeam")
       .contains(playerEntityID)
       .return.all();
-    return matches.filter((match) => !match.deleted);
+    return this.withIds(matches.filter((match) => !match.deleted));
   }
 
   async updateMatch(entityId: string, updateRequest: UpdateMatchRequest) {

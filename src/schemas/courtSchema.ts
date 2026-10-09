@@ -1,7 +1,6 @@
 import { Schema } from "redis-om";
-import { Court } from "../entities/court";
 
-let courtSchema = new Schema(Court, {
+const courtSchema = new Schema("Court", {
   uuid: { type: "string" },
   name: { type: "string" },
   surface: { type: "string" },

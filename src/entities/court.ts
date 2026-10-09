@@ -1,7 +1,7 @@
 import CourtSurface from "../enums/courtSurface";
 import BaseEntity from "./baseEntity";
 
-interface Court {
+type Court = BaseEntity & {
   name: string;
   surface: CourtSurface;
   stands: boolean;
@@ -9,8 +9,6 @@ interface Court {
   double: boolean;
   club: string;
   pricePerHour: number;
-}
-
-class Court extends BaseEntity {}
+};
 
 export { Court };

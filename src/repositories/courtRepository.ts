@@ -21,7 +21,7 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.pricePerHour = createRequest.pricePerHour;
     court.club = clubEntityID;
 
-    return await this.repository.save(court);
+    return await this.save(court);
   }
 
   async findClubCourts(clubEntityID: string) {
@@ -31,7 +31,7 @@ export default class CourtRepository extends BaseRepository<Court> {
   async assignToClub(courtEntityID: string, clubEntityID: string) {
     const court = await this.findByIdOrThrow(courtEntityID, "Court");
     court.club = clubEntityID;
-    return await this.repository.save(court);
+    return await this.save(court);
   }
 
   async findUnassignedCourts() {
@@ -49,7 +49,7 @@ export default class CourtRepository extends BaseRepository<Court> {
 
     courts = courts.and("deleted").false();
 
-    return await courts.return.all();
+    return this.withIds(await courts.return.all());
   }
 
   async updateCourt(entityId: string, updateRequest: UpdateCourtRequest) {

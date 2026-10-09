@@ -53,7 +53,7 @@ export default class BookingRepository extends BaseRepository<Booking> {
 
     bookings = bookings.and("deleted").false();
 
-    return bookings.return.all();
+    return this.withIds(await bookings.return.all());
   }
 
   // The total price is recalculated by the caller when the court or the hours change.

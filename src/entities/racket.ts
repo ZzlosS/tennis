@@ -1,7 +1,7 @@
 import RacketLevels from "../enums/racketLevels";
 import BaseEntity from "./baseEntity";
 
-interface Racket {
+type Racket = BaseEntity & {
   brand: string;
   model: string;
   year: number;
@@ -11,7 +11,6 @@ interface Racket {
   balance: number;
   stringPattern: string;
   recommendedStrings: string;
-}
+};
 
-class Racket extends BaseEntity {}
 export { Racket };

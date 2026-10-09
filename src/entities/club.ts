@@ -1,6 +1,6 @@
 import BaseEntity from "./baseEntity";
 
-interface Club {
+type Club = BaseEntity & {
   name: string;
   address: string;
   description: string;
@@ -8,10 +8,6 @@ interface Club {
   country: string;
   courts: number;
   admins: string[];
-}
-
-class Club extends BaseEntity {
-  courts: number = 0;
-}
+};
 
 export { Club };

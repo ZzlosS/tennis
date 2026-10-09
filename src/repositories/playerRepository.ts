@@ -59,7 +59,7 @@ export default class PlayerRepository extends BaseRepository<Player> {
   }
 
   async assignRacketToPlayer(player: Player, racketEID: string): Promise<string> {
-    if (player.rackets === null) {
+    if (!player.rackets) {
       player.rackets = [];
     }
 
