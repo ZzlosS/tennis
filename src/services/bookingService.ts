@@ -256,13 +256,18 @@ export default class BookingService {
 
   // Cancels the booking, or with `series` this one and every later one made with it.
   // A player cancelling their own booking must do so before the club's cut-off.
-  async cancel(actor: AuthUser, booking: Booking, series: boolean): Promise<Booking> {
+  async cancel(
+    actor: AuthUser,
+    booking: Booking,
+    series: boolean,
+    options: { skipCutoff?: boolean } = {}
+  ): Promise<Booking> {
     if (booking.status === BookingStatus.CANCELLED) {
       return booking;
     }
     const court = await this.courts.findByEntityID(booking.court);
     const club = await this.clubOf(court);
-    if (!(await this.isPrivileged(actor, court, club))) {
+    if (!options.skipCutoff && !(await this.isPrivileged(actor, court, club))) {
       const { cancelCutoffHours } = scheduleOf(court, club);
       if (booking.startsAt.getTime() - now().getTime() < cancelCutoffHours * HOUR_MS) {
         throw new AppError(

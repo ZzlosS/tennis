@@ -587,3 +587,16 @@ export const availabilityExample = {
     },
   ],
 };
+
+export const meExample = {
+  id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+  firstName: "Marko",
+  lastName: "Petrovic",
+  nickname: "marko",
+  level: "INTERMEDIATE",
+  email: "marko@example.com",
+  role: "PLAYER",
+  address: "Knez Mihailova 5",
+  city: "Belgrade",
+  country: "Serbia",
+};

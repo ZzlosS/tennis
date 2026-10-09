@@ -114,6 +114,9 @@ export default class PlayerRepository extends BaseRepository<Player> {
     if (updateRequest.lastName) {
       player.lastName = updateRequest.lastName;
     }
+    if (updateRequest.nickname) {
+      player.nickname = updateRequest.nickname;
+    }
     if (updateRequest.level) {
       player.level = updateRequest.level;
     }

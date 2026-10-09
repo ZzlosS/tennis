@@ -41,6 +41,11 @@ export default class ClubRepository extends BaseRepository<Club> {
     return await this.findPage((search) => (city ? search.where("city").equals(city) : search), query);
   }
 
+  // The clubs this player is an admin of.
+  async findClubsPageByAdmin(playerId: string, query: PageQuery) {
+    return await this.findPage((search) => search.where("admins").contains(playerId), query);
+  }
+
   async updateClub(entityId: string, updateRequest: UpdateClubRequest) {
     const club = await this.findByIdOrThrow(entityId, "Club");
 

@@ -1,7 +1,5 @@
 import { Body, Example, Middlewares, Post, Response, Route, SuccessResponse, Tags } from "tsoa";
 import { authExample } from "../http/examples";
-import { Player } from "../entities/player";
-import Role from "../enums/role";
 import { ConflictError, UnauthorizedError } from "../errors/appError";
 import { ErrorCode } from "../errors/codes";
 import { validate } from "../middleware/validate";
@@ -13,7 +11,8 @@ import RefreshRequest from "../requests/refreshRequest";
 import RegisterRequest from "../requests/registerRequest";
 import AuthResponse from "../responses/authResponse";
 import { burnPasswordCheck, hashPassword, verifyPassword } from "../services/passwordService";
-import { consumeRefreshToken, issueRefreshToken, revokeRefreshToken, signAccessToken } from "../services/tokenService";
+import { issueSession } from "../services/sessionService";
+import { consumeRefreshToken, revokeRefreshToken } from "../services/tokenService";
 
 @Tags("Auth")
 @Route("auth")
@@ -45,7 +44,7 @@ export class AuthController {
       throw error;
     }
 
-    return await this.issueSession(await this.repository.findByIdOrThrow(playerId, "Player"));
+    return await issueSession(await this.repository.findByIdOrThrow(playerId, "Player"));
   }
 
   // Unknown email, wrong password and deleted account all give the same answer.
@@ -64,7 +63,7 @@ export class AuthController {
       throw invalidCredentials();
     }
 
-    return await this.issueSession(player);
+    return await issueSession(player);
   }
 
   // Each refresh token works once: using it returns a new pair.
@@ -83,7 +82,7 @@ export class AuthController {
       throw new UnauthorizedError("Invalid refresh token");
     }
 
-    return await this.issueSession(player);
+    return await issueSession(player);
   }
 
   @SuccessResponse(204, "Logged out")
@@ -91,29 +90,6 @@ export class AuthController {
   @Post("/logout")
   async logout(@Body() request: RefreshRequest): Promise<void> {
     await revokeRefreshToken(request.refreshToken ?? "");
-  }
-
-  private async issueSession(player: Player): Promise<AuthResponse> {
-    const role = player.role ?? Role.PLAYER;
-    const { token, expiresIn } = signAccessToken({ id: player.entityId, role });
-
-    return {
-      accessToken: token,
-      expiresIn,
-      refreshToken: await issueRefreshToken(player.entityId),
-      player: {
-        id: player.entityId,
-        firstName: player.firstName,
-        lastName: player.lastName,
-        nickname: player.nickname,
-        email: player.email,
-        level: player.level,
-        role,
-        address: player.address,
-        city: player.city,
-        country: player.country,
-      },
-    };
   }
 }
 

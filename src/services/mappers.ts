@@ -19,6 +19,7 @@ import { ClubSummary, CourtSummary, PlayerSummary } from "../responses/common";
 import CourtResponse from "../responses/courtResponse";
 import MatchResponse from "../responses/matchResponse";
 import PartnerRequestResponse from "../responses/partnerRequestResponse";
+import MeResponse from "../responses/meResponse";
 import PlayerResponse from "../responses/playerResponse";
 import RacketResponse from "../responses/racketResponse";
 import BookingStatus from "../enums/bookingStatus";
@@ -112,6 +113,15 @@ export default class Mapper {
       city: player.city,
       address: player.address,
       country: player.country,
+    };
+  }
+
+  // The logged-in player's own view of themselves.
+  me(player: Player): MeResponse {
+    return {
+      ...this.player(player, { id: player.entityId, role: player.role }),
+      email: player.email,
+      role: player.role,
     };
   }
 

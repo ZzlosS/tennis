@@ -24,6 +24,7 @@ import UpdatePlayerRequest from "../requests/updatePlayerRequest";
 import { ErrorBody } from "../responses/common";
 import PlayerResponse from "../responses/playerResponse";
 import { assertSelfOrAdmin } from "../services/access";
+import AccountService from "../services/accountService";
 import Mapper from "../services/mappers";
 import { updatePlayerBody } from "../validation/auth";
 
@@ -37,6 +38,7 @@ import { updatePlayerBody } from "../validation/auth";
 export class PlayerController {
   private repository = new PlayerRepository();
   private mapper = new Mapper();
+  private accountService = new AccountService();
 
   /**
    * Players, oldest first.
@@ -80,6 +82,6 @@ export class PlayerController {
   @Delete("/{id}")
   async deletePlayer(@Request() req: ExRequest, @Path() id: string): Promise<void> {
     assertSelfOrAdmin(currentUser(req), id);
-    await this.repository.deletePlayer(id);
+    await this.accountService.deleteAccount(id);
   }
 }

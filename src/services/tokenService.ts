@@ -18,6 +18,8 @@ interface AccessPayload {
 
 const ALGORITHM = "HS256";
 const refreshKey = (tokenId: string) => `refresh:${tokenId}`;
+// The refresh tokens of one player, so all of them can be ended at once.
+const playerTokensKey = (playerId: string) => `refresh-by-player:${playerId}`;
 const REFRESH_TTL_SECONDS = () => config.JWT_REFRESH_TTL_DAYS * 24 * 60 * 60;
 
 export function signAccessToken(user: AuthUser): { token: string; expiresIn: number } {
@@ -52,15 +54,34 @@ export function verifyAccessToken(token: string): AuthUser {
 export async function issueRefreshToken(playerId: string): Promise<string> {
   const tokenId = crypto.randomBytes(32).toString("base64url");
   await RedisClient.execute("SET", refreshKey(tokenId), playerId, "EX", REFRESH_TTL_SECONDS());
+  await RedisClient.execute("SADD", playerTokensKey(playerId), tokenId);
+  await RedisClient.execute("EXPIRE", playerTokensKey(playerId), REFRESH_TTL_SECONDS());
   return tokenId;
 }
 
 // Single use: the token is deleted as it is read, so a replayed token finds nothing.
 export async function consumeRefreshToken(tokenId: string): Promise<string | null> {
   const playerId = await RedisClient.execute("GETDEL", refreshKey(tokenId));
-  return typeof playerId === "string" ? playerId : null;
+  if (typeof playerId !== "string") {
+    return null;
+  }
+  await RedisClient.execute("SREM", playerTokensKey(playerId), tokenId);
+  return playerId;
 }
 
 export async function revokeRefreshToken(tokenId: string): Promise<void> {
+  const playerId = await RedisClient.execute("GET", refreshKey(tokenId));
   await RedisClient.execute("DEL", refreshKey(tokenId));
+  if (typeof playerId === "string") {
+    await RedisClient.execute("SREM", playerTokensKey(playerId), tokenId);
+  }
+}
+
+// Ends every session of a player: after a password change or when the account is deleted.
+export async function revokeAllRefreshTokens(playerId: string): Promise<void> {
+  const tokenIds = await RedisClient.execute("SMEMBERS", playerTokensKey(playerId));
+  for (const tokenId of Array.isArray(tokenIds) ? tokenIds : []) {
+    await RedisClient.execute("DEL", refreshKey(String(tokenId)));
+  }
+  await RedisClient.execute("DEL", playerTokensKey(playerId));
 }

@@ -312,6 +312,9 @@
 					"lastName": {
 						"type": "string"
 					},
+					"nickname": {
+						"type": "string"
+					},
 					"level": {
 						"$ref": "#/components/schemas/PlayerLevel"
 					},
@@ -527,158 +530,160 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"SetScore": {
-				"properties": {
-					"firstTeam": {
-						"type": "number",
-						"format": "double"
-					},
-					"secondTeam": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"firstTeam",
-					"secondTeam"
+			"Role": {
+				"enum": [
+					"PLAYER",
+					"CLUB_ADMIN",
+					"ADMIN"
 				],
-				"type": "object",
-				"additionalProperties": false
+				"type": "string"
 			},
-			"MatchResponse": {
+			"MeResponse": {
 				"properties": {
 					"id": {
 						"type": "string"
 					},
-					"firstTeam": {
-						"items": {
-							"$ref": "#/components/schemas/PlayerSummary"
-						},
-						"type": "array"
-					},
-					"secondTeam": {
-						"items": {
-							"$ref": "#/components/schemas/PlayerSummary"
-						},
-						"type": "array"
-					},
-					"sets": {
-						"items": {
-							"$ref": "#/components/schemas/SetScore"
-						},
-						"type": "array"
-					},
-					"playedAt": {
+					"firstName": {
 						"type": "string"
 					},
-					"court": {
-						"$ref": "#/components/schemas/CourtSummary"
+					"lastName": {
+						"type": "string"
 					},
-					"club": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ClubSummary"
-							}
-						],
-						"nullable": true
+					"nickname": {
+						"type": "string"
+					},
+					"level": {
+						"$ref": "#/components/schemas/PlayerLevel"
+					},
+					"address": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"role": {
+						"$ref": "#/components/schemas/Role"
 					}
 				},
 				"required": [
 					"id",
-					"firstTeam",
-					"secondTeam",
-					"sets",
-					"playedAt",
-					"court",
-					"club"
+					"firstName",
+					"lastName",
+					"nickname",
+					"level",
+					"address",
+					"city",
+					"country",
+					"email",
+					"role"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Page_MatchResponse_": {
+			"AuthPlayerResponse": {
 				"properties": {
-					"items": {
-						"items": {
-							"$ref": "#/components/schemas/MatchResponse"
-						},
-						"type": "array"
-					},
-					"nextCursor": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"required": [
-					"items",
-					"nextCursor"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"CreateMatchRequest": {
-				"properties": {
-					"firstTeam": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"secondTeam": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"sets": {
-						"items": {
-							"$ref": "#/components/schemas/SetScore"
-						},
-						"type": "array"
-					},
-					"courtId": {
+					"id": {
 						"type": "string"
 					},
-					"playedAt": {
+					"firstName": {
+						"type": "string"
+					},
+					"lastName": {
+						"type": "string"
+					},
+					"nickname": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"level": {
+						"$ref": "#/components/schemas/PlayerLevel"
+					},
+					"role": {
+						"$ref": "#/components/schemas/Role"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"country": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"firstTeam",
-					"secondTeam",
-					"sets",
-					"courtId",
-					"playedAt"
+					"id",
+					"firstName",
+					"lastName",
+					"nickname",
+					"email",
+					"level",
+					"role",
+					"address",
+					"city",
+					"country"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"UpdateMatchRequest": {
+			"AuthResponse": {
 				"properties": {
-					"firstTeam": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"secondTeam": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"sets": {
-						"items": {
-							"$ref": "#/components/schemas/SetScore"
-						},
-						"type": "array"
-					},
-					"courtId": {
+					"accessToken": {
 						"type": "string"
 					},
-					"playedAt": {
+					"expiresIn": {
+						"type": "number",
+						"format": "double"
+					},
+					"refreshToken": {
+						"type": "string"
+					},
+					"player": {
+						"$ref": "#/components/schemas/AuthPlayerResponse"
+					}
+				},
+				"required": [
+					"accessToken",
+					"expiresIn",
+					"refreshToken",
+					"player"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChangePasswordRequest": {
+				"properties": {
+					"currentPassword": {
+						"type": "string"
+					},
+					"newPassword": {
 						"type": "string"
 					}
 				},
+				"required": [
+					"currentPassword",
+					"newPassword"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DeleteAccountRequest": {
+				"properties": {
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"password"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -834,6 +839,347 @@
 					"items",
 					"nextCursor"
 				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ClubResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"currency": {
+						"type": "string"
+					},
+					"courtCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
+					},
+					"cancelCutoffHours": {
+						"type": "number",
+						"format": "double"
+					},
+					"seasonEndsOn": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"address",
+					"description",
+					"city",
+					"country",
+					"currency",
+					"courtCount",
+					"timeZone",
+					"openingHours",
+					"cancelCutoffHours",
+					"seasonEndsOn"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Page_ClubResponse_": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/ClubResponse"
+						},
+						"type": "array"
+					},
+					"nextCursor": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"items",
+					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BookingType": {
+				"enum": [
+					"ONE_TIME",
+					"MONTH",
+					"SEASON"
+				],
+				"type": "string"
+			},
+			"BookingStatus": {
+				"enum": [
+					"PENDING",
+					"CONFIRMED",
+					"CANCELLED"
+				],
+				"type": "string"
+			},
+			"BookingResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"startsAt": {
+						"type": "string"
+					},
+					"endsAt": {
+						"type": "string"
+					},
+					"court": {
+						"$ref": "#/components/schemas/CourtSummary"
+					},
+					"club": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ClubSummary"
+							}
+						],
+						"nullable": true
+					},
+					"player": {
+						"$ref": "#/components/schemas/PlayerSummary"
+					},
+					"totalPrice": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Money"
+							}
+						],
+						"nullable": true
+					},
+					"bookingType": {
+						"$ref": "#/components/schemas/BookingType"
+					},
+					"status": {
+						"$ref": "#/components/schemas/BookingStatus"
+					},
+					"seriesId": {
+						"type": "string",
+						"nullable": true
+					},
+					"paidAt": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"startsAt",
+					"endsAt",
+					"court",
+					"club",
+					"player",
+					"totalPrice",
+					"bookingType",
+					"status",
+					"seriesId",
+					"paidAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Page_BookingResponse_": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/BookingResponse"
+						},
+						"type": "array"
+					},
+					"nextCursor": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"items",
+					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BookingWhen": {
+				"enum": [
+					"upcoming",
+					"past"
+				],
+				"type": "string"
+			},
+			"SetScore": {
+				"properties": {
+					"firstTeam": {
+						"type": "number",
+						"format": "double"
+					},
+					"secondTeam": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"firstTeam",
+					"secondTeam"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MatchResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"firstTeam": {
+						"items": {
+							"$ref": "#/components/schemas/PlayerSummary"
+						},
+						"type": "array"
+					},
+					"secondTeam": {
+						"items": {
+							"$ref": "#/components/schemas/PlayerSummary"
+						},
+						"type": "array"
+					},
+					"sets": {
+						"items": {
+							"$ref": "#/components/schemas/SetScore"
+						},
+						"type": "array"
+					},
+					"playedAt": {
+						"type": "string"
+					},
+					"court": {
+						"$ref": "#/components/schemas/CourtSummary"
+					},
+					"club": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ClubSummary"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"firstTeam",
+					"secondTeam",
+					"sets",
+					"playedAt",
+					"court",
+					"club"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Page_MatchResponse_": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/MatchResponse"
+						},
+						"type": "array"
+					},
+					"nextCursor": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"items",
+					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateMatchRequest": {
+				"properties": {
+					"firstTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"secondTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"sets": {
+						"items": {
+							"$ref": "#/components/schemas/SetScore"
+						},
+						"type": "array"
+					},
+					"courtId": {
+						"type": "string"
+					},
+					"playedAt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"firstTeam",
+					"secondTeam",
+					"sets",
+					"courtId",
+					"playedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateMatchRequest": {
+				"properties": {
+					"firstTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"secondTeam": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"sets": {
+						"items": {
+							"$ref": "#/components/schemas/SetScore"
+						},
+						"type": "array"
+					},
+					"courtId": {
+						"type": "string"
+					},
+					"playedAt": {
+						"type": "string"
+					}
+				},
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -1060,85 +1406,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ClubResponse": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"address": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"city": {
-						"type": "string"
-					},
-					"country": {
-						"type": "string"
-					},
-					"currency": {
-						"type": "string"
-					},
-					"courtCount": {
-						"type": "number",
-						"format": "double"
-					},
-					"timeZone": {
-						"type": "string"
-					},
-					"openingHours": {
-						"$ref": "#/components/schemas/OpeningHours"
-					},
-					"cancelCutoffHours": {
-						"type": "number",
-						"format": "double"
-					},
-					"seasonEndsOn": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"address",
-					"description",
-					"city",
-					"country",
-					"currency",
-					"courtCount",
-					"timeZone",
-					"openingHours",
-					"cancelCutoffHours",
-					"seasonEndsOn"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Page_ClubResponse_": {
-				"properties": {
-					"items": {
-						"items": {
-							"$ref": "#/components/schemas/ClubResponse"
-						},
-						"type": "array"
-					},
-					"nextCursor": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"required": [
-					"items",
-					"nextCursor"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ClubCreateRequest": {
 				"properties": {
 					"name": {
@@ -1286,86 +1553,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"BookingType": {
-				"enum": [
-					"ONE_TIME",
-					"MONTH",
-					"SEASON"
-				],
-				"type": "string"
-			},
-			"BookingStatus": {
-				"enum": [
-					"PENDING",
-					"CONFIRMED",
-					"CANCELLED"
-				],
-				"type": "string"
-			},
-			"BookingResponse": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"startsAt": {
-						"type": "string"
-					},
-					"endsAt": {
-						"type": "string"
-					},
-					"court": {
-						"$ref": "#/components/schemas/CourtSummary"
-					},
-					"club": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ClubSummary"
-							}
-						],
-						"nullable": true
-					},
-					"player": {
-						"$ref": "#/components/schemas/PlayerSummary"
-					},
-					"totalPrice": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Money"
-							}
-						],
-						"nullable": true
-					},
-					"bookingType": {
-						"$ref": "#/components/schemas/BookingType"
-					},
-					"status": {
-						"$ref": "#/components/schemas/BookingStatus"
-					},
-					"seriesId": {
-						"type": "string",
-						"nullable": true
-					},
-					"paidAt": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"required": [
-					"id",
-					"startsAt",
-					"endsAt",
-					"court",
-					"club",
-					"player",
-					"totalPrice",
-					"bookingType",
-					"status",
-					"seriesId",
-					"paidAt"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"BookingPartnerRequest": {
 				"properties": {
 					"playersNeeded": {
@@ -1406,26 +1593,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Page_BookingResponse_": {
-				"properties": {
-					"items": {
-						"items": {
-							"$ref": "#/components/schemas/BookingResponse"
-						},
-						"type": "array"
-					},
-					"nextCursor": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"required": [
-					"items",
-					"nextCursor"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"UpdateBookingRequest": {
 				"properties": {
 					"courtId": {
@@ -1438,87 +1605,6 @@
 						"type": "string"
 					}
 				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Role": {
-				"enum": [
-					"PLAYER",
-					"CLUB_ADMIN",
-					"ADMIN"
-				],
-				"type": "string"
-			},
-			"AuthPlayerResponse": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"firstName": {
-						"type": "string"
-					},
-					"lastName": {
-						"type": "string"
-					},
-					"nickname": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
-					"level": {
-						"$ref": "#/components/schemas/PlayerLevel"
-					},
-					"role": {
-						"$ref": "#/components/schemas/Role"
-					},
-					"address": {
-						"type": "string"
-					},
-					"city": {
-						"type": "string"
-					},
-					"country": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id",
-					"firstName",
-					"lastName",
-					"nickname",
-					"email",
-					"level",
-					"role",
-					"address",
-					"city",
-					"country"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"AuthResponse": {
-				"properties": {
-					"accessToken": {
-						"type": "string"
-					},
-					"expiresIn": {
-						"type": "number",
-						"format": "double"
-					},
-					"refreshToken": {
-						"type": "string"
-					},
-					"player": {
-						"$ref": "#/components/schemas/AuthPlayerResponse"
-					}
-				},
-				"required": [
-					"accessToken",
-					"expiresIn",
-					"refreshToken",
-					"player"
-				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -3347,6 +3433,706 @@
 						"in": "path",
 						"name": "id",
 						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/me": {
+			"get": {
+				"operationId": "GetMe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MeResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+											"firstName": "Marko",
+											"lastName": "Petrovic",
+											"nickname": "marko",
+											"level": "INTERMEDIATE",
+											"email": "marko@example.com",
+											"role": "PLAYER",
+											"address": "Knez Mihailova 5",
+											"city": "Belgrade",
+											"country": "Serbia"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			},
+			"patch": {
+				"operationId": "UpdateMe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MeResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+											"firstName": "Marko",
+											"lastName": "Petrovic",
+											"nickname": "marko",
+											"level": "INTERMEDIATE",
+											"email": "marko@example.com",
+											"role": "PLAYER",
+											"address": "Knez Mihailova 5",
+											"city": "Belgrade",
+											"country": "Serbia"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdatePlayerRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteMe",
+				"responses": {
+					"204": {
+						"description": "Deleted"
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Deletes the account. Bookings still to come are cancelled, courts the player owns are closed,\nevery session ends and the email can be used to sign up again. Asks for the password.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteAccountRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/me/password": {
+			"post": {
+				"operationId": "ChangePassword",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUpCWDNLN00yIn0.signature",
+											"expiresIn": 900,
+											"refreshToken": "9f2c1d7a4b8e4f6a9c3d5e7f1a2b3c4d",
+											"player": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"firstName": "Marko",
+												"lastName": "Petrovic",
+												"nickname": "marko",
+												"level": "INTERMEDIATE",
+												"email": "marko@example.com",
+												"role": "PLAYER",
+												"address": "Knez Mihailova 5",
+												"city": "Belgrade",
+												"country": "Serbia"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Changes the password and ends every other session: all refresh tokens stop working. The answer holds a new\npair of tokens, so this device stays signed in. A wrong current password gives 403 INVALID_CREDENTIALS.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ChangePasswordRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/me/courts": {
+			"get": {
+				"operationId": "GetMyCourts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Page_CourtResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"items": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+													"name": "Court 1",
+													"surface": "CLAY",
+													"stands": false,
+													"roof": false,
+													"double": false,
+													"kind": "CLUB",
+													"club": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+														"name": "TK Banjica",
+														"city": "Belgrade"
+													},
+													"ownerId": null,
+													"address": "Banjicka 1",
+													"city": "Belgrade",
+													"country": "Serbia",
+													"pricePerHour": {
+														"amountMinor": 180000,
+														"currency": "RSD"
+													},
+													"active": true,
+													"timeZone": "Europe/Belgrade",
+													"openingHours": [
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														}
+													]
+												}
+											],
+											"nextCursor": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Courts without a club that the player added, oldest first.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "Page size, 1 to 100. Default 20.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The nextCursor of the previous page.",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/me/clubs": {
+			"get": {
+				"operationId": "GetMyClubs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Page_ClubResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"items": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+													"name": "TK Banjica",
+													"address": "Banjicka 1",
+													"description": "Six clay courts and a clubhouse in Banjica.",
+													"city": "Belgrade",
+													"country": "Serbia",
+													"currency": "RSD",
+													"courtCount": 6,
+													"timeZone": "Europe/Belgrade",
+													"openingHours": [
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														}
+													],
+													"cancelCutoffHours": 24,
+													"seasonEndsOn": null
+												}
+											],
+											"nextCursor": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Clubs the player is an admin of, oldest first.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "Page size, 1 to 100. Default 20.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The nextCursor of the previous page.",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/me/bookings": {
+			"get": {
+				"operationId": "GetMyBookings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Page_BookingResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"items": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZKL",
+													"startsAt": "2026-11-01T16:00:00.000Z",
+													"endsAt": "2026-11-01T18:00:00.000Z",
+													"court": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+														"name": "Court 1",
+														"surface": "CLAY",
+														"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+													},
+													"club": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+														"name": "TK Banjica",
+														"city": "Belgrade"
+													},
+													"player": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+														"nickname": "marko",
+														"level": "INTERMEDIATE"
+													},
+													"totalPrice": {
+														"amountMinor": 360000,
+														"currency": "RSD"
+													},
+													"bookingType": "ONE_TIME",
+													"status": "CONFIRMED",
+													"seriesId": null,
+													"paidAt": null
+												}
+											],
+											"nextCursor": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "The player's own bookings. Upcoming ones (not yet ended) come soonest first, past ones newest first.\nCancelled bookings are left out.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "`upcoming` (default) or `past`.",
+						"in": "query",
+						"name": "when",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/BookingWhen"
+						}
+					},
+					{
+						"description": "Only the bookings made together by one weekly repeat.",
+						"in": "query",
+						"name": "seriesId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Page size, 1 to 100. Default 20.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The nextCursor of the previous page.",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
 						"schema": {
 							"type": "string"
 						}

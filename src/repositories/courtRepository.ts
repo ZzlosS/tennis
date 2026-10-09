@@ -17,6 +17,8 @@ export interface CourtFilters {
   // A club id, or COURT_NO_CLUB for courts that have none.
   club?: string;
   kind?: CourtKind;
+  // The player who owns a court without a club.
+  ownerId?: string;
   city?: string;
   surface?: CourtSurface;
   minPrice?: number;
@@ -78,6 +80,9 @@ export default class CourtRepository extends BaseRepository<Court> {
       if (filters.kind) {
         search = search.where("kind").equals(filters.kind);
       }
+      if (filters.ownerId) {
+        search = search.where("ownerId").equals(filters.ownerId);
+      }
       if (filters.city) {
         search = search.where("city").equals(filters.city);
       }
@@ -100,6 +105,10 @@ export default class CourtRepository extends BaseRepository<Court> {
 
   async findClubCourts(clubId: string) {
     return await this.findAllMatching(this.matching({ club: clubId }));
+  }
+
+  async findOwnedCourts(ownerId: string) {
+    return await this.findAllMatching(this.matching({ ownerId }));
   }
 
   async countClubCourts(clubId: string) {
