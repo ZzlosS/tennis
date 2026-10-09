@@ -2,7 +2,7 @@ import PlayerLevel from "../enums/playerLevel";
 import Role from "../enums/role";
 
 export interface AuthPlayerResponse {
-  entityId: string;
+  id: string;
   firstName: string;
   lastName: string;
   nickname: string;

@@ -11,7 +11,7 @@ describe("grant-role script", () => {
     const club = { name: "x", address: "x", description: "", city: "x", country: "x" };
     await api().post("/clubs").set(bearer(player.accessToken)).send(club).expect(403);
     const session = await login(player.email, player.password);
-    await api().post("/clubs").set(bearer(session.token)).send(club).expect(200);
+    await api().post("/clubs").set(bearer(session.token)).send(club).expect(201);
   });
 
   it("makes a CLUB_ADMIN of one club", async () => {

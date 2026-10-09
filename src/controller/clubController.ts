@@ -1,110 +1,103 @@
-import { Route, Get, Post, Body, Tags, Path, Delete, Patch, Security } from "tsoa";
+import { Request as ExRequest } from "express";
+import {
+  Body,
+  Delete,
+  Example,
+  Get,
+  Middlewares,
+  Patch,
+  Path,
+  Post,
+  Query,
+  Request,
+  Response,
+  Route,
+  Security,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
+import { clubDetailExample, clubExample, clubPageExample } from "../http/examples";
+import { Page } from "../http/pagination";
+import { currentUser } from "../middleware/auth";
+import { validate } from "../middleware/validate";
 import ClubRepository from "../repositories/clubRepository";
-import ClubCreateRequest from "../requests/clubCreateRequest";
-import ClubResponse from "../responses/clubResponse";
 import CourtRepository from "../repositories/courtRepository";
-import CourtResponse from "../responses/courtResponse";
-import { Club } from "../entities/club";
+import ClubCreateRequest from "../requests/clubCreateRequest";
 import UpdateClubRequest from "../requests/updateClubRequest";
-import Role from "../enums/role";
-import { AuthUser } from "../services/tokenService";
-import { assertClubAdmin, requireRole } from "../services/access";
+import ClubResponse, { ClubDetailResponse } from "../responses/clubResponse";
+import { ErrorBody } from "../responses/common";
+import { assertClubAdmin } from "../services/access";
+import Mapper from "../services/mappers";
+import { createClubBody, updateClubBody } from "../validation/clubs";
 
 @Tags("Clubs")
 @Route("clubs")
-export default class ClubsController {
-  repository: ClubRepository;
-  courtRepository: CourtRepository;
-  user: AuthUser;
+@Security("jwt")
+@Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(401, "UNAUTHENTICATED")
+@Response<ErrorBody>(403, "FORBIDDEN")
+@Response<ErrorBody>(404, "NOT_FOUND")
+export class ClubController {
+  private repository = new ClubRepository();
+  private courtRepository = new CourtRepository();
+  private mapper = new Mapper();
 
-  constructor(user: AuthUser) {
-    this.repository = new ClubRepository();
-    this.courtRepository = new CourtRepository();
-    this.user = user;
+  /**
+   * Clubs, oldest first.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(clubPageExample)
+  @Get("/")
+  async getClubs(
+    @Query() city?: string,
+    @Query() limit?: number,
+    @Query() cursor?: string
+  ): Promise<Page<ClubResponse>> {
+    const { entities, nextCursor } = await this.repository.findClubsPage(city, { limit, cursor });
+    return { items: await Promise.all(entities.map((club) => this.mapper.club(club))), nextCursor };
   }
 
-  @Security("jwt")
+  @Example(clubExample)
+  @SuccessResponse(201, "Created")
+  @Security("jwt", ["ADMIN"])
+  @Middlewares(validate({ body: createClubBody }))
   @Post("/")
-  async createClub(@Body() createClub: ClubCreateRequest): Promise<any> {
-    requireRole(this.user, Role.ADMIN);
-    let clubEID = await this.repository.createClub(createClub);
-
-    return { entityId: clubEID };
+  async createClub(@Body() createClub: ClubCreateRequest): Promise<ClubResponse> {
+    const id = await this.repository.createClub(createClub);
+    return await this.mapper.club(await this.repository.findByIdOrThrow(id, "Club"));
   }
 
-  @Security("jwt")
-  @Get("/all")
-  async getAllClubs(): Promise<ClubResponse[]> {
-    let clubs = await this.repository.findAll();
-    const data = clubs.map(async (club) => {
-      return await this.convertClubModelToResponse(club);
-    });
-
-    return await Promise.all(data);
-  }
-
-  @Security("jwt")
-  @Get("/city/{city}")
-  async getClubsByCity(@Path() city: string): Promise<ClubResponse[]> {
-    const clubs = await this.repository.findClubsByCity(city);
-    const data = clubs.map(async (club) => {
-      return await this.convertClubModelToResponse(club);
-    });
-
-    return await Promise.all(data);
-  }
-
-  @Security("jwt")
-  @Get("/{entityId}")
-  async getById(@Path() entityId: string): Promise<ClubResponse> {
-    const club = await this.repository.findByIdOrThrow(entityId, "Club");
-    const clubCourts = await this.courtRepository.findClubCourts(club.entityId);
-    const courts = clubCourts.map((court) => {
-      return {
-        name: court.name,
-        surface: court.surface,
-        stands: court.stands,
-        roof: court.roof,
-        double: court.double,
-        clubId: court.club,
-        pricePerHour: court.pricePerHour,
-      } as CourtResponse;
-    });
+  @Example(clubDetailExample)
+  @Get("/{id}")
+  async getClub(@Path() id: string): Promise<ClubDetailResponse> {
+    const club = await this.repository.findByIdOrThrow(id, "Club");
+    const courts = await this.courtRepository.findClubCourts(id);
     return {
-      entityId: club.entityId,
-      name: club.name,
-      address: club.address,
-      description: club.description,
-      city: club.city,
-      country: club.country,
-      courtsNumber: club.courts,
-      courts: courts,
-    } as ClubResponse;
+      ...(await this.mapper.club(club)),
+      courts: await Promise.all(courts.map((court) => this.mapper.court(court))),
+    };
   }
 
-  @Security("jwt")
-  @Delete("/{entityId}")
-  async deleteClub(@Path() entityId: string): Promise<string> {
-    assertClubAdmin(this.user, await this.repository.findByIdOrThrow(entityId, "Club"));
-    return await this.repository.deleteEntity(entityId);
+  @Example(clubExample)
+  @Middlewares(validate({ body: updateClubBody }))
+  @Patch("/{id}")
+  async updateClub(
+    @Request() req: ExRequest,
+    @Path() id: string,
+    @Body() updateRequest: UpdateClubRequest
+  ): Promise<ClubResponse> {
+    assertClubAdmin(currentUser(req), await this.repository.findByIdOrThrow(id, "Club"));
+    await this.repository.updateClub(id, updateRequest);
+    const club = await this.repository.findByIdOrThrow(id, "Club");
+    // The courts copy the club's place and currency, so they follow it.
+    await this.courtRepository.syncClubDetails(club);
+    return await this.mapper.club(club);
   }
 
-  @Security("jwt")
-  @Patch("/{entityId}")
-  async updateClub(@Body() updateRequest: UpdateClubRequest, @Path() entityId: string): Promise<string> {
-    assertClubAdmin(this.user, await this.repository.findByIdOrThrow(entityId, "Club"));
-    return await this.repository.updateClub(entityId, updateRequest);
-  }
-
-  private async convertClubModelToResponse(club: Club): Promise<ClubResponse> {
-    return {
-      entityId: club.entityId,
-      name: club.name,
-      address: club.address,
-      description: club.description,
-      city: club.city,
-      country: club.country,
-      courtsNumber: club.courts,
-    } as ClubResponse;
+  @Delete("/{id}")
+  async deleteClub(@Request() req: ExRequest, @Path() id: string): Promise<void> {
+    assertClubAdmin(currentUser(req), await this.repository.findByIdOrThrow(id, "Club"));
+    await this.repository.deleteEntity(id);
   }
 }

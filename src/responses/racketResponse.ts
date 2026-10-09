@@ -1,6 +1,7 @@
 import RacketLevels from "../enums/racketLevels";
 
 export default interface RacketResponse {
+  id: string;
   brand: string;
   model: string;
   year: number;

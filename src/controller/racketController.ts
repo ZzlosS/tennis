@@ -1,114 +1,82 @@
-import { NotFoundError } from "../errors/appError";
-import PlayerRepository from "../repositories/playerRepository";
+import {
+  Body,
+  Delete,
+  Example,
+  Get,
+  Middlewares,
+  Patch,
+  Path,
+  Post,
+  Query,
+  Response,
+  Route,
+  Security,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
+import { racketExample, racketPageExample } from "../http/examples";
+import { Page } from "../http/pagination";
+import { validate } from "../middleware/validate";
 import RacketRepository from "../repositories/racketRepository";
-import { Route, Get, Post, Body, Tags, Delete, Path, Patch, Security } from "tsoa";
-import RacketResponse from "../responses/racketResponse";
-import AssignRacketRequest from "../requests/assignRacketRequest";
 import CreateRacketRequest from "../requests/createRacketRequest";
-import { Racket } from "../entities/racket";
 import UpdateRacketRequest from "../requests/updateRacketRequest";
-import Role from "../enums/role";
-import { requireRole } from "../services/access";
-import { AuthUser } from "../services/tokenService";
+import { ErrorBody } from "../responses/common";
+import RacketResponse from "../responses/racketResponse";
+import Mapper from "../services/mappers";
+import { createRacketBody, updateRacketBody } from "../validation/rackets";
 
+// The shared catalog of rackets. Everyone can read it; only ADMINs change it.
 @Tags("Rackets")
 @Route("rackets")
-export default class RacketController {
-  repository: RacketRepository;
-  playerRepository: PlayerRepository;
-  user: AuthUser;
+@Security("jwt")
+@Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(401, "UNAUTHENTICATED")
+@Response<ErrorBody>(403, "FORBIDDEN")
+@Response<ErrorBody>(404, "NOT_FOUND")
+export class RacketController {
+  private repository = new RacketRepository();
+  private mapper = new Mapper();
 
-  constructor(user: AuthUser) {
-    this.repository = new RacketRepository();
-    this.playerRepository = new PlayerRepository();
-    this.user = user;
-  }
-
-  private async convertPlayerModelToResponse(racket: Racket): Promise<RacketResponse> {
-    return {
-      entityId: racket.entityId,
-      brand: racket.brand,
-      model: racket.model,
-      year: racket.year,
-      weight: racket.weight,
-      level: racket.level,
-      headSizeInch: racket.headSizeInch,
-      balance: racket.balance,
-      stringPattern: racket.stringPattern,
-      recommendedStrings: racket.recommendedStrings,
-    } as RacketResponse;
-  }
-
-  @Security("jwt")
+  /**
+   * The racket catalog, oldest first.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(racketPageExample)
   @Get("/")
-  async getRackets(): Promise<RacketResponse[]> {
-    let player = await this.playerRepository.findByIdOrThrow(this.user.id, "Player");
-
-    if (!player.rackets || player.rackets.length === 0) {
-      return [];
-    }
-
-    let rackets = await this.repository.getUserRackets(player.rackets);
-
-    const data = rackets.map(async (racket) => {
-      return await this.convertPlayerModelToResponse(racket);
-    });
-
-    return await Promise.all(data);
+  async getRackets(@Query() limit?: number, @Query() cursor?: string): Promise<Page<RacketResponse>> {
+    const { entities, nextCursor } = await this.repository.findPage((search) => search, { limit, cursor });
+    return { items: entities.map((racket) => this.mapper.racket(racket)), nextCursor };
   }
 
-  @Get("/all")
-  @Security("jwt")
-  async getAllRackets(): Promise<RacketResponse[]> {
-    let rackets = await this.repository.findAll();
-
-    if (!rackets) {
-      throw new NotFoundError("No rackets at all!");
-    }
-
-    const data = rackets.map(async (racket) => {
-      return await this.convertPlayerModelToResponse(racket);
-    });
-
-    return await Promise.all(data);
+  @Example(racketExample)
+  @Get("/{id}")
+  async getRacket(@Path() id: string): Promise<RacketResponse> {
+    return this.mapper.racket(await this.repository.findByIdOrThrow(id, "Racket"));
   }
 
+  @Example(racketExample)
+  @SuccessResponse(201, "Created")
+  @Security("jwt", ["ADMIN"])
+  @Middlewares(validate({ body: createRacketBody }))
   @Post("/")
-  @Security("jwt")
-  async createRacket(@Body() createRacket: CreateRacketRequest): Promise<string> {
-    requireRole(this.user, Role.ADMIN);
-    let racketEID = await this.repository.createRacket(createRacket);
-
-    return racketEID;
+  async createRacket(@Body() createRacket: CreateRacketRequest): Promise<RacketResponse> {
+    const id = await this.repository.createRacket(createRacket);
+    return this.mapper.racket(await this.repository.findByIdOrThrow(id, "Racket"));
   }
 
-  @Post("/assign")
-  @Security("jwt")
-  async assignRacketToPlayer(@Body() assignRequest: AssignRacketRequest): Promise<any> {
-    await this.repository.findByIdOrThrow(assignRequest.racketEid, "Racket");
-    const player = await this.playerRepository.findByIdOrThrow(this.user.id, "Player");
-    await this.playerRepository.assignRacketToPlayer(player, assignRequest.racketEid);
-
-    return { assigned: true };
+  @Example(racketExample)
+  @Security("jwt", ["ADMIN"])
+  @Middlewares(validate({ body: updateRacketBody }))
+  @Patch("/{id}")
+  async updateRacket(@Path() id: string, @Body() updateRequest: UpdateRacketRequest): Promise<RacketResponse> {
+    await this.repository.updateRacket(id, updateRequest);
+    return this.mapper.racket(await this.repository.findByIdOrThrow(id, "Racket"));
   }
 
-  @Delete("/{entityId}")
-  @Security("jwt")
-  async deleteRacket(@Path() entityId: string): Promise<string> {
-    requireRole(this.user, Role.ADMIN);
-    return await this.repository.deleteEntity(entityId);
-  }
-
-  @Get("/{entityId}")
-  @Security("jwt")
-  async getRacket(@Path() entityId: string): Promise<RacketResponse> {
-    return await this.convertPlayerModelToResponse(await this.repository.findByIdOrThrow(entityId, "Racket"));
-  }
-
-  @Patch("/{entityId}")
-  @Security("jwt")
-  async updateRacket(@Body() updateRequest: UpdateRacketRequest, @Path() entityId: string): Promise<string> {
-    requireRole(this.user, Role.ADMIN);
-    return await this.repository.updateRacket(entityId, updateRequest);
+  @Security("jwt", ["ADMIN"])
+  @Delete("/{id}")
+  async deleteRacket(@Path() id: string): Promise<void> {
+    await this.repository.deleteEntity(id);
   }
 }

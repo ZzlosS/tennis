@@ -10,29 +10,28 @@ export default class RacketRepository extends BaseRepository<Racket> {
     super(racketSchema);
   }
 
-  async getUserRackets(racketsArray: string[]): Promise<Racket[]> {
-    let rackets: Racket[] = [];
-    try {
-      await this.initializeRepository();
-      rackets = this.withIds(await this.repository.fetch(racketsArray));
-    } catch (error) {
-      console.log("🚀 ~ RacketRepository ~ getUserRackets ~ error:", error);
+  // The rackets a player owns, skipping any that an admin has deleted from the catalog since.
+  async getUserRackets(racketIds: string[]): Promise<Racket[]> {
+    if (racketIds.length === 0) {
+      return [];
     }
-    return rackets;
+    await this.initializeRepository();
+    const rackets = this.withIds(await this.repository.fetch(racketIds));
+    return rackets.filter((racket) => racket.uuid != null && !racket.deleted);
   }
 
-  async createRacket(dto: CreateRacketRequest) {
+  async createRacket(request: CreateRacketRequest) {
     const racket = await this.createEntity();
 
-    racket.brand = dto.brand;
-    racket.model = dto.model;
-    racket.year = dto.year;
-    racket.weight = dto.weight;
-    racket.level = dto.level;
-    racket.headSizeInch = dto.headSizeInch;
-    racket.balance = dto.balance;
-    racket.stringPattern = dto.stringPattern;
-    racket.recommendedStrings = dto.recommendedStrings;
+    racket.brand = request.brand;
+    racket.model = request.model;
+    racket.year = request.year;
+    racket.weight = request.weight;
+    racket.level = request.level as RacketLevels;
+    racket.headSizeInch = request.headSizeInch;
+    racket.balance = request.balance;
+    racket.stringPattern = request.stringPattern;
+    racket.recommendedStrings = request.recommendedStrings ?? "";
 
     return await this.save(racket);
   }
@@ -58,13 +57,13 @@ export default class RacketRepository extends BaseRepository<Racket> {
     if (updateRequest.headSizeInch) {
       racket.headSizeInch = updateRequest.headSizeInch;
     }
-    if (updateRequest.balance) {
+    if (updateRequest.balance !== undefined) {
       racket.balance = updateRequest.balance;
     }
     if (updateRequest.stringPattern) {
       racket.stringPattern = updateRequest.stringPattern;
     }
-    if (updateRequest.recommendedStrings) {
+    if (updateRequest.recommendedStrings !== undefined) {
       racket.recommendedStrings = updateRequest.recommendedStrings;
     }
 

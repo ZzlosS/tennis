@@ -1,15 +1,27 @@
 {
     "entryFile": "src/app.ts",
-    "noImplicitAdditionalProperties": "throw-on-extras",
+    "noImplicitAdditionalProperties": "silently-remove-extras",
+    "controllerPathGlobs": ["src/controller/*Controller.ts"],
     "spec": {
-        "outputDirectory": "public",
+        "outputDirectory": "openapi",
+        "specFileBaseName": "v1",
         "specVersion": 3,
+        "basePath": "/v1",
+        "name": "Tennis API",
+        "description": "REST API for the tennis app. Every error has the shape { error: { code, message, fields? } }; clients translate by code.",
+        "version": "1.0.0",
         "securityDefinitions": {
             "jwt": {
-                "type": "apiKey",
-                "name": "Authorization",
-                "in": "header"
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
             }
         }
+    },
+    "routes": {
+        "routesDir": "src/generated",
+        "basePath": "/v1",
+        "middleware": "express",
+        "authenticationModule": "src/middleware/tsoaAuth.ts"
     }
 }

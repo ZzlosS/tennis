@@ -3,9 +3,10 @@ import BaseEntity from "./baseEntity";
 type Match = BaseEntity & {
   firstTeam: string[];
   secondTeam: string[];
-  result: string[];
+  // JSON text of [{ firstTeam, secondTeam }, ...], one entry per set.
+  sets: string;
   court: string;
-  date: Date;
+  playedAt: Date;
 };
 
 export { Match };

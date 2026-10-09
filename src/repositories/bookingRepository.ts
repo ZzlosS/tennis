@@ -1,79 +1,85 @@
 import { Search } from "redis-om";
-import BookingDto from "../dtos/bookingDto";
-import BookingFilterDto from "../dtos/bookingFilterDto";
 import { Booking } from "../entities/booking";
+import { PageQuery } from "../http/pagination";
 import { bookingSchema } from "../schemas/bookingSchema";
-import BaseRepository from "./baseRepository";
 import BookingCreateRequest from "../requests/bookingCreateRequest";
-import BookingFilterRequest from "../requests/bookingFilterRequest";
 import UpdateBookingRequest from "../requests/updateBookingRequest";
+import BaseRepository from "./baseRepository";
+
+export interface BookingFilters {
+  courtId?: string;
+  playerId?: string;
+  // Bookings that start at or after `from` and end at or before `to`.
+  from?: Date;
+  to?: Date;
+}
 
 export default class BookingRepository extends BaseRepository<Booking> {
   constructor() {
     super(bookingSchema);
   }
-  async createBooking(createRequest: BookingCreateRequest, playerId: string, totalPrice: number) {
+
+  async createBooking(request: BookingCreateRequest, playerId: string, totalPriceMinor: number, currency: string) {
     const booking = await this.createEntity();
 
-    booking.court = createRequest.court;
-    booking.from = createRequest.from;
-    booking.to = createRequest.to;
+    booking.court = request.courtId;
+    booking.startsAt = new Date(request.startsAt);
+    booking.endsAt = new Date(request.endsAt);
     booking.player = playerId;
-    booking.bookingType = createRequest.bookingType;
-    booking.totalPrice = totalPrice;
-    booking.date = new Date(createRequest.date);
+    booking.bookingType = request.bookingType;
+    booking.totalPriceMinor = totalPriceMinor;
+    booking.currency = currency;
 
     return await this.save(booking);
   }
 
-  async findBookings(bookingFilterDto: BookingFilterRequest) {
-    await this.initializeRepository();
-
-    let bookings = this.repository.search();
-
-    if (bookingFilterDto.court) {
-      bookings = bookings.where("court").equals(bookingFilterDto.court);
-    }
-
-    if (bookingFilterDto.from) {
-      bookings.where("from").greaterThanOrEqualTo(bookingFilterDto.from);
-    }
-
-    if (bookingFilterDto.to) {
-      bookings.where("to").lessThanOrEqualTo(bookingFilterDto.to);
-    }
-
-    if (bookingFilterDto.player) {
-      bookings = bookings.where("player").equals(bookingFilterDto.player);
-    }
-
-    if (bookingFilterDto.date) {
-      bookings = bookings.where("date").equals(new Date(bookingFilterDto.date));
-    }
-
-    bookings = bookings.and("deleted").false();
-
-    return this.withIds(await bookings.return.all());
+  private matching(filters: BookingFilters) {
+    return (search: Search<Booking>) => {
+      if (filters.courtId) {
+        search = search.where("court").equals(filters.courtId);
+      }
+      if (filters.playerId) {
+        search = search.where("player").equals(filters.playerId);
+      }
+      if (filters.from) {
+        search = search.where("startsAt").onOrAfter(filters.from);
+      }
+      if (filters.to) {
+        search = search.where("endsAt").onOrBefore(filters.to);
+      }
+      return search;
+    };
   }
 
-  // The total price is recalculated by the caller when the court or the hours change.
-  async updateBooking(entityId: string, updateRequest: UpdateBookingRequest, totalPrice?: number) {
+  async findBookingsPage(filters: BookingFilters, query: PageQuery) {
+    return await this.findPage(this.matching(filters), query);
+  }
+
+  // For callers that drop bookings in code before paging.
+  async findBookings(filters: BookingFilters) {
+    return await this.findAllMatching(this.matching(filters));
+  }
+
+  // The caller works out a new total when the court or the hours change.
+  async updateBooking(
+    entityId: string,
+    updateRequest: UpdateBookingRequest,
+    price?: { totalPriceMinor: number; currency: string }
+  ) {
     const booking = await this.findByIdOrThrow(entityId, "Booking");
 
-    if (updateRequest.court) {
-      booking.court = updateRequest.court;
+    if (updateRequest.courtId) {
+      booking.court = updateRequest.courtId;
     }
-    if (updateRequest.from) {
-      booking.from = updateRequest.from;
+    if (updateRequest.startsAt) {
+      booking.startsAt = new Date(updateRequest.startsAt);
     }
-    if (updateRequest.to) {
-      booking.to = updateRequest.to;
+    if (updateRequest.endsAt) {
+      booking.endsAt = new Date(updateRequest.endsAt);
     }
-    if (totalPrice !== undefined) {
-      booking.totalPrice = totalPrice;
-    }
-    if (updateRequest.date) {
-      booking.date = new Date(updateRequest.date);
+    if (price) {
+      booking.totalPriceMinor = price.totalPriceMinor;
+      booking.currency = price.currency;
     }
 
     return await this.save(booking);

@@ -1,6 +1,7 @@
 import { Player } from "../entities/player";
 import PlayerLevel from "../enums/playerLevel";
 import Role from "../enums/role";
+import { PageQuery } from "../http/pagination";
 import RegisterRequest from "../requests/registerRequest";
 import UpdatePlayerRequest from "../requests/updatePlayerRequest";
 import { playerSchema } from "../schemas/playerSchema";
@@ -50,12 +51,21 @@ export default class PlayerRepository extends BaseRepository<Player> {
     return player;
   }
 
-  async findPlayersByLevel(level: PlayerLevel): Promise<Player[]> {
-    return await this.findAllByField(level, "level");
+  async findPlayersPage(filters: { city?: string; level?: PlayerLevel }, query: PageQuery) {
+    return await this.findPage((search) => {
+      if (filters.city) {
+        search = search.where("city").equals(filters.city);
+      }
+      if (filters.level) {
+        search = search.where("level").equals(filters.level);
+      }
+      return search;
+    }, query);
   }
 
-  async findPlayersByCity(city: string): Promise<Player[]> {
-    return await this.findAllByField(city, "city");
+  async removeRacketFromPlayer(player: Player, racketId: string): Promise<string> {
+    player.rackets = (player.rackets ?? []).filter((id) => id !== racketId);
+    return await this.save(player);
   }
 
   async assignRacketToPlayer(player: Player, racketEID: string): Promise<string> {

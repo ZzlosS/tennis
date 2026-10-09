@@ -7,9 +7,9 @@ const clubSchema = new Schema("Club", {
   description: { type: "text" },
   city: { type: "string" },
   country: { type: "string" },
-  courts: { type: "number" },
+  currency: { type: "string" },
   admins: { type: "string[]" },
-  createdAt: { type: "number" },
+  createdAt: { type: "number", sortable: true },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },
 });

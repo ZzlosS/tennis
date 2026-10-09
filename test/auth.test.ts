@@ -62,7 +62,7 @@ describe("login", () => {
       .post("/auth/login")
       .send({ email: player.email.toUpperCase(), password: player.password });
     expect(response.status).toBe(200);
-    expect(response.body.player.entityId).toBe(player.id);
+    expect(response.body.player.id).toBe(player.id);
   });
 
   it("answers a wrong password and an unknown email with the same 401", async () => {
@@ -81,7 +81,7 @@ describe("login", () => {
 
   it("does not let a deleted player log in", async () => {
     const player = await registerPlayer();
-    await api().delete(`/players/${player.id}`).set(bearer(player.accessToken)).expect(200);
+    await api().delete(`/players/${player.id}`).set(bearer(player.accessToken)).expect(204);
     const response = await api().post("/auth/login").send({ email: player.email, password: player.password });
     expect(response.status).toBe(401);
   });
@@ -155,7 +155,7 @@ describe("refresh and logout", () => {
 
   it("does not refresh a deleted player", async () => {
     const player = await registerPlayer();
-    await api().delete(`/players/${player.id}`).set(bearer(player.accessToken)).expect(200);
+    await api().delete(`/players/${player.id}`).set(bearer(player.accessToken)).expect(204);
     await api().post("/auth/refresh").send({ refreshToken: player.refreshToken }).expect(401);
   });
 });

@@ -4,4 +4,4 @@ PROJECT_SETUP
 .env
 build
 gitfix.sh
-local-data
+local-datasrc/generated

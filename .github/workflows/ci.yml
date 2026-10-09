@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [main]
 
@@ -30,8 +31,39 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      # Also generates the Swagger spec, which fails if a controller type cannot be resolved.
       - run: npm run build
+      - name: Check the committed spec is up to date
+        run: |
+          npm run spec
+          git diff --exit-code -- openapi src/generated || { echo "Run npm run spec and commit the result."; exit 1; }
+      - name: Upload the spec
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-v1
+          path: openapi/v1.json
+
+  breaking-changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Compare the spec with main
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          if ! git cat-file -e origin/main:openapi/v1.json 2>/dev/null; then
+            echo "main has no spec yet, nothing to compare."; exit 0
+          fi
+          git show origin/main:openapi/v1.json > /tmp/main-v1.json
+          docker run --rm -v /tmp:/tmp -v "$PWD:/w" tufin/oasdiff:latest breaking /tmp/main-v1.json /w/openapi/v1.json --fail-on ERR > /tmp/breaking.txt || status=$?
+          cat /tmp/breaking.txt
+          if [ "${status:-0}" != 0 ]; then
+            if echo ",$LABELS," | grep -q ",api-breaking,"; then echo "Breaking, but labelled api-breaking."; exit 0; fi
+            echo "Breaking API change. Add the api-breaking label if this is intended."; exit 1
+          fi
 
   docker:
     runs-on: ubuntu-latest

@@ -1,15 +1,17 @@
+import BookingType from "../enums/bookingType";
+import { Money } from "../http/money";
+import { ClubSummary, CourtSummary, PlayerSummary } from "./common";
+
 export default interface BookingResponse {
-  entityId: string;
-  clubName: string;
-  clubAddress: string;
-  clubCity: string;
-  courtName: string;
-  courtSurface: string;
-  from: number;
-  to: number;
-  totalPrice: number;
-  playerFirstName: string;
-  playerLastName: string;
-  bookingType: string;
-  date: Date;
+  id: string;
+  // ISO 8601 in UTC, on the hour.
+  startsAt: string;
+  endsAt: string;
+  court: CourtSummary;
+  // Null when the court has no club.
+  club: ClubSummary | null;
+  player: PlayerSummary;
+  // Null when the court is free.
+  totalPrice: Money | null;
+  bookingType: BookingType;
 }

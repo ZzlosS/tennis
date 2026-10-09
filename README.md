@@ -1,6 +1,6 @@
 # Tennis API
 
-A REST API for organising tennis: players, rackets, clubs, courts, court bookings, matches, and "enemy requests" (looking for opponents to fill a booking). It is written in TypeScript with Express, stores its data in Redis Stack through [Redis OM](https://github.com/redis/redis-om-node), and generates an OpenAPI spec with [tsoa](https://tsoa-community.github.io/docs/) that is served through Swagger UI.
+A REST API for organising tennis: players, rackets, clubs, courts, court bookings, matches, and partner requests (looking for opponents to fill a booking). It is written in TypeScript with Express, stores its data in Redis Stack through [Redis OM](https://github.com/redis/redis-om-node), and generates an OpenAPI spec with [tsoa](https://tsoa-community.github.io/docs/) that is served through Swagger UI.
 
 ## Tech stack
 
@@ -59,8 +59,10 @@ The server listens on <http://localhost:8787>. `GET /health` answers `{ "status"
 | Script | What it does |
 | --- | --- |
 | `npm run watch` | Run the app from source with nodemon. |
-| `npm run dev` | Regenerate the Swagger spec, then run nodemon for the app and for `tsoa spec` side by side. |
-| `npm run swagger` | Generate `public/swagger.json` from the tsoa controller decorators. |
+| `npm run dev` | Regenerate the spec and routes, then run nodemon for the app and for tsoa side by side. |
+| `npm run spec` | Generate `openapi/v1.json` and `src/generated/routes.ts` from the controllers. Commit the result. |
+| `npm run mock` | Serve the sample responses from the spec on <http://localhost:4010> with Prism (no Redis or login needed; routes have no `/v1` prefix there). |
+| `npm run seed` | Fill Redis with sample players, clubs, courts and bookings. |
 | `npm run build` | Generate the spec, then compile TypeScript to `build/`. |
 | `npm start` | Run the compiled app from `build/server.js`. |
 | `npm test` | Run the tests (needs Redis Stack, see Testing). |
@@ -69,7 +71,21 @@ The server listens on <http://localhost:8787>. `GET /health` answers `{ "status"
 
 ## API documentation
 
-With the server running, open <http://localhost:8787/docs> for Swagger UI. The raw spec is at `/swagger.json` (`public/swagger.json` in the repo). Regenerate it with `npm run swagger` after changing controllers.
+With the server running, open <http://localhost:8787/docs> for Swagger UI. The OpenAPI spec is committed at `openapi/v1.json` and served at `/openapi/v1.json`; the app generates its client from it. All routes live under `/v1`.
+
+After changing a controller, run `npm run spec` and commit the changed spec. CI fails if the committed spec is out of date, and fails on a breaking change to the spec compared with `main` (checked with oasdiff). A pull request that breaks the contract on purpose needs the `api-breaking` label.
+
+### Conventions
+
+- **Lists** return `{ "items": [...], "nextCursor": "..." | null }`. Pass `limit` (1 to 100, default 20) and the previous `nextCursor` as `cursor`.
+- **Money** is `{ "amountMinor": 180000, "currency": "RSD" }`, in minor units. A court with `pricePerHour: null` is free.
+- **Times** are ISO 8601 UTC strings (`startsAt`, `endsAt`). Bookings start and end on the hour.
+- **Summaries**: other records appear as small objects (`PlayerSummary`, `ClubSummary`, `CourtSummary`) so screens need no extra calls.
+- **Errors** have one shape (see Errors).
+
+### Courts with and without a club
+
+A court has a `kind`: `CLUB`, `PUBLIC` (for example a park court) or `PRIVATE` (owned by a person). Any player can add a `PUBLIC` or `PRIVATE` court through `POST /courts` and becomes its owner (`ownerId`). `GET /courts/unassigned` lists courts without a club. The owner or an `ADMIN` can edit, delete or hand the court to a club with `POST /courts/{id}/assign`. Club courts are created with `POST /clubs/{clubId}/courts` and use the club's currency. These courts can be booked and can have partner requests like any other.
 
 ## Authentication
 
@@ -88,7 +104,7 @@ A player is `PLAYER` by default. The role is read from the access token, so afte
 | --- | --- | --- | --- |
 | Players | any logged-in user (email only visible to the player and admins) | `/auth/register` | the player or an `ADMIN` |
 | Clubs | any logged-in user | `ADMIN` | admins of that club, or `ADMIN` |
-| Courts | any logged-in user | club admins in their own club (`clubId` is required), `ADMIN` anywhere | admins of the court's club, or `ADMIN` |
+| Courts | any logged-in user | club admins in their own club, `ADMIN` anywhere; any player for a court without a club | admins of the court's club, the owner of a court without a club, or `ADMIN` |
 | Bookings | own; club admins also see their club's; `ADMIN` all | any user, as themselves | the owner, admins of the court's club, or `ADMIN` |
 | Matches | any logged-in user | a player in the match | players in the match, or `ADMIN` |
 | Partner requests | any logged-in user | the owner of the booking | the creator or `ADMIN`; you cannot accept your own |
@@ -131,15 +147,16 @@ Every error has one shape. The app translates by `code`, so the API stays langua
 
 | Resource | Routes |
 | --- | --- |
-| Auth `/auth` | `POST /register`, `POST /login`, `POST /refresh`, `POST /logout` |
-| Players `/players` | `GET /`, `GET /:entityId`, `GET /level/:level`, `GET /city/:city`, `PATCH /:entityId`, `DELETE /:entityId` |
-| Rackets `/rackets` | `POST /`, `POST /assign`, `GET /`, `GET /all`, `GET /:entityId`, `PATCH /:entityId`, `DELETE /:entityId` |
-| Clubs `/clubs` | `POST /`, `GET /all`, `GET /city/:city`, `GET /:entityId`, `PATCH /:entityId`, `DELETE /:entityId` |
-| Courts `/courts` | `POST /`, `POST /assign`, `GET /all`, `GET /unassigned`, `GET /price`, `GET /:entityId`, `PATCH /:entityId`, `DELETE /:entityId` |
-| Bookings `/bookings` | `POST /`, `GET /`, `GET /:entityId`, `PATCH /:entityId`, `DELETE /:entityId` |
-| Matches `/matches` | `POST /`, `GET /all`, `GET /player/:entityId`, `GET /:entityId`, `PATCH /:entityId`, `DELETE /:entityId` |
-| Partner requests `/requests` | `POST /`, `POST /accept`, `GET /`, `GET /inactive`, `GET /:entityId`, `PATCH /:entityId`, `DELETE /:entityId` |
-| Health | `GET /health` (no auth), `GET /` (no auth), `GET /ping` |
+| Auth `/v1/auth` | `POST /register`, `POST /login`, `POST /refresh`, `POST /logout` |
+| Players `/v1/players` | `GET /`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}` |
+| Player rackets `/v1/players/{playerId}/rackets` | `GET /`, `PUT /{racketId}`, `DELETE /{racketId}` |
+| Rackets `/v1/rackets` | `GET /`, `POST /`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}` |
+| Clubs `/v1/clubs` | `GET /`, `POST /`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}` |
+| Club courts `/v1/clubs/{clubId}/courts` | `GET /`, `POST /` |
+| Courts `/v1/courts` | `GET /`, `POST /`, `GET /unassigned`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}`, `POST /{id}/assign` |
+| Bookings `/v1/bookings` | `GET /`, `POST /`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}` |
+| Matches `/v1/matches` | `GET /`, `POST /`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}` |
+| Partner requests `/v1/partner-requests` | `GET /` (`status=OPEN\|CLOSED`), `POST /`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}`, `POST /{id}/join` |
 
 See Swagger UI for request and response bodies. Deleted records are soft-deleted: they disappear from every list and answer `404` by id.
 
@@ -173,8 +190,8 @@ src/
   scripts/        grantRole.ts
   examples/       insertData.ts: faker-based helpers to seed sample data
 test/             Vitest + Supertest tests
-public/
-  swagger.json    Generated OpenAPI spec
+openapi/
+  v1.json         Generated OpenAPI spec (committed)
 ```
 
 ## Testing
@@ -198,7 +215,7 @@ Starts the API on port `8787` next to Redis Stack. `JWT_SECRET` (and optionally 
 
 ## Sample data
 
-`src/examples/insertData.ts` exports helpers (`insertPlayer`, `insertClub`, `insertCourt`, `insertRacket`, `insertBooking`, `insertRequest`, ...) that create random records with faker. Several use hard-coded ids from an old local database, so adjust them before running.
+`npm run seed` runs `src/examples/insertData.ts`, which creates random players, clubs, courts, rackets, bookings and partner requests with faker.
 
 ## Known limitations
 

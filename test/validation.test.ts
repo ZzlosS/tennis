@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import Role from "../src/enums/role";
-import { api, bearer, createBooking, createClub, createCourt, playerWithRole, registerPlayer } from "./helpers";
+import {
+  api,
+  bearer,
+  createBooking,
+  createClub,
+  createCourt,
+  createLooseCourt,
+  playerWithRole,
+  registerPlayer,
+} from "./helpers";
 
 const validRegister = {
   firstName: "Ana",
@@ -50,77 +59,152 @@ describe("validation errors", () => {
 });
 
 describe("bookings", () => {
-  it("checks hours and dates", async () => {
+  async function setup() {
     const admin = await playerWithRole(Role.ADMIN);
-    const court = await createCourt(admin.token);
+    const club = await createClub(admin.token);
+    const court = await createCourt(admin.token, club);
     const player = await registerPlayer();
+    return { court, player };
+  }
+
+  it("checks times", async () => {
+    const { court, player } = await setup();
     const book = (body: Record<string, unknown>) =>
       api()
         .post("/bookings")
         .set(bearer(player.accessToken))
-        .send({ court, from: 10, to: 12, bookingType: "ONE_TIME", date: "2026-11-01", ...body });
+        .send({
+          courtId: court,
+          startsAt: "2026-11-01T10:00:00Z",
+          endsAt: "2026-11-01T12:00:00Z",
+          bookingType: "ONE_TIME",
+          ...body,
+        });
 
     for (const bad of [
-      { from: 12, to: 10 },
-      { from: 10, to: 10 },
-      { to: 25 },
-      { from: -1 },
-      { from: 10.5 },
-      { date: "tomorrow" },
+      { startsAt: "2026-11-01T12:00:00Z", endsAt: "2026-11-01T10:00:00Z" },
+      { endsAt: "2026-11-01T10:00:00Z" },
+      { endsAt: "2026-11-02T11:00:00Z" },
+      { startsAt: "2026-11-01T10:30:00Z" },
+      { startsAt: "2026-11-01T10:00:00+02:00" },
+      { startsAt: "2026-11-01" },
+      { startsAt: "tomorrow" },
       { bookingType: "WEEKLY" },
     ]) {
       const response = await book(bad);
       expect(response.status, JSON.stringify(bad)).toBe(400);
       expect(response.body.error.code).toBe("VALIDATION_FAILED");
     }
-    await book({}).expect(200);
+    await book({}).expect(201);
+  });
+
+  it("names the field that is wrong", async () => {
+    const { court, player } = await setup();
+    const response = await api().post("/bookings").set(bearer(player.accessToken)).send({
+      courtId: court,
+      startsAt: "2026-11-01T10:30:00Z",
+      endsAt: "2026-11-01T12:00:00Z",
+      bookingType: "ONE_TIME",
+    });
+    expect(Object.keys(response.body.error.fields)).toEqual(["startsAt"]);
+  });
+
+  it("answers a body of the wrong type with VALIDATION_FAILED too", async () => {
+    const { player } = await setup();
+    const response = await api().post("/bookings").set(bearer(player.accessToken)).send({ courtId: 5 });
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe("VALIDATION_FAILED");
+    expect(response.body.error.fields.courtId).toBeDefined();
   });
 
   it("answers an unknown court with 404", async () => {
     const player = await registerPlayer();
-    const response = await api()
-      .post("/bookings")
-      .set(bearer(player.accessToken))
-      .send({ court: "does-not-exist", from: 10, to: 12, bookingType: "ONE_TIME", date: "2026-11-01" });
+    const response = await api().post("/bookings").set(bearer(player.accessToken)).send({
+      courtId: "does-not-exist",
+      startsAt: "2026-11-01T10:00:00Z",
+      endsAt: "2026-11-01T12:00:00Z",
+      bookingType: "ONE_TIME",
+    });
     expect(response.status).toBe(404);
     expect(response.body.error.code).toBe("NOT_FOUND");
   });
 
-  it("refuses an update that leaves 'to' before 'from'", async () => {
-    const admin = await playerWithRole(Role.ADMIN);
-    const court = await createCourt(admin.token);
-    const player = await registerPlayer();
+  it("refuses an update that leaves the end before the start", async () => {
+    const { court, player } = await setup();
     const booking = await createBooking(player.accessToken, court);
-    const response = await api().patch(`/bookings/${booking}`).set(bearer(player.accessToken)).send({ from: 15 });
+    const response = await api()
+      .patch(`/bookings/${booking}`)
+      .set(bearer(player.accessToken))
+      .send({ startsAt: "2026-11-01T15:00:00Z" });
     expect(response.status).toBe(400);
-    expect(response.body.error.fields.to).toBeDefined();
+    expect(response.body.error.fields.endsAt).toBeDefined();
   });
 });
 
 describe("other bodies", () => {
-  it("checks clubs, courts, requests and rackets", async () => {
+  it("checks clubs, courts, requests, rackets and matches", async () => {
     const admin = await playerWithRole(Role.ADMIN);
+    const club = await createClub(admin.token);
     const post = (path: string, body: Record<string, unknown>) => api().post(path).set(bearer(admin.token)).send(body);
 
     await post("/clubs", { name: "" }).expect(400);
-    await post("/courts", { name: "C", surface: "ICE", pricePerHour: 100 }).expect(400);
-    await post("/courts", { name: "C", surface: "HARD", pricePerHour: -5 }).expect(400);
-    await post("/requests", { bookingEntityID: "x", numberOfPlayersNeeded: 0 }).expect(400);
-    await post("/requests", { bookingEntityID: "x", numberOfPlayersNeeded: 4 }).expect(400);
+    await post("/clubs", { name: "X", address: "a", city: "c", country: "s", currency: "rsd" }).expect(400);
+    await post(`/clubs/${club}/courts`, { name: "C", surface: "ICE" }).expect(400);
+    await post(`/clubs/${club}/courts`, { name: "C", surface: "HARD", pricePerHourMinor: -5 }).expect(400);
+    await post(`/clubs/${club}/courts`, { name: "C", surface: "HARD", pricePerHourMinor: 10.5 }).expect(400);
+    await post("/courts", { name: "C", surface: "HARD", kind: "CLUB", address: "a", city: "c", country: "s" }).expect(
+      400
+    );
+    await post("/partner-requests", { bookingId: "x", playersNeeded: 0 }).expect(400);
+    await post("/partner-requests", { bookingId: "x", playersNeeded: 4 }).expect(400);
     await post("/rackets", { brand: "Wilson", level: "SUPER" }).expect(400);
-    await post("/matches", { firstTeam: "a" }).expect(400);
+    await post("/matches", { firstTeam: ["a"] }).expect(400);
   });
 
-  it("needs numeric from and to for the price search", async () => {
+  it("checks match scores", async () => {
+    const admin = await playerWithRole(Role.ADMIN);
+    const club = await createClub(admin.token);
+    const court = await createCourt(admin.token, club);
+    const a = await registerPlayer();
+    const b = await registerPlayer();
+    const match = (sets: unknown) =>
+      api()
+        .post("/matches")
+        .set(bearer(a.accessToken))
+        .send({ firstTeam: [a.id], secondTeam: [b.id], sets, courtId: court, playedAt: "2026-11-01T10:00:00Z" });
+
+    const set = { firstTeam: 6, secondTeam: 4 };
+    await match([]).expect(400);
+    await match(Array(7).fill(set)).expect(400);
+    await match([{ firstTeam: -1, secondTeam: 6 }]).expect(400);
+    await match([{ firstTeam: 6.5, secondTeam: 4 }]).expect(400);
+    await match([set, set]).expect(201);
+  });
+
+  it("answers a bad query value with VALIDATION_FAILED", async () => {
     const player = await registerPlayer();
-    await api().get("/courts/price").set(bearer(player.accessToken)).expect(400);
-    await api().get("/courts/price?from=abc&to=5").set(bearer(player.accessToken)).expect(400);
+    for (const query of ["limit=0", "limit=101", "limit=abc", "cursor=nonsense", "level=GOD"]) {
+      const response = await api().get(`/players?${query}`).set(bearer(player.accessToken));
+      expect(response.status, query).toBe(400);
+      expect(response.body.error.code).toBe("VALIDATION_FAILED");
+    }
+  });
+
+  it("filters courts by price in minor units", async () => {
+    const player = await registerPlayer();
+    await api().get("/courts?minPrice=abc").set(bearer(player.accessToken)).expect(400);
 
     const admin = await playerWithRole(Role.ADMIN);
     const club = await createClub(admin.token);
-    await createCourt(admin.token, club, { pricePerHour: 800 });
-    await createCourt(admin.token, club, { pricePerHour: 3000 });
-    const response = await api().get("/courts/price?from=500&to=1000").set(bearer(player.accessToken)).expect(200);
-    expect(response.body.map((c: { pricePerHour: number }) => c.pricePerHour)).toEqual([800]);
+    await createCourt(admin.token, club, { pricePerHourMinor: 80000 });
+    await createCourt(admin.token, club, { pricePerHourMinor: 300000 });
+    await createLooseCourt(player.accessToken);
+    const response = await api()
+      .get("/courts?minPrice=50000&maxPrice=100000")
+      .set(bearer(player.accessToken))
+      .expect(200);
+    expect(
+      response.body.items.map((c: { pricePerHour: { amountMinor: number } }) => c.pricePerHour.amountMinor)
+    ).toEqual([80000]);
   });
 });
