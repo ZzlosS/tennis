@@ -201,8 +201,13 @@ export default class BookingService {
 
     if (request.partnerRequest) {
       await this.partnerRequests.createPartnerRequest(
-        { bookingId: pending[0].entityId, playersNeeded: request.partnerRequest.playersNeeded },
-        playerId
+        {
+          bookingId: pending[0].entityId,
+          playersNeeded: request.partnerRequest.playersNeeded,
+          level: request.partnerRequest.level,
+        },
+        playerId,
+        pending[0].startsAt
       );
     }
     return pending;
@@ -246,6 +251,7 @@ export default class BookingService {
       );
       throw error;
     }
+    await this.partnerRequests.moveForBooking(booking.entityId, next.startsAt);
     return booking;
   }
 

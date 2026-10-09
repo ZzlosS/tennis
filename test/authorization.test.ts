@@ -418,7 +418,7 @@ describe("partner requests", () => {
     const third = await playerWithRole(Role.PLAYER);
     const late = await api().post(`/partner-requests/${request}/join`).set(bearer(third.token));
     expect(late.status).toBe(409);
-    expect(late.body.error.code).toBe("CONFLICT");
+    expect(late.body.error.code).toBe("REQUEST_FULL");
     expect((await api().get("/partner-requests").set(bearer(third.token)).expect(200)).body.items).toEqual([]);
     const closed = await api().get("/partner-requests?status=CLOSED").set(bearer(third.token)).expect(200);
     expect(idsOf(closed)).toEqual([request]);
@@ -427,7 +427,8 @@ describe("partner requests", () => {
   it("does not count the same player twice", async () => {
     const request = (await createRequest(w.playerA.token, w.bookingA, { playersNeeded: 2 }).expect(201)).body.id;
     await api().post(`/partner-requests/${request}/join`).set(bearer(w.playerB.token)).expect(200);
-    await api().post(`/partner-requests/${request}/join`).set(bearer(w.playerB.token)).expect(200);
+    const again = await api().post(`/partner-requests/${request}/join`).set(bearer(w.playerB.token)).expect(409);
+    expect(again.body.error.code).toBe("ALREADY_JOINED");
     const stored = await storedRequest(request);
     expect(stored.joinedBy).toEqual([w.playerB.id]);
     expect(stored.active).toBe(true);

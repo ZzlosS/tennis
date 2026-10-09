@@ -191,6 +191,8 @@ export default class Mapper {
       },
       createdBy: await this.playerSummary(request.playerId),
       playersNeeded: request.playersNeeded,
+      level: request.level && request.level !== "ANY" ? (request.level as PlayerLevel) : null,
+      spotsLeft: Math.max(0, request.playersNeeded - (request.joinedBy ?? []).length),
       joined: await Promise.all((request.joinedBy ?? []).map((id) => this.playerSummary(id))),
       status: request.active ? RequestStatus.OPEN : RequestStatus.CLOSED,
     };

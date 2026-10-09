@@ -6,6 +6,8 @@ const partnerRequestSchema = new Schema("PartnerRequest", {
   playersNeeded: { type: "number" },
   joinedBy: { type: "string[]" },
   active: { type: "boolean" },
+  level: { type: "string" },
+  startsAt: { type: "number", sortable: true },
   uuid: { type: "string" },
   createdAt: { type: "number", sortable: true },
   deleted: { type: "boolean" },

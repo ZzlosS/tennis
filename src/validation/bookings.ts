@@ -1,3 +1,4 @@
+import PlayerLevel from "../enums/playerLevel";
 import { z } from "zod";
 import BookingType from "../enums/bookingType";
 import { id, isoDateTime, onTheHour } from "./common";
@@ -25,7 +26,9 @@ export const createBookingBody = z
     startsAt: hourlyTime,
     endsAt: hourlyTime,
     bookingType: z.nativeEnum(BookingType),
-    partnerRequest: z.object({ playersNeeded: z.number().int().min(1).max(3) }).optional(),
+    partnerRequest: z
+      .object({ playersNeeded: z.number().int().min(1).max(3), level: z.nativeEnum(PlayerLevel).optional() })
+      .optional(),
   })
   .superRefine(checkBookingTimes);
 

@@ -408,6 +408,8 @@ export const partnerRequestExample = {
     level: "INTERMEDIATE",
   },
   playersNeeded: 1,
+  level: "INTERMEDIATE",
+  spotsLeft: 1,
   joined: [],
   status: "OPEN",
 };
@@ -438,6 +440,8 @@ export const partnerRequestPageExample = {
         level: "INTERMEDIATE",
       },
       playersNeeded: 1,
+      level: "INTERMEDIATE",
+      spotsLeft: 1,
       joined: [],
       status: "OPEN",
     },

@@ -39,7 +39,7 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 const models: TsoaRoute.Models = {
     "ErrorCode": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["VALIDATION_FAILED"]},{"dataType":"enum","enums":["UNAUTHENTICATED"]},{"dataType":"enum","enums":["TOKEN_EXPIRED"]},{"dataType":"enum","enums":["INVALID_CREDENTIALS"]},{"dataType":"enum","enums":["FORBIDDEN"]},{"dataType":"enum","enums":["NOT_FOUND"]},{"dataType":"enum","enums":["EMAIL_TAKEN"]},{"dataType":"enum","enums":["CONFLICT"]},{"dataType":"enum","enums":["INTERNAL"]},{"dataType":"enum","enums":["SLOT_TAKEN"]},{"dataType":"enum","enums":["OUTSIDE_OPENING_HOURS"]},{"dataType":"enum","enums":["COURT_CLOSED"]},{"dataType":"enum","enums":["BOOKING_IN_PAST"]},{"dataType":"enum","enums":["CANCEL_TOO_LATE"]},{"dataType":"enum","enums":["REQUEST_FULL"]},{"dataType":"enum","enums":["ALREADY_JOINED"]},{"dataType":"enum","enums":["MATCH_NOT_PENDING"]},{"dataType":"enum","enums":["HANDOVER_PENDING"]},{"dataType":"enum","enums":["RATE_LIMITED"]},{"dataType":"enum","enums":["TOKEN_INVALID"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["VALIDATION_FAILED"]},{"dataType":"enum","enums":["UNAUTHENTICATED"]},{"dataType":"enum","enums":["TOKEN_EXPIRED"]},{"dataType":"enum","enums":["INVALID_CREDENTIALS"]},{"dataType":"enum","enums":["FORBIDDEN"]},{"dataType":"enum","enums":["NOT_FOUND"]},{"dataType":"enum","enums":["EMAIL_TAKEN"]},{"dataType":"enum","enums":["CONFLICT"]},{"dataType":"enum","enums":["INTERNAL"]},{"dataType":"enum","enums":["SLOT_TAKEN"]},{"dataType":"enum","enums":["OUTSIDE_OPENING_HOURS"]},{"dataType":"enum","enums":["COURT_CLOSED"]},{"dataType":"enum","enums":["BOOKING_IN_PAST"]},{"dataType":"enum","enums":["CANCEL_TOO_LATE"]},{"dataType":"enum","enums":["REQUEST_FULL"]},{"dataType":"enum","enums":["ALREADY_JOINED"]},{"dataType":"enum","enums":["NOT_JOINED"]},{"dataType":"enum","enums":["MATCH_NOT_PENDING"]},{"dataType":"enum","enums":["HANDOVER_PENDING"]},{"dataType":"enum","enums":["RATE_LIMITED"]},{"dataType":"enum","enums":["TOKEN_INVALID"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ErrorBody": {
@@ -247,6 +247,8 @@ const models: TsoaRoute.Models = {
             "booking": {"ref":"PartnerRequestBooking","required":true},
             "createdBy": {"ref":"PlayerSummary","required":true},
             "playersNeeded": {"dataType":"double","required":true},
+            "level": {"dataType":"union","subSchemas":[{"ref":"PlayerLevel"},{"dataType":"enum","enums":[null]}],"required":true},
+            "spotsLeft": {"dataType":"double","required":true},
             "joined": {"dataType":"array","array":{"dataType":"refObject","ref":"PlayerSummary"},"required":true},
             "status": {"ref":"RequestStatus","required":true},
         },
@@ -258,6 +260,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "bookingId": {"dataType":"string","required":true},
             "playersNeeded": {"dataType":"double","required":true},
+            "level": {"ref":"PlayerLevel"},
         },
         "additionalProperties": false,
     },
@@ -276,6 +279,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "bookingId": {"dataType":"string"},
             "playersNeeded": {"dataType":"double"},
+            "level": {"ref":"PlayerLevel"},
         },
         "additionalProperties": false,
     },
@@ -690,6 +694,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "playersNeeded": {"dataType":"double","required":true},
+            "level": {"ref":"PlayerLevel"},
         },
         "additionalProperties": false,
     },
@@ -1225,6 +1230,10 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsPartnerRequestController_getPartnerRequests: Record<string, TsoaRoute.ParameterSchema> = {
                 status: {"in":"query","name":"status","ref":"RequestStatus"},
+                level: {"in":"query","name":"level","ref":"PlayerLevel"},
+                from: {"in":"query","name":"from","dataType":"string"},
+                to: {"in":"query","name":"to","dataType":"string"},
+                doubles: {"in":"query","name":"doubles","dataType":"boolean"},
                 limit: {"in":"query","name":"limit","dataType":"double"},
                 cursor: {"in":"query","name":"cursor","dataType":"string"},
         };
@@ -1373,6 +1382,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'joinPartnerRequest',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPartnerRequestController_leavePartnerRequest: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+        };
+        app.post('/v1/partner-requests/:id/leave',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PartnerRequestController)),
+            ...(fetchMiddlewares<RequestHandler>(PartnerRequestController.prototype.leavePartnerRequest)),
+
+            async function PartnerRequestController_leavePartnerRequest(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPartnerRequestController_leavePartnerRequest, request, response });
+
+                const controller = new PartnerRequestController();
+
+              await templateService.apiHandler({
+                methodName: 'leavePartnerRequest',
                 controller,
                 response,
                 next,

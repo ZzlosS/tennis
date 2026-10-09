@@ -26,6 +26,7 @@
 					"CANCEL_TOO_LATE",
 					"REQUEST_FULL",
 					"ALREADY_JOINED",
+					"NOT_JOINED",
 					"MATCH_NOT_PENDING",
 					"HANDOVER_PENDING",
 					"RATE_LIMITED",
@@ -535,6 +536,18 @@
 						"type": "number",
 						"format": "double"
 					},
+					"level": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/PlayerLevel"
+							}
+						],
+						"nullable": true
+					},
+					"spotsLeft": {
+						"type": "number",
+						"format": "double"
+					},
 					"joined": {
 						"items": {
 							"$ref": "#/components/schemas/PlayerSummary"
@@ -550,6 +563,8 @@
 					"booking",
 					"createdBy",
 					"playersNeeded",
+					"level",
+					"spotsLeft",
 					"joined",
 					"status"
 				],
@@ -564,6 +579,9 @@
 					"playersNeeded": {
 						"type": "number",
 						"format": "double"
+					},
+					"level": {
+						"$ref": "#/components/schemas/PlayerLevel"
 					}
 				},
 				"required": [
@@ -601,6 +619,9 @@
 					"playersNeeded": {
 						"type": "number",
 						"format": "double"
+					},
+					"level": {
+						"$ref": "#/components/schemas/PlayerLevel"
 					}
 				},
 				"type": "object",
@@ -1694,6 +1715,9 @@
 					"playersNeeded": {
 						"type": "number",
 						"format": "double"
+					},
+					"level": {
+						"$ref": "#/components/schemas/PlayerLevel"
 					}
 				},
 				"required": [
@@ -3120,6 +3144,8 @@
 												"level": "INTERMEDIATE"
 											},
 											"playersNeeded": 1,
+											"level": "INTERMEDIATE",
+											"spotsLeft": 1,
 											"joined": [],
 											"status": "OPEN"
 										}
@@ -3160,6 +3186,16 @@
 					},
 					"404": {
 						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "BOOKING_IN_PAST",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -3227,6 +3263,8 @@
 														"level": "INTERMEDIATE"
 													},
 													"playersNeeded": 1,
+													"level": "INTERMEDIATE",
+													"spotsLeft": 1,
 													"joined": [],
 													"status": "OPEN"
 												}
@@ -3279,7 +3317,7 @@
 						}
 					}
 				},
-				"description": "Requests that are still looking for players, or already full. Oldest first.",
+				"description": "Requests that are still looking for players, or already full, soonest booking first. Requests whose booking\nhas started are not listed.",
 				"tags": [
 					"Partner requests"
 				],
@@ -3296,6 +3334,42 @@
 						"required": false,
 						"schema": {
 							"$ref": "#/components/schemas/RequestStatus"
+						}
+					},
+					{
+						"description": "Requests for this level, and those open to any level.",
+						"in": "query",
+						"name": "level",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/PlayerLevel"
+						}
+					},
+					{
+						"description": "Only bookings that start at or after this time, ISO 8601 in UTC.",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Only bookings that start before this time, ISO 8601 in UTC.",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "true for doubles (3 more players), false for singles or a pair.",
+						"in": "query",
+						"name": "doubles",
+						"required": false,
+						"schema": {
+							"type": "boolean"
 						}
 					},
 					{
@@ -3357,6 +3431,8 @@
 												"level": "INTERMEDIATE"
 											},
 											"playersNeeded": 1,
+											"level": "INTERMEDIATE",
+											"spotsLeft": 1,
 											"joined": [],
 											"status": "OPEN"
 										}
@@ -3461,6 +3537,8 @@
 												"level": "INTERMEDIATE"
 											},
 											"playersNeeded": 1,
+											"level": "INTERMEDIATE",
+											"spotsLeft": 1,
 											"joined": [],
 											"status": "OPEN"
 										}
@@ -3501,6 +3579,16 @@
 					},
 					"404": {
 						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "BOOKING_IN_PAST",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -3643,6 +3731,8 @@
 												"level": "INTERMEDIATE"
 											},
 											"playersNeeded": 1,
+											"level": "INTERMEDIATE",
+											"spotsLeft": 1,
 											"joined": [],
 											"status": "OPEN"
 										}
@@ -3692,7 +3782,125 @@
 						}
 					},
 					"409": {
-						"description": "CONFLICT",
+						"description": "BOOKING_IN_PAST",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Partner requests"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/partner-requests/{id}/leave": {
+			"post": {
+				"operationId": "LeavePartnerRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PartnerRequestResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZMN",
+											"booking": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZKL",
+												"startsAt": "2026-11-01T16:00:00.000Z",
+												"endsAt": "2026-11-01T18:00:00.000Z",
+												"court": {
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+													"name": "Court 1",
+													"surface": "CLAY",
+													"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+												},
+												"club": {
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+													"name": "TK Banjica",
+													"city": "Belgrade"
+												}
+											},
+											"createdBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"playersNeeded": 1,
+											"level": "INTERMEDIATE",
+											"spotsLeft": 1,
+											"joined": [],
+											"status": "OPEN"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "NOT_JOINED",
 						"content": {
 							"application/json": {
 								"schema": {
