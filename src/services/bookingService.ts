@@ -11,6 +11,7 @@ import { ErrorCode } from "../errors/codes";
 import { Money, toMoney } from "../http/money";
 import BookingRepository from "../repositories/bookingRepository";
 import ClubRepository from "../repositories/clubRepository";
+import CourtBlockRepository from "../repositories/courtBlockRepository";
 import CourtRepository from "../repositories/courtRepository";
 import PartnerRequestRepository from "../repositories/partnerRequestRepository";
 import SlotRepository, { makeHolder, ParsedHolder, SlotRef } from "../repositories/slotRepository";
@@ -41,6 +42,8 @@ export interface AvailabilitySlotData {
   endsAt: Date;
   localTime: string;
   status: SlotStatus;
+  // Who holds the hour, for the club's own view. Only set for BOOKED and BLOCKED hours.
+  holder?: ParsedHolder;
 }
 
 const hoursOf = (occurrence: Occurrence) => (occurrence.endsAt.getTime() - occurrence.startsAt.getTime()) / HOUR_MS;
@@ -52,6 +55,7 @@ export default class BookingService {
   private clubs = new ClubRepository();
   private slots = new SlotRepository();
   private partnerRequests = new PartnerRequestRepository();
+  private blocks = new CourtBlockRepository();
 
   async clubOf(court: Court): Promise<Club | null> {
     if (!court.club || court.club === COURT_NO_CLUB) {
@@ -73,7 +77,8 @@ export default class BookingService {
       }
       return true;
     }
-    return true;
+    const block = await this.blocks.findByEntityID(holder.id);
+    return block.uuid != null && !block.deleted;
   }
 
   // The first occurrence plus the weekly ones, at the same wall-clock time in the court's zone.
@@ -255,6 +260,11 @@ export default class BookingService {
     return booking;
   }
 
+  // Who runs a court: the club's admins, the owner of a court without a club, and ADMIN.
+  async canManage(actor: AuthUser, court: Court): Promise<boolean> {
+    return this.isPrivileged(actor, court, await this.clubOf(court));
+  }
+
   // Who may cancel without the cut-off: the club's admins, the owner of a court without a club, and ADMIN.
   private async isPrivileged(actor: AuthUser, court: Court, club: Club | null): Promise<boolean> {
     return isAdmin(actor) || (club ? isClubAdmin(actor, club) : court.ownerId === actor.id);
@@ -322,12 +332,14 @@ export default class BookingService {
       hours.map(async (hour): Promise<AvailabilitySlotData> => {
         const holder = days.get(hour.toISOString().slice(0, 10))?.get(hour.getUTCHours());
         let status = SlotStatus.FREE;
+        let held: ParsedHolder | undefined;
         if (!schedule.active || !isOpenAt(schedule.openingHours, hour, schedule.timeZone)) {
           status = SlotStatus.CLOSED;
         } else if (holder) {
           const parsed = parseHolderSafe(holder);
           if (parsed && (await this.isLive(parsed))) {
             status = parsed.kind === "x" ? SlotStatus.BLOCKED : SlotStatus.BOOKED;
+            held = parsed;
           }
         }
         if (status === SlotStatus.FREE && hour.getTime() <= now().getTime()) {
@@ -338,6 +350,7 @@ export default class BookingService {
           endsAt: new Date(hour.getTime() + HOUR_MS),
           localTime: `${String(localParts(hour, schedule.timeZone).hour).padStart(2, "0")}:00`,
           status,
+          ...(held ? { holder: held } : {}),
         };
       })
     );

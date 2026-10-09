@@ -20,6 +20,8 @@ import { MatchController } from './../controller/matchController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { CourtController } from './../controller/courtController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { CourtBlockController } from './../controller/courtBlockController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ClubCourtController } from './../controller/clubCourtController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ClubController } from './../controller/clubController';
@@ -639,6 +641,38 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BlockResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "court": {"ref":"CourtSummary","required":true},
+            "startsAt": {"dataType":"string","required":true},
+            "endsAt": {"dataType":"string","required":true},
+            "reason": {"dataType":"string","required":true},
+            "createdBy": {"ref":"PlayerSummary","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CreateBlockRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "startsAt": {"dataType":"string","required":true},
+            "endsAt": {"dataType":"string","required":true},
+            "reason": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Page_BlockResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "items": {"dataType":"array","array":{"dataType":"refObject","ref":"BlockResponse"},"required":true},
+            "nextCursor": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "CourtCreateRequest": {
         "dataType": "refObject",
         "properties": {
@@ -689,6 +723,60 @@ const models: TsoaRoute.Models = {
             "latitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "longitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "courts": {"dataType":"array","array":{"dataType":"refObject","ref":"CourtResponse"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ScheduleBooking": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "player": {"ref":"PlayerSummary","required":true},
+            "paidAt": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "seriesId": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ScheduleBlock": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "reason": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ScheduleSlot": {
+        "dataType": "refObject",
+        "properties": {
+            "startsAt": {"dataType":"string","required":true},
+            "endsAt": {"dataType":"string","required":true},
+            "localTime": {"dataType":"string","required":true},
+            "status": {"ref":"SlotStatus","required":true},
+            "booking": {"dataType":"union","subSchemas":[{"ref":"ScheduleBooking"},{"dataType":"enum","enums":[null]}],"required":true},
+            "block": {"dataType":"union","subSchemas":[{"ref":"ScheduleBlock"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ScheduleCourt": {
+        "dataType": "refObject",
+        "properties": {
+            "court": {"ref":"CourtSummary","required":true},
+            "active": {"dataType":"boolean","required":true},
+            "slots": {"dataType":"array","array":{"dataType":"refObject","ref":"ScheduleSlot"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ClubScheduleResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "clubId": {"dataType":"string","required":true},
+            "date": {"dataType":"string","required":true},
+            "timeZone": {"dataType":"string","required":true},
+            "courts": {"dataType":"array","array":{"dataType":"refObject","ref":"ScheduleCourt"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -2260,6 +2348,106 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCourtBlockController_createBlock: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                courtId: {"in":"path","name":"courtId","required":true,"dataType":"string"},
+                request: {"in":"body","name":"request","required":true,"ref":"CreateBlockRequest"},
+        };
+        app.post('/v1/courts/:courtId/blocks',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CourtBlockController)),
+            ...(fetchMiddlewares<RequestHandler>(CourtBlockController.prototype.createBlock)),
+
+            async function CourtBlockController_createBlock(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCourtBlockController_createBlock, request, response });
+
+                const controller = new CourtBlockController();
+
+              await templateService.apiHandler({
+                methodName: 'createBlock',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCourtBlockController_getBlocks: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                courtId: {"in":"path","name":"courtId","required":true,"dataType":"string"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                cursor: {"in":"query","name":"cursor","dataType":"string"},
+        };
+        app.get('/v1/courts/:courtId/blocks',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CourtBlockController)),
+            ...(fetchMiddlewares<RequestHandler>(CourtBlockController.prototype.getBlocks)),
+
+            async function CourtBlockController_getBlocks(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCourtBlockController_getBlocks, request, response });
+
+                const controller = new CourtBlockController();
+
+              await templateService.apiHandler({
+                methodName: 'getBlocks',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCourtBlockController_deleteBlock: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                courtId: {"in":"path","name":"courtId","required":true,"dataType":"string"},
+                blockId: {"in":"path","name":"blockId","required":true,"dataType":"string"},
+        };
+        app.delete('/v1/courts/:courtId/blocks/:blockId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CourtBlockController)),
+            ...(fetchMiddlewares<RequestHandler>(CourtBlockController.prototype.deleteBlock)),
+
+            async function CourtBlockController_deleteBlock(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCourtBlockController_deleteBlock, request, response });
+
+                const controller = new CourtBlockController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteBlock',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsClubCourtController_getClubCourts: Record<string, TsoaRoute.ParameterSchema> = {
                 clubId: {"in":"path","name":"clubId","required":true,"dataType":"string"},
                 limit: {"in":"query","name":"limit","dataType":"double"},
@@ -2410,6 +2598,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getClub',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsClubController_getSchedule: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                date: {"in":"query","name":"date","required":true,"dataType":"string"},
+        };
+        app.get('/v1/clubs/:id/schedule',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ClubController)),
+            ...(fetchMiddlewares<RequestHandler>(ClubController.prototype.getSchedule)),
+
+            async function ClubController_getSchedule(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsClubController_getSchedule, request, response });
+
+                const controller = new ClubController();
+
+              await templateService.apiHandler({
+                methodName: 'getSchedule',
                 controller,
                 response,
                 next,
@@ -2644,6 +2865,70 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'cancelBooking',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBookingController_markPaid: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+        };
+        app.post('/v1/bookings/:id/paid',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(BookingController)),
+            ...(fetchMiddlewares<RequestHandler>(BookingController.prototype.markPaid)),
+
+            async function BookingController_markPaid(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBookingController_markPaid, request, response });
+
+                const controller = new BookingController();
+
+              await templateService.apiHandler({
+                methodName: 'markPaid',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBookingController_unmarkPaid: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+        };
+        app.delete('/v1/bookings/:id/paid',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(BookingController)),
+            ...(fetchMiddlewares<RequestHandler>(BookingController.prototype.unmarkPaid)),
+
+            async function BookingController_unmarkPaid(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBookingController_unmarkPaid, request, response });
+
+                const controller = new BookingController();
+
+              await templateService.apiHandler({
+                methodName: 'unmarkPaid',
                 controller,
                 response,
                 next,

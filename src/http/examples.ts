@@ -671,3 +671,70 @@ export const statsExample = {
   gamesWon: 121,
   gamesLost: 108,
 };
+
+export const blockExample = {
+  id: "01JBX3K7M2Q8N5R4T6V9W0YZBL",
+  court: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+    name: "Court 1",
+    surface: "CLAY",
+    clubId: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+  },
+  startsAt: "2026-11-07T08:00:00.000Z",
+  endsAt: "2026-11-07T16:00:00.000Z",
+  reason: "Club tournament",
+  createdBy: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+    nickname: "marko",
+    level: "INTERMEDIATE",
+  },
+};
+
+export const blockPageExample = {
+  items: [blockExample],
+  nextCursor: null,
+};
+
+export const clubScheduleExample = {
+  clubId: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+  date: "2026-11-07",
+  timeZone: "Europe/Belgrade",
+  courts: [
+    {
+      court: {
+        id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+        name: "Court 1",
+        surface: "CLAY",
+        clubId: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+      },
+      active: true,
+      slots: [
+        {
+          startsAt: "2026-11-07T16:00:00.000Z",
+          endsAt: "2026-11-07T17:00:00.000Z",
+          localTime: "17:00",
+          status: "BOOKED",
+          booking: {
+            id: "01JBX3K7M2Q8N5R4T6V9W0YZBK",
+            player: {
+              id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+              nickname: "marko",
+              level: "INTERMEDIATE",
+            },
+            paidAt: null,
+            seriesId: null,
+          },
+          block: null,
+        },
+        {
+          startsAt: "2026-11-07T17:00:00.000Z",
+          endsAt: "2026-11-07T18:00:00.000Z",
+          localTime: "18:00",
+          status: "FREE",
+          booking: null,
+          block: null,
+        },
+      ],
+    },
+  ],
+};

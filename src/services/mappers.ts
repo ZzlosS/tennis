@@ -1,6 +1,7 @@
 import { COURT_NO_CLUB } from "../consts";
 import { Club } from "../entities/club";
 import { Court } from "../entities/court";
+import { CourtBlock } from "../entities/courtBlock";
 import { Match } from "../entities/match";
 import { Booking } from "../entities/booking";
 import { PartnerRequest } from "../entities/partnerRequest";
@@ -14,6 +15,7 @@ import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import { parseSets } from "../repositories/matchRepository";
 import PlayerRepository from "../repositories/playerRepository";
+import BlockResponse from "../responses/blockResponse";
 import BookingResponse from "../responses/bookingResponse";
 import ClubResponse from "../responses/clubResponse";
 import { ClubSummary, CourtSummary, PlayerSummary } from "../responses/common";
@@ -178,6 +180,18 @@ export default class Mapper {
       playedAt: match.playedAt.toISOString(),
       court: this.courtSummary(court),
       club: this.clubSummary(await this.clubOf(court)),
+    };
+  }
+
+  async block(block: CourtBlock): Promise<BlockResponse> {
+    const court = await this.courts.findByEntityID(block.court);
+    return {
+      id: block.entityId,
+      court: this.courtSummary(court),
+      startsAt: block.startsAt.toISOString(),
+      endsAt: block.endsAt.toISOString(),
+      reason: block.reason ?? "",
+      createdBy: await this.playerSummary(block.createdBy),
     };
   }
 

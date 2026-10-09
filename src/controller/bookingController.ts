@@ -21,7 +21,7 @@ import { COURT_NO_CLUB } from "../consts";
 import { Booking } from "../entities/booking";
 import BookingStatus from "../enums/bookingStatus";
 import Role from "../enums/role";
-import { ForbiddenError } from "../errors/appError";
+import { ConflictError, ForbiddenError } from "../errors/appError";
 import { Page, pageOfArray } from "../http/pagination";
 import { currentUser } from "../middleware/auth";
 import { validate } from "../middleware/validate";
@@ -162,6 +162,40 @@ export class BookingController {
     const booking = await this.repository.findByIdOrThrow(id, "Booking");
     await this.assertCanAccess(user, booking);
     await this.service.cancel(user, booking, series === true);
+    return await this.mapper.booking(await this.repository.findByIdOrThrow(id, "Booking"));
+  }
+
+  /**
+   * Notes that the player paid at the club. This is only a note for the club's books; the app takes no payments.
+   * For the club's admins, the owner of a court without a club and ADMINs. Marking twice does nothing.
+   */
+  @Example(bookingExample)
+  @Response<ErrorBody>(409, "CONFLICT")
+  @Post("/{id}/paid")
+  async markPaid(@Request() req: ExRequest, @Path() id: string): Promise<BookingResponse> {
+    return await this.setPaid(currentUser(req), id, true);
+  }
+
+  /** Takes the paid note off again. */
+  @Example(bookingExample)
+  @Response<ErrorBody>(409, "CONFLICT")
+  @Delete("/{id}/paid")
+  async unmarkPaid(@Request() req: ExRequest, @Path() id: string): Promise<BookingResponse> {
+    return await this.setPaid(currentUser(req), id, false);
+  }
+
+  private async setPaid(user: AuthUser, id: string, paid: boolean): Promise<BookingResponse> {
+    const booking = await this.repository.findByIdOrThrow(id, "Booking");
+    const court = await this.courtRepository.findByEntityID(booking.court);
+    if (!(await this.service.canManage(user, court))) {
+      throw new ForbiddenError();
+    }
+    if (booking.status !== BookingStatus.CONFIRMED) {
+      throw new ConflictError("Only a confirmed booking can be marked as paid");
+    }
+    if (paid !== Boolean(booking.paidAt)) {
+      await this.repository.setPaid(booking, paid);
+    }
     return await this.mapper.booking(await this.repository.findByIdOrThrow(id, "Booking"));
   }
 

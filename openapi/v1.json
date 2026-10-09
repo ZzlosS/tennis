@@ -1568,6 +1568,77 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"BlockResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"court": {
+						"$ref": "#/components/schemas/CourtSummary"
+					},
+					"startsAt": {
+						"type": "string"
+					},
+					"endsAt": {
+						"type": "string"
+					},
+					"reason": {
+						"type": "string"
+					},
+					"createdBy": {
+						"$ref": "#/components/schemas/PlayerSummary"
+					}
+				},
+				"required": [
+					"id",
+					"court",
+					"startsAt",
+					"endsAt",
+					"reason",
+					"createdBy"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateBlockRequest": {
+				"properties": {
+					"startsAt": {
+						"type": "string"
+					},
+					"endsAt": {
+						"type": "string"
+					},
+					"reason": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"startsAt",
+					"endsAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Page_BlockResponse_": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/BlockResponse"
+						},
+						"type": "array"
+					},
+					"nextCursor": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"items",
+					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CourtCreateRequest": {
 				"properties": {
 					"name": {
@@ -1725,6 +1796,140 @@
 					"seasonEndsOn",
 					"latitude",
 					"longitude",
+					"courts"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ScheduleBooking": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"player": {
+						"$ref": "#/components/schemas/PlayerSummary"
+					},
+					"paidAt": {
+						"type": "string",
+						"nullable": true
+					},
+					"seriesId": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"player",
+					"paidAt",
+					"seriesId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ScheduleBlock": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"reason": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"reason"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ScheduleSlot": {
+				"properties": {
+					"startsAt": {
+						"type": "string"
+					},
+					"endsAt": {
+						"type": "string"
+					},
+					"localTime": {
+						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/SlotStatus"
+					},
+					"booking": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ScheduleBooking"
+							}
+						],
+						"nullable": true
+					},
+					"block": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ScheduleBlock"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"startsAt",
+					"endsAt",
+					"localTime",
+					"status",
+					"booking",
+					"block"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ScheduleCourt": {
+				"properties": {
+					"court": {
+						"$ref": "#/components/schemas/CourtSummary"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"slots": {
+						"items": {
+							"$ref": "#/components/schemas/ScheduleSlot"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"court",
+					"active",
+					"slots"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ClubScheduleResponse": {
+				"properties": {
+					"clubId": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"courts": {
+						"items": {
+							"$ref": "#/components/schemas/ScheduleCourt"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"clubId",
+					"date",
+					"timeZone",
 					"courts"
 				],
 				"type": "object",
@@ -7469,6 +7674,349 @@
 				}
 			}
 		},
+		"/courts/{courtId}/blocks": {
+			"post": {
+				"operationId": "CreateBlock",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BlockResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZBL",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+												"name": "Court 1",
+												"surface": "CLAY",
+												"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+											},
+											"startsAt": "2026-11-07T08:00:00.000Z",
+											"endsAt": "2026-11-07T16:00:00.000Z",
+											"reason": "Club tournament",
+											"createdBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "SLOT_TAKEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Keeps the hours free. If some of them are already booked or blocked the answer is 409 SLOT_TAKEN and\n`fields.slots` lists them; cancel those bookings first.",
+				"tags": [
+					"Court blocks"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "courtId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateBlockRequest"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetBlocks",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Page_BlockResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"items": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZBL",
+													"court": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+														"name": "Court 1",
+														"surface": "CLAY",
+														"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+													},
+													"startsAt": "2026-11-07T08:00:00.000Z",
+													"endsAt": "2026-11-07T16:00:00.000Z",
+													"reason": "Club tournament",
+													"createdBy": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+														"nickname": "marko",
+														"level": "INTERMEDIATE"
+													}
+												}
+											],
+											"nextCursor": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "The court's blocks that have not ended yet, soonest first.",
+				"tags": [
+					"Court blocks"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "courtId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Page size, 1 to 100. Default 20.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The nextCursor of the previous page.",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/courts/{courtId}/blocks/{blockId}": {
+			"delete": {
+				"operationId": "DeleteBlock",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Frees the hours again.",
+				"tags": [
+					"Court blocks"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "courtId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "blockId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/clubs/{clubId}/courts": {
 			"get": {
 				"operationId": "GetClubCourts",
@@ -8498,6 +9046,148 @@
 				]
 			}
 		},
+		"/clubs/{id}/schedule": {
+			"get": {
+				"operationId": "GetSchedule",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ClubScheduleResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+											"date": "2026-11-07",
+											"timeZone": "Europe/Belgrade",
+											"courts": [
+												{
+													"court": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+														"name": "Court 1",
+														"surface": "CLAY",
+														"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+													},
+													"active": true,
+													"slots": [
+														{
+															"startsAt": "2026-11-07T16:00:00.000Z",
+															"endsAt": "2026-11-07T17:00:00.000Z",
+															"localTime": "17:00",
+															"status": "BOOKED",
+															"booking": {
+																"id": "01JBX3K7M2Q8N5R4T6V9W0YZBK",
+																"player": {
+																	"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+																	"nickname": "marko",
+																	"level": "INTERMEDIATE"
+																},
+																"paidAt": null,
+																"seriesId": null
+															},
+															"block": null
+														},
+														{
+															"startsAt": "2026-11-07T17:00:00.000Z",
+															"endsAt": "2026-11-07T18:00:00.000Z",
+															"localTime": "18:00",
+															"status": "FREE",
+															"booking": null,
+															"block": null
+														}
+													]
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "One day of the club, hour by hour on every court, with who booked each hour and whether it was paid.\nFor the club's admins.",
+				"tags": [
+					"Clubs"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The day in the club's time zone, \"YYYY-MM-DD\".",
+						"in": "query",
+						"name": "date",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/bookings": {
 			"post": {
 				"operationId": "CreateBooking",
@@ -9277,6 +9967,262 @@
 						"required": false,
 						"schema": {
 							"type": "boolean"
+						}
+					}
+				]
+			}
+		},
+		"/bookings/{id}/paid": {
+			"post": {
+				"operationId": "MarkPaid",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BookingResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZKL",
+											"startsAt": "2026-11-01T16:00:00.000Z",
+											"endsAt": "2026-11-01T18:00:00.000Z",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+												"name": "Court 1",
+												"surface": "CLAY",
+												"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"player": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"totalPrice": {
+												"amountMinor": 360000,
+												"currency": "RSD"
+											},
+											"bookingType": "ONE_TIME",
+											"status": "CONFIRMED",
+											"seriesId": null,
+											"paidAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "CONFLICT",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Notes that the player paid at the club. This is only a note for the club's books; the app takes no payments.\nFor the club's admins, the owner of a court without a club and ADMINs. Marking twice does nothing.",
+				"tags": [
+					"Bookings"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "UnmarkPaid",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BookingResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZKL",
+											"startsAt": "2026-11-01T16:00:00.000Z",
+											"endsAt": "2026-11-01T18:00:00.000Z",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+												"name": "Court 1",
+												"surface": "CLAY",
+												"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"player": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"totalPrice": {
+												"amountMinor": 360000,
+												"currency": "RSD"
+											},
+											"bookingType": "ONE_TIME",
+											"status": "CONFIRMED",
+											"seriesId": null,
+											"paidAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "CONFLICT",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Takes the paid note off again.",
+				"tags": [
+					"Bookings"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]
