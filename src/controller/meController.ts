@@ -26,7 +26,7 @@ import {
   statsExample,
 } from "../http/examples";
 import BookingWhen from "../enums/bookingWhen";
-import AppError from "../errors/appError";
+import AppError, { ConflictError } from "../errors/appError";
 import { ErrorCode } from "../errors/codes";
 import HandoverStatus from "../enums/handoverStatus";
 import MatchStatus from "../enums/matchStatus";
@@ -52,6 +52,7 @@ import MatchResponse from "../responses/matchResponse";
 import MeResponse from "../responses/meResponse";
 import StatsResponse from "../responses/statsResponse";
 import AccountService from "../services/accountService";
+import EmailAccountService from "../services/emailAccountService";
 import { now } from "../services/clock";
 import Mapper from "../services/mappers";
 import StatsService from "../services/statsService";
@@ -74,6 +75,7 @@ export class MeController {
   private courts = new CourtRepository();
   private clubs = new ClubRepository();
   private accounts = new AccountService();
+  private emails = new EmailAccountService();
   private handovers = new CourtHandoverRepository();
   private matches = new MatchRepository();
   private stats = new StatsService();
@@ -92,6 +94,21 @@ export class MeController {
     const { id } = currentUser(req);
     await this.players.updatePlayer(id, updateRequest);
     return this.mapper.me(await this.players.findByIdOrThrow(id, "Player"));
+  }
+
+  /**
+   * Sends the email with the link that confirms the address again. Asking twice within a minute gives 429.
+   * Already confirmed gives 409.
+   */
+  @SuccessResponse(204, "Sent")
+  @Response<ErrorBody>(409, "CONFLICT")
+  @Post("/verify-email")
+  async resendVerification(@Request() req: ExRequest, @Query() language?: "en" | "sr"): Promise<void> {
+    const player = await this.players.findByIdOrThrow(currentUser(req).id, "Player");
+    if (player.emailVerifiedAt) {
+      throw new ConflictError("This email address is already confirmed");
+    }
+    await this.emails.sendVerification(player, language ?? "en", true);
   }
 
   /**

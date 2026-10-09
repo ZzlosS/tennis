@@ -715,6 +715,9 @@
 					},
 					"role": {
 						"$ref": "#/components/schemas/Role"
+					},
+					"emailVerified": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -727,7 +730,8 @@
 					"city",
 					"country",
 					"email",
-					"role"
+					"role",
+					"emailVerified"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -2132,6 +2136,13 @@
 					},
 					"country": {
 						"type": "string"
+					},
+					"language": {
+						"type": "string",
+						"enum": [
+							"en",
+							"sr"
+						]
 					}
 				},
 				"required": [
@@ -2171,6 +2182,53 @@
 				},
 				"required": [
 					"refreshToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ForgotPasswordRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"language": {
+						"type": "string",
+						"enum": [
+							"en",
+							"sr"
+						]
+					}
+				},
+				"required": [
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResetPasswordRequest": {
+				"properties": {
+					"token": {
+						"type": "string"
+					},
+					"newPassword": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token",
+					"newPassword"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenRequest": {
+				"properties": {
+					"token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -4587,6 +4645,7 @@
 											"level": "INTERMEDIATE",
 											"email": "marko@example.com",
 											"role": "PLAYER",
+											"emailVerified": true,
 											"address": "Knez Mihailova 5",
 											"city": "Belgrade",
 											"country": "Serbia"
@@ -4667,6 +4726,7 @@
 											"level": "INTERMEDIATE",
 											"email": "marko@example.com",
 											"role": "PLAYER",
+											"emailVerified": true,
 											"address": "Knez Mihailova 5",
 											"city": "Belgrade",
 											"country": "Serbia"
@@ -4804,6 +4864,89 @@
 						}
 					}
 				}
+			}
+		},
+		"/me/verify-email": {
+			"post": {
+				"operationId": "ResendVerification",
+				"responses": {
+					"204": {
+						"description": "Sent"
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "CONFLICT",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Sends the email with the link that confirms the address again. Asking twice within a minute gives 429.\nAlready confirmed gives 409.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "language",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"en",
+								"sr"
+							]
+						}
+					}
+				]
 			}
 		},
 		"/me/password": {
@@ -11273,6 +11416,144 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/RefreshRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/forgot-password": {
+			"post": {
+				"operationId": "ForgotPassword",
+				"responses": {
+					"204": {
+						"description": "Done"
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Emails a link to choose a new password, which works once for an hour. The answer is always 204, whether or not\nthe email belongs to a player, so the route cannot be used to find out who has an account. Asking again within\na minute sends nothing new.",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ForgotPasswordRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/reset-password": {
+			"post": {
+				"operationId": "ResetPassword",
+				"responses": {
+					"204": {
+						"description": "Password changed"
+					},
+					"400": {
+						"description": "TOKEN_INVALID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Sets the new password with the token from the email. Every session of the player ends; they log in again.",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ResetPasswordRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/verify-email": {
+			"post": {
+				"operationId": "VerifyEmail",
+				"responses": {
+					"204": {
+						"description": "Email confirmed"
+					},
+					"400": {
+						"description": "TOKEN_INVALID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Confirms the email address with the token from the email.",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TokenRequest"
 							}
 						}
 					}

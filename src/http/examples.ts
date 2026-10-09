@@ -628,6 +628,7 @@ export const meExample = {
   level: "INTERMEDIATE",
   email: "marko@example.com",
   role: "PLAYER",
+  emailVerified: true,
   address: "Knez Mihailova 5",
   city: "Belgrade",
   country: "Serbia",

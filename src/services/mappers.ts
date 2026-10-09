@@ -135,6 +135,7 @@ export default class Mapper {
       ...this.player(player, { id: player.entityId, role: player.role }),
       email: player.email,
       role: player.role,
+      emailVerified: Boolean(player.emailVerifiedAt),
     };
   }
 

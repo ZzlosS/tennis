@@ -2,6 +2,8 @@ import { z } from "zod";
 import PlayerLevel from "../enums/playerLevel";
 import { email, optionalText, text } from "./common";
 
+const language = z.enum(["en", "sr"]);
+
 export const registerBody = z.object({
   firstName: text(100),
   lastName: text(100),
@@ -13,6 +15,7 @@ export const registerBody = z.object({
   address: optionalText(),
   city: optionalText(100),
   country: optionalText(100),
+  language: language.optional(),
 });
 
 export const loginBody = z.object({
@@ -41,4 +44,18 @@ export const changePasswordBody = z.object({
 
 export const deleteAccountBody = z.object({
   password: z.string().min(1).max(200),
+});
+
+export const forgotPasswordBody = z.object({
+  email,
+  language: language.optional(),
+});
+
+export const resetPasswordBody = z.object({
+  token: z.string().min(1).max(200),
+  newPassword: z.string().min(8).max(72),
+});
+
+export const tokenBody = z.object({
+  token: z.string().min(1).max(200),
 });

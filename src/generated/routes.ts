@@ -321,6 +321,7 @@ const models: TsoaRoute.Models = {
             "city": {"dataType":"string","required":true},
             "country": {"dataType":"string","required":true},
             "role": {"ref":"Role","required":true},
+            "emailVerified": {"dataType":"boolean","required":true},
         },
         "additionalProperties": false,
     },
@@ -873,6 +874,7 @@ const models: TsoaRoute.Models = {
             "address": {"dataType":"string","required":true},
             "city": {"dataType":"string","required":true},
             "country": {"dataType":"string","required":true},
+            "language": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["en"]},{"dataType":"enum","enums":["sr"]}]},
         },
         "additionalProperties": false,
     },
@@ -890,6 +892,32 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "refreshToken": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ForgotPasswordRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "email": {"dataType":"string","required":true},
+            "language": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["en"]},{"dataType":"enum","enums":["sr"]}]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResetPasswordRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "token": {"dataType":"string","required":true},
+            "newPassword": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TokenRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "token": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -1653,6 +1681,38 @@ export function RegisterRoutes(app: Router) {
                 next,
                 validatedArgs,
                 successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsMeController_resendVerification: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                language: {"in":"query","name":"language","dataType":"union","subSchemas":[{"dataType":"enum","enums":["en"]},{"dataType":"enum","enums":["sr"]}]},
+        };
+        app.post('/v1/me/verify-email',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(MeController)),
+            ...(fetchMiddlewares<RequestHandler>(MeController.prototype.resendVerification)),
+
+            async function MeController_resendVerification(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsMeController_resendVerification, request, response });
+
+                const controller = new MeController();
+
+              await templateService.apiHandler({
+                methodName: 'resendVerification',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 204,
               });
             } catch (err) {
                 return next(err);
@@ -3281,6 +3341,96 @@ export function RegisterRoutes(app: Router) {
                 next,
                 validatedArgs,
                 successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_forgotPassword: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"body","name":"request","required":true,"ref":"ForgotPasswordRequest"},
+        };
+        app.post('/v1/auth/forgot-password',
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.forgotPassword)),
+
+            async function AuthController_forgotPassword(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_forgotPassword, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'forgotPassword',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 204,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_resetPassword: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"body","name":"request","required":true,"ref":"ResetPasswordRequest"},
+        };
+        app.post('/v1/auth/reset-password',
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.resetPassword)),
+
+            async function AuthController_resetPassword(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_resetPassword, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'resetPassword',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 204,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAuthController_verifyEmail: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"body","name":"request","required":true,"ref":"TokenRequest"},
+        };
+        app.post('/v1/auth/verify-email',
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.verifyEmail)),
+
+            async function AuthController_verifyEmail(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAuthController_verifyEmail, request, response });
+
+                const controller = new AuthController();
+
+              await templateService.apiHandler({
+                methodName: 'verifyEmail',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 204,
               });
             } catch (err) {
                 return next(err);
