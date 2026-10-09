@@ -30,3 +30,35 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      # Also generates the Swagger spec, which fails if a controller type cannot be resolved.
+      - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t tennis-api .
+      - name: Start the image with Redis and wait for /health
+        run: |
+          docker network create tennis
+          docker run -d --name redis --network tennis redis/redis-stack-server:7.4.0-v3
+          docker run -d --name api --network tennis -p 8787:8787 \
+            -e REDIS_URL=redis://redis:6379 \
+            -e JWT_SECRET=ci-secret-ci-secret-ci-secret-ci-secret-1234 \
+            tennis-api
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8787/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs api
+          exit 1
+      - name: Check the container reports healthy
+        run: |
+          for i in $(seq 1 20); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' api)
+            echo "health: $status"
+            if [ "$status" = "healthy" ]; then exit 0; fi
+            sleep 3
+          done
+          docker logs api
+          exit 1
