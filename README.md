@@ -104,7 +104,7 @@ A court has opening hours and a time zone (a club court follows its club unless 
 - A booking is whole hours, in the future, inside opening hours and at most 90 days ahead. `MONTH` makes four weekly bookings, `SEASON` weekly bookings up to the club's `seasonEndsOn` (12 weeks if not set). Weekly repeats keep the same wall-clock time across daylight saving changes. They share a `seriesId`.
 - Two people can never hold the same hour: all the hours of a request are taken or none, and the answer is `409 SLOT_TAKEN` with `fields.slots` listing the hours that clash. This holds under parallel requests (see Redis design below).
 - A player can cancel until the club's `cancelCutoffHours` before the start (24 by default) with `POST /bookings/{id}/cancel`; with `?series=true` the later bookings of the series go too. Club admins, the owner of a court without a club and `ADMIN`s can always cancel. Cancelled bookings stay (status `CANCELLED`) and free their hours.
-- `GET /me/bookings?when=upcoming|past` is a player's own list. Club admins see a whole day of their club with `GET /clubs/{id}/schedule?date=` (who booked each hour and whether it was marked paid), mark a booking as paid at the club with `POST /bookings/{id}/paid` (a note only, the app takes no payments), and keep hours free with `POST /courts/{id}/blocks`.
+- `GET /me/bookings?when=upcoming|past` is a player's own list; each booking carries a short `partnerRequest` (places left, open or full) when the player is looking for partners. `GET /me/partner-requests?role=created|joined&when=upcoming|past` lists the requests a player made or joined. Club admins see a whole day of their club with `GET /clubs/{id}/schedule?date=` (who booked each hour and whether it was marked paid), mark a booking as paid at the club with `POST /bookings/{id}/paid` (a note only, the app takes no payments), and keep hours free with `POST /courts/{id}/blocks`.
 
 ### Map
 
@@ -160,13 +160,13 @@ In the Docker image use `node build/scripts/grantRole.js` with the same argument
 
 ## Push notifications
 
-The app registers its Expo push token with `POST /me/devices` (on every start) and removes it with `DELETE /me/devices` (on logout). The API sends through [Expo](https://docs.expo.dev/push-notifications/overview/) for: a booking reminder (`REMINDER_HOURS_BEFORE` before the start), a booking cancelled by someone else, someone joining a partner request, a match score to confirm, confirmed or disputed, and court handover requests and answers. Text is in the player's language and every notification carries `data.type` and an id for opening the right screen. Reminders run from a sorted set that the server checks every minute, so run one server process or accept that several share the work safely. Tokens Expo reports as gone are dropped. Building the app needs an Expo account; the API works without one.
+The app registers its Expo push token with `POST /me/devices` (on every start) and removes it with `DELETE /me/devices` (on logout). The API sends through [Expo](https://docs.expo.dev/push-notifications/overview/) for: a booking reminder (`REMINDER_HOURS_BEFORE` before the start), a booking cancelled by someone else, someone joining a partner request, a match score to confirm, confirmed or disputed, and court handover requests and answers. Text is in the player's language and every notification carries `data.type` and an id for opening the right screen. Reminders run from a sorted set that the server checks every minute, so run one server process or accept that several share the work safely. Tokens Expo reports as gone are dropped. Each notification is also kept in the player's inbox, with or without a phone: `GET /me/notifications` lists the last 50 newest first, `GET /me/notifications/unread` counts the new ones and `POST /me/notifications/read` marks them all read (a Redis list per player, trimmed on every write). Building the app needs an Expo account; the API works without one.
 
 ## Operations
 
 - **Rate limit:** a Redis counter per client and minute (the token, else the IP). Over the limit the answer is `429 RATE_LIMITED` with `Retry-After`. If Redis fails the request goes through.
 - **Logging:** one JSON line per request (method, path without the query string, status, time, request id, player id) through pino. Every response has an `X-Request-Id` header; send your own to trace a call. Passwords, tokens and bodies are never logged.
-- **Redis design:** each court has one hash per UTC day (`slots:{courtId}:YYYY-MM-DD`, field = hour, value = who holds it) that a Lua script claims all-or-nothing; the map is a GEO set (`geo:places`); player stats are hashes (`stats:<playerId>`); partner request join/leave, match answers and handover answers are Lua scripts on the stored JSON; reminders are a sorted set; rate limits, reset tokens (stored hashed) and devices are plain keys. No data needs migrating between versions of this release because there was no data before it.
+- **Redis design:** each court has one hash per UTC day (`slots:{courtId}:YYYY-MM-DD`, field = hour, value = who holds it) that a Lua script claims all-or-nothing; the map is a GEO set (`geo:places`); player stats are hashes (`stats:<playerId>`); partner request join/leave, match answers and handover answers are Lua scripts on the stored JSON; reminders are a sorted set; rate limits, reset tokens (stored hashed) and devices are plain keys; the notification inbox is a capped list per player. Players are found by name through a full-text field (`searchName`) in the RediSearch index. No data needs migrating between versions of this release because there was no data before it.
 
 ## Errors
 
@@ -203,9 +203,9 @@ Every error has one shape. The app translates by `code`, so the API stays langua
 | Resource | Routes |
 | --- | --- |
 | Auth `/v1/auth` | `POST /register`, `POST /login`, `POST /refresh`, `POST /logout`, `POST /forgot-password`, `POST /reset-password`, `POST /verify-email` |
-| Me `/v1/me` | `GET /`, `PATCH /`, `DELETE /`, `POST /password`, `POST /verify-email`, `GET /courts`, `GET /clubs`, `GET /bookings`, `GET /matches`, `GET /stats`, `GET /court-handovers`, `POST /devices`, `DELETE /devices` |
+| Me `/v1/me` | `GET /`, `PATCH /`, `DELETE /`, `POST /password`, `POST /verify-email`, `GET /courts`, `GET /clubs`, `GET /bookings`, `GET /matches`, `GET /stats`, `GET /court-handovers`, `GET /partner-requests` (`role`, `when`), `POST /devices`, `DELETE /devices`, `GET /notifications`, `GET /notifications/unread`, `POST /notifications/read` |
 | Places `/v1/places` | `GET /` (around a point) |
-| Players `/v1/players` | `GET /`, `GET /{id}`, `GET /{id}/stats`, `PATCH /{id}`, `DELETE /{id}` |
+| Players `/v1/players` | `GET /` (`q`, `city`, `level`), `GET /{id}`, `GET /{id}/stats`, `PATCH /{id}`, `DELETE /{id}` |
 | Player rackets `/v1/players/{playerId}/rackets` | `GET /`, `PUT /{racketId}`, `DELETE /{racketId}` |
 | Rackets `/v1/rackets` | `GET /`, `POST /`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}` |
 | Clubs `/v1/clubs` | `GET /`, `POST /`, `GET /{id}`, `GET /{id}/schedule`, `PATCH /{id}`, `DELETE /{id}` |

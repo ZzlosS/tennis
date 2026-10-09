@@ -47,6 +47,12 @@ export const bookingExample = {
   status: "CONFIRMED",
   seriesId: null,
   paidAt: null,
+  partnerRequest: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZPR",
+    playersNeeded: 1,
+    spotsLeft: 0,
+    status: "CLOSED",
+  },
 };
 
 export const bookingPageExample = {
@@ -79,6 +85,7 @@ export const bookingPageExample = {
       status: "CONFIRMED",
       seriesId: null,
       paidAt: null,
+      partnerRequest: null,
     },
   ],
   nextCursor: null,
@@ -767,4 +774,23 @@ export const handoverExample = {
 export const handoverPageExample = {
   items: [handoverExample],
   nextCursor: null,
+};
+
+export const notificationPageExample = {
+  items: [
+    {
+      id: "6f1c2b9e-3d4a-4c1b-9a7e-2f5d8c0b1a23",
+      type: "PARTNER_JOINED",
+      title: "Someone joined you",
+      body: "ana will play with you on Sat 1 Nov, 17:00",
+      data: { requestId: "01JBX3K7M2Q8N5R4T6V9W0YZMN" },
+      createdAt: "2026-10-30T12:15:00.000Z",
+      read: false,
+    },
+  ],
+  nextCursor: null,
+};
+
+export const unreadCountExample = {
+  count: 1,
 };

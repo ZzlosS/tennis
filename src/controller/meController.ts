@@ -23,13 +23,17 @@ import {
   handoverPageExample,
   matchPageExample,
   meExample,
+  notificationPageExample,
+  partnerRequestPageExample,
   statsExample,
+  unreadCountExample,
 } from "../http/examples";
 import BookingWhen from "../enums/bookingWhen";
 import AppError, { ConflictError } from "../errors/appError";
 import { ErrorCode } from "../errors/codes";
 import HandoverStatus from "../enums/handoverStatus";
 import MatchStatus from "../enums/matchStatus";
+import PartnerRole from "../enums/partnerRole";
 import { Page, pageOfArray } from "../http/pagination";
 import { currentUser } from "../middleware/auth";
 import { validate } from "../middleware/validate";
@@ -38,6 +42,7 @@ import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import CourtHandoverRepository from "../repositories/courtHandoverRepository";
 import MatchRepository from "../repositories/matchRepository";
+import PartnerRequestRepository from "../repositories/partnerRequestRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import ChangePasswordRequest from "../requests/changePasswordRequest";
 import DeleteAccountRequest from "../requests/deleteAccountRequest";
@@ -50,6 +55,8 @@ import CourtResponse from "../responses/courtResponse";
 import HandoverResponse from "../responses/handoverResponse";
 import MatchResponse from "../responses/matchResponse";
 import MeResponse from "../responses/meResponse";
+import NotificationResponse, { UnreadCountResponse } from "../responses/notificationResponse";
+import PartnerRequestResponse from "../responses/partnerRequestResponse";
 import StatsResponse from "../responses/statsResponse";
 import AccountService from "../services/accountService";
 import EmailAccountService from "../services/emailAccountService";
@@ -62,6 +69,7 @@ import { revokeAllRefreshTokens } from "../services/tokenService";
 import { changePasswordBody, deleteAccountBody, deviceBody, updatePlayerBody } from "../validation/auth";
 import DeviceRequest from "../requests/deviceRequest";
 import { registerDevice, unregisterDevice } from "../services/deviceService";
+import { inboxOf, inboxReadAt, markInboxRead } from "../services/inboxService";
 
 // Everything about the logged-in player. The player always comes from the token.
 @Tags("Me")
@@ -80,6 +88,7 @@ export class MeController {
   private emails = new EmailAccountService();
   private handovers = new CourtHandoverRepository();
   private matches = new MatchRepository();
+  private partnerRequests = new PartnerRequestRepository();
   private stats = new StatsService();
   private mapper = new Mapper();
 
@@ -273,5 +282,73 @@ export class MeController {
       { field: "startsAt", descending: past }
     );
     return { items: await Promise.all(entities.map((booking) => this.mapper.booking(booking))), nextCursor };
+  }
+
+  /**
+   * Partner requests the player made or joined, open and full ones. Upcoming ones (booking not started) come
+   * soonest first, past ones newest first.
+   * @param role `created` for the player's own requests, `joined` for those they joined. Both when left out.
+   * @param when `upcoming` (default) or `past`.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(partnerRequestPageExample)
+  @Get("/partner-requests")
+  async getMyPartnerRequests(
+    @Request() req: ExRequest,
+    @Query() role?: PartnerRole,
+    @Query() when?: BookingWhen,
+    @Query() limit?: number,
+    @Query() cursor?: string
+  ): Promise<Page<PartnerRequestResponse>> {
+    const requests = await this.partnerRequests.findForPlayer(currentUser(req).id, {
+      role,
+      past: when === BookingWhen.PAST,
+      now: now().getTime(),
+    });
+    return await pageOfArray(requests, { limit, cursor }, async (request) =>
+      this.mapper.partnerRequest(request, await this.bookings.findByEntityID(request.bookingId))
+    );
+  }
+
+  /**
+   * The notifications the player was sent, newest first; the last 50 are kept.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(notificationPageExample)
+  @Get("/notifications")
+  async getMyNotifications(
+    @Request() req: ExRequest,
+    @Query() limit?: number,
+    @Query() cursor?: string
+  ): Promise<Page<NotificationResponse>> {
+    const playerId = currentUser(req).id;
+    const readAt = await inboxReadAt(playerId);
+    return await pageOfArray(await inboxOf(playerId), { limit, cursor }, (item) => ({
+      id: item.id,
+      type: item.type,
+      title: item.title,
+      body: item.body,
+      data: item.data ?? {},
+      createdAt: new Date(item.createdAt).toISOString(),
+      read: item.createdAt <= readAt,
+    }));
+  }
+
+  /** How many notifications arrived since the player last marked the list as read. */
+  @Example(unreadCountExample)
+  @Get("/notifications/unread")
+  async getMyUnreadCount(@Request() req: ExRequest): Promise<UnreadCountResponse> {
+    const playerId = currentUser(req).id;
+    const readAt = await inboxReadAt(playerId);
+    return { count: (await inboxOf(playerId)).filter((item) => item.createdAt > readAt).length };
+  }
+
+  /** Marks every notification sent so far as read. */
+  @SuccessResponse(204, "Marked")
+  @Post("/notifications/read")
+  async markMyNotificationsRead(@Request() req: ExRequest): Promise<void> {
+    await markInboxRead(currentUser(req).id, now().getTime());
   }
 }

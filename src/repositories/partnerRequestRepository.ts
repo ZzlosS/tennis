@@ -103,6 +103,23 @@ export default class PartnerRequestRepository extends BaseRepository<PartnerRequ
     );
   }
 
+  // Requests a player made or joined. Upcoming ones (booking not started) soonest first, past ones newest first.
+  async findForPlayer(playerId: string, options: { role?: "created" | "joined"; past: boolean; now: number }) {
+    const found = await this.findAllMatching((search) => {
+      if (options.role === "created") {
+        return search.where("playerId").equals(playerId);
+      }
+      if (options.role === "joined") {
+        return search.where("joinedBy").contains(playerId);
+      }
+      return search.where((group) => group.where("playerId").equals(playerId).or("joinedBy").contains(playerId));
+    });
+    const chosen = found.filter((request) =>
+      options.past ? request.startsAt <= options.now : request.startsAt > options.now
+    );
+    return chosen.sort((a, b) => (options.past ? b.startsAt - a.startsAt : a.startsAt - b.startsAt));
+  }
+
   // A booking that is cancelled takes the requests for it with it.
   async deleteForBooking(bookingId: string) {
     for (const request of await this.findAllByField(bookingId, "bookingId")) {

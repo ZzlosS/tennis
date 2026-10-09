@@ -15,10 +15,11 @@ import { toMoney } from "../http/money";
 import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import { parseSets } from "../repositories/matchRepository";
+import PartnerRequestRepository from "../repositories/partnerRequestRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import HandoverResponse from "../responses/handoverResponse";
 import BlockResponse from "../responses/blockResponse";
-import BookingResponse from "../responses/bookingResponse";
+import BookingResponse, { BookingPartnerInfo } from "../responses/bookingResponse";
 import ClubResponse from "../responses/clubResponse";
 import { ClubSummary, CourtSummary, PlayerSummary } from "../responses/common";
 import CourtResponse from "../responses/courtResponse";
@@ -44,6 +45,7 @@ export default class Mapper {
   private players = new PlayerRepository();
   private clubs = new ClubRepository();
   private courts = new CourtRepository();
+  private partnerRequests = new PartnerRequestRepository();
 
   async playerSummary(playerId: string): Promise<PlayerSummary> {
     const player = await this.players.findByEntityID(playerId);
@@ -174,6 +176,20 @@ export default class Mapper {
       status: booking.status ?? BookingStatus.CONFIRMED,
       seriesId: booking.seriesId || null,
       paidAt: booking.paidAt ? new Date(booking.paidAt).toISOString() : null,
+      partnerRequest: await this.bookingPartnerInfo(booking.entityId),
+    };
+  }
+
+  private async bookingPartnerInfo(bookingId: string): Promise<BookingPartnerInfo | null> {
+    const request = await this.partnerRequests.findFirstByField(bookingId, "bookingId");
+    if (!request) {
+      return null;
+    }
+    return {
+      id: request.entityId,
+      playersNeeded: request.playersNeeded,
+      spotsLeft: Math.max(0, request.playersNeeded - (request.joinedBy ?? []).length),
+      status: request.active ? RequestStatus.OPEN : RequestStatus.CLOSED,
     };
   }
 
