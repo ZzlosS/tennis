@@ -94,10 +94,10 @@ redis.call('JSON.SET', KEYS[1], '$.active', 'true')
 return 'OK'
 `);
 
-// Moves a match from one status to another, only if it is still in the first one, so two players answering at
-// the same moment cannot both win. KEYS[1]: the match's JSON key. ARGV: from status, to status.
+// Moves a record kept as JSON (a match, a court handover) from one status to another, only if it is still in the
+// first one, so two people answering at the same moment cannot both win. KEYS[1]: the record's JSON key. ARGV: from status, to status.
 // Replies "OK", "WRONG_STATUS" or "MISSING".
-export const moveMatchStatus = define(`
+export const moveStatus = define(`
 local raw = redis.call('JSON.GET', KEYS[1], '$')
 if not raw then return 'MISSING' end
 local doc = cjson.decode(raw)[1]

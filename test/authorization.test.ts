@@ -295,19 +295,33 @@ describe("courts without a club", () => {
     await api().delete(`/courts/${id}`).set(bearer(w.playerA.token)).expect(204);
   });
 
-  it("lets the owner hand it over to a club, which then manages it", async () => {
+  it("lets the owner hand it over to a club once the club accepts, and the club then manages it", async () => {
     const id = await createLooseCourt(w.playerA.token);
-    await api().post(`/courts/${id}/assign`).set(bearer(w.playerB.token)).send({ clubId: w.clubA }).expect(403);
-    await api().post(`/courts/${id}/assign`).set(bearer(w.playerA.token)).send({ clubId: "missing" }).expect(404);
+    const ask = (token: string, clubId: string) =>
+      api().post(`/courts/${id}/handover`).set(bearer(token)).send({ clubId });
+    await ask(w.playerB.token, w.clubA).expect(403);
+    await ask(w.playerA.token, "missing").expect(404);
 
-    const assigned = await api()
-      .post(`/courts/${id}/assign`)
-      .set(bearer(w.playerA.token))
-      .send({ clubId: w.clubA })
+    const requested = await ask(w.playerA.token, w.clubA).expect(201);
+    expect(requested.body.status).toBe("PENDING");
+    // Nothing changes until the club answers.
+    expect((await api().get(`/courts/${id}`).set(bearer(w.playerA.token))).body.kind).toBe("PUBLIC");
+    const again = await ask(w.playerA.token, w.clubB).expect(409);
+    expect(again.body.error.code).toBe("HANDOVER_PENDING");
+
+    const handover = requested.body.id;
+    await api().post(`/court-handovers/${handover}/accept`).set(bearer(w.playerA.token)).expect(403);
+    await api().post(`/court-handovers/${handover}/accept`).set(bearer(w.clubAdminB.token)).expect(403);
+    const accepted = await api()
+      .post(`/court-handovers/${handover}/accept`)
+      .set(bearer(w.clubAdminA.token))
       .expect(200);
-    expect(assigned.body.kind).toBe("CLUB");
-    expect(assigned.body.club.id).toBe(w.clubA);
-    expect(assigned.body.ownerId).toBeNull();
+    expect(accepted.body.status).toBe("ACCEPTED");
+
+    const assigned = (await api().get(`/courts/${id}`).set(bearer(w.playerA.token))).body;
+    expect(assigned.kind).toBe("CLUB");
+    expect(assigned.club.id).toBe(w.clubA);
+    expect(assigned.ownerId).toBeNull();
 
     await api().patch(`/courts/${id}`).set(bearer(w.playerA.token)).send({ name: "Still mine" }).expect(403);
     await api().patch(`/courts/${id}`).set(bearer(w.clubAdminA.token)).send({ name: "Club's" }).expect(200);
@@ -315,11 +329,53 @@ describe("courts without a club", () => {
 
     expect((await api().get(`/clubs/${w.clubA}`).set(bearer(w.playerA.token))).body.courtCount).toBe(2);
     expect(idsOf(await api().get("/courts/unassigned").set(bearer(w.playerA.token)).expect(200))).toEqual([]);
+    await api().post(`/court-handovers/${handover}/accept`).set(bearer(w.clubAdminA.token)).expect(409);
+  });
+
+  it("lets the club decline and the owner take the request back", async () => {
+    const id = await createLooseCourt(w.playerA.token);
+    const ask = async (clubId: string) =>
+      (await api().post(`/courts/${id}/handover`).set(bearer(w.playerA.token)).send({ clubId }).expect(201)).body.id;
+
+    const first = await ask(w.clubA);
+    const incoming = await api().get("/me/court-handovers").set(bearer(w.clubAdminA.token)).expect(200);
+    expect(idsOf(incoming)).toEqual([first]);
+    expect(idsOf(await api().get("/me/court-handovers").set(bearer(w.playerA.token)).expect(200))).toEqual([first]);
+    expect(idsOf(await api().get("/me/court-handovers").set(bearer(w.clubAdminB.token)).expect(200))).toEqual([]);
+
+    const declined = await api().post(`/court-handovers/${first}/decline`).set(bearer(w.clubAdminA.token)).expect(200);
+    expect(declined.body.status).toBe("DECLINED");
+    expect(declined.body.decidedAt).toEqual(expect.any(String));
+    await api().post(`/court-handovers/${first}/decline`).set(bearer(w.clubAdminA.token)).expect(409);
+    expect((await api().get(`/courts/${id}`).set(bearer(w.playerA.token))).body.kind).toBe("PUBLIC");
+
+    const second = await ask(w.clubB);
+    await api().post(`/court-handovers/${second}/cancel`).set(bearer(w.playerB.token)).expect(403);
+    const cancelled = await api().post(`/court-handovers/${second}/cancel`).set(bearer(w.playerA.token)).expect(200);
+    expect(cancelled.body.status).toBe("CANCELLED");
+    await api().post(`/court-handovers/${second}/accept`).set(bearer(w.clubAdminB.token)).expect(409);
+    const pending = await api().get("/me/court-handovers?status=PENDING").set(bearer(w.playerA.token)).expect(200);
+    expect(idsOf(pending)).toEqual([]);
+  });
+
+  it("lets only one of two club admins answer", async () => {
+    const id = await createLooseCourt(w.playerA.token);
+    const handover = (
+      await api().post(`/courts/${id}/handover`).set(bearer(w.playerA.token)).send({ clubId: w.clubA }).expect(201)
+    ).body.id;
+    const answers = await Promise.all([
+      api().post(`/court-handovers/${handover}/accept`).set(bearer(w.clubAdminA.token)),
+      api().post(`/court-handovers/${handover}/decline`).set(bearer(w.admin.token)),
+    ]);
+    expect(answers.map((a) => a.status).sort()).toEqual([200, 409]);
   });
 
   it("does not let a club admin take someone else's court, or move a club court", async () => {
     const id = await createLooseCourt(w.playerA.token);
     await api().post(`/courts/${id}/assign`).set(bearer(w.clubAdminA.token)).send({ clubId: w.clubA }).expect(403);
+    // The owner cannot skip the club's consent either.
+    await api().post(`/courts/${id}/assign`).set(bearer(w.playerA.token)).send({ clubId: w.clubA }).expect(403);
+    await api().post(`/courts/${w.courtA}/handover`).set(bearer(w.admin.token)).send({ clubId: w.clubB }).expect(409);
 
     const moved = await api().post(`/courts/${w.courtA}/assign`).set(bearer(w.admin.token)).send({ clubId: w.clubB });
     expect(moved.status).toBe(409);
@@ -598,6 +654,8 @@ describe("every write route needs a login", () => {
     ["post", "/clubs/x/courts"],
     ["post", "/courts"],
     ["post", "/courts/x/assign"],
+    ["post", "/courts/x/handover"],
+    ["post", "/court-handovers/x/accept"],
     ["patch", "/courts/x"],
     ["delete", "/courts/x"],
     ["post", "/matches"],

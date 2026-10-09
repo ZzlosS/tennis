@@ -20,6 +20,7 @@ import {
   bookingPageExample,
   clubPageExample,
   courtPageExample,
+  handoverPageExample,
   matchPageExample,
   meExample,
   statsExample,
@@ -27,6 +28,7 @@ import {
 import BookingWhen from "../enums/bookingWhen";
 import AppError from "../errors/appError";
 import { ErrorCode } from "../errors/codes";
+import HandoverStatus from "../enums/handoverStatus";
 import MatchStatus from "../enums/matchStatus";
 import { Page, pageOfArray } from "../http/pagination";
 import { currentUser } from "../middleware/auth";
@@ -34,6 +36,7 @@ import { validate } from "../middleware/validate";
 import BookingRepository from "../repositories/bookingRepository";
 import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
+import CourtHandoverRepository from "../repositories/courtHandoverRepository";
 import MatchRepository from "../repositories/matchRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import ChangePasswordRequest from "../requests/changePasswordRequest";
@@ -44,6 +47,7 @@ import BookingResponse from "../responses/bookingResponse";
 import ClubResponse from "../responses/clubResponse";
 import { ErrorBody } from "../responses/common";
 import CourtResponse from "../responses/courtResponse";
+import HandoverResponse from "../responses/handoverResponse";
 import MatchResponse from "../responses/matchResponse";
 import MeResponse from "../responses/meResponse";
 import StatsResponse from "../responses/statsResponse";
@@ -70,6 +74,7 @@ export class MeController {
   private courts = new CourtRepository();
   private clubs = new ClubRepository();
   private accounts = new AccountService();
+  private handovers = new CourtHandoverRepository();
   private matches = new MatchRepository();
   private stats = new StatsService();
   private mapper = new Mapper();
@@ -155,6 +160,29 @@ export class MeController {
   ): Promise<Page<ClubResponse>> {
     const { entities, nextCursor } = await this.clubs.findClubsPageByAdmin(currentUser(req).id, { limit, cursor });
     return { items: await Promise.all(entities.map((club) => this.mapper.club(club))), nextCursor };
+  }
+
+  /**
+   * Court handovers the player asked for, and those asked of clubs the player is an admin of, newest first.
+   * @param status Only handovers in this status.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(handoverPageExample)
+  @Get("/court-handovers")
+  async getMyCourtHandovers(
+    @Request() req: ExRequest,
+    @Query() status?: HandoverStatus,
+    @Query() limit?: number,
+    @Query() cursor?: string
+  ): Promise<Page<HandoverResponse>> {
+    const playerId = currentUser(req).id;
+    const handovers = await this.handovers.findForPlayerPage(
+      playerId,
+      await this.clubs.findAdminClubIds(playerId),
+      status
+    );
+    return await pageOfArray(handovers, { limit, cursor }, (handover) => this.mapper.handover(handover));
   }
 
   /**

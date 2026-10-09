@@ -1083,6 +1083,72 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"HandoverStatus": {
+				"enum": [
+					"PENDING",
+					"ACCEPTED",
+					"DECLINED",
+					"CANCELLED"
+				],
+				"type": "string"
+			},
+			"HandoverResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"court": {
+						"$ref": "#/components/schemas/CourtSummary"
+					},
+					"club": {
+						"$ref": "#/components/schemas/ClubSummary"
+					},
+					"requestedBy": {
+						"$ref": "#/components/schemas/PlayerSummary"
+					},
+					"status": {
+						"$ref": "#/components/schemas/HandoverStatus"
+					},
+					"createdAt": {
+						"type": "string"
+					},
+					"decidedAt": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"court",
+					"club",
+					"requestedBy",
+					"status",
+					"createdAt",
+					"decidedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Page_HandoverResponse_": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/HandoverResponse"
+						},
+						"type": "array"
+					},
+					"nextCursor": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"items",
+					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SetScore": {
 				"properties": {
 					"firstTeam": {
@@ -5131,6 +5197,133 @@
 				]
 			}
 		},
+		"/me/court-handovers": {
+			"get": {
+				"operationId": "GetMyCourtHandovers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Page_HandoverResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"items": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+													"court": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+														"name": "Kalemegdan park court",
+														"surface": "HARD",
+														"clubId": null
+													},
+													"club": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+														"name": "TK Banjica",
+														"city": "Belgrade"
+													},
+													"requestedBy": {
+														"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+														"nickname": "marko",
+														"level": "INTERMEDIATE"
+													},
+													"status": "PENDING",
+													"createdAt": "2026-10-09T08:00:00.000Z",
+													"decidedAt": null
+												}
+											],
+											"nextCursor": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Court handovers the player asked for, and those asked of clubs the player is an admin of, newest first.",
+				"tags": [
+					"Me"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "Only handovers in this status.",
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/HandoverStatus"
+						}
+					},
+					{
+						"description": "Page size, 1 to 100. Default 20.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The nextCursor of the previous page.",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/me/matches": {
 			"get": {
 				"operationId": "GetMyMatches",
@@ -6500,6 +6693,483 @@
 				]
 			}
 		},
+		"/court-handovers/{id}": {
+			"get": {
+				"operationId": "GetHandover",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HandoverResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+												"name": "Kalemegdan park court",
+												"surface": "HARD",
+												"clubId": null
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"requestedBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"status": "PENDING",
+											"createdAt": "2026-10-09T08:00:00.000Z",
+											"decidedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Court handovers"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/court-handovers/{id}/accept": {
+			"post": {
+				"operationId": "Accept",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HandoverResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+												"name": "Kalemegdan park court",
+												"surface": "HARD",
+												"clubId": null
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"requestedBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"status": "PENDING",
+											"createdAt": "2026-10-09T08:00:00.000Z",
+											"decidedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "CONFLICT",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "The club agrees. The court becomes a club court, managed by the club's admins from then on.",
+				"tags": [
+					"Court handovers"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/court-handovers/{id}/decline": {
+			"post": {
+				"operationId": "Decline",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HandoverResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+												"name": "Kalemegdan park court",
+												"surface": "HARD",
+												"clubId": null
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"requestedBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"status": "PENDING",
+											"createdAt": "2026-10-09T08:00:00.000Z",
+											"decidedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "CONFLICT",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "The club says no. The court stays as it was.",
+				"tags": [
+					"Court handovers"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/court-handovers/{id}/cancel": {
+			"post": {
+				"operationId": "Cancel",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HandoverResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+												"name": "Kalemegdan park court",
+												"surface": "HARD",
+												"clubId": null
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"requestedBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"status": "PENDING",
+											"createdAt": "2026-10-09T08:00:00.000Z",
+											"decidedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "CONFLICT",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "The owner takes the request back.",
+				"tags": [
+					"Court handovers"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/courts": {
 			"get": {
 				"operationId": "GetCourts",
@@ -7507,6 +8177,138 @@
 						}
 					}
 				]
+			}
+		},
+		"/courts/{id}/handover": {
+			"post": {
+				"operationId": "RequestHandover",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HandoverResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+												"name": "Kalemegdan park court",
+												"surface": "HARD",
+												"clubId": null
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"requestedBy": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"status": "PENDING",
+											"createdAt": "2026-10-09T08:00:00.000Z",
+											"decidedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "HANDOVER_PENDING",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "RATE_LIMITED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Asks a club to take over a public or private court. The court's owner (or an ADMIN) asks, and the club's\nadmins accept or decline; nothing changes until they accept. One request per court at a time.",
+				"tags": [
+					"Courts"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AssignCourtRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/courts/{id}/assign": {
@@ -9419,7 +10221,7 @@
 						}
 					}
 				},
-				"description": "Players see their own bookings, club admins also see their clubs' bookings, ADMINs see all. Oldest first.\nCancelled bookings are left out unless `status` is CANCELLED.",
+				"description": "Players see their own bookings, club admins also see their clubs' bookings, ADMINs see all. Soonest first.\nCancelled bookings are left out unless `status` is CANCELLED.",
 				"tags": [
 					"Bookings"
 				],

@@ -1,6 +1,7 @@
 import { COURT_NO_CLUB } from "../consts";
 import { Club } from "../entities/club";
 import { Court } from "../entities/court";
+import { CourtHandover } from "../entities/courtHandover";
 import { CourtBlock } from "../entities/courtBlock";
 import { Match } from "../entities/match";
 import { Booking } from "../entities/booking";
@@ -15,6 +16,7 @@ import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import { parseSets } from "../repositories/matchRepository";
 import PlayerRepository from "../repositories/playerRepository";
+import HandoverResponse from "../responses/handoverResponse";
 import BlockResponse from "../responses/blockResponse";
 import BookingResponse from "../responses/bookingResponse";
 import ClubResponse from "../responses/clubResponse";
@@ -180,6 +182,20 @@ export default class Mapper {
       playedAt: match.playedAt.toISOString(),
       court: this.courtSummary(court),
       club: this.clubSummary(await this.clubOf(court)),
+    };
+  }
+
+  async handover(handover: CourtHandover): Promise<HandoverResponse> {
+    const court = await this.courts.findByEntityID(handover.court);
+    const club = await this.clubs.findByEntityID(handover.club);
+    return {
+      id: handover.entityId,
+      court: this.courtSummary(court),
+      club: { id: club.entityId, name: club.name, city: club.city },
+      requestedBy: await this.playerSummary(handover.requestedBy),
+      status: handover.status,
+      createdAt: new Date(handover.createdAt ?? 0).toISOString(),
+      decidedAt: handover.decidedAt ? new Date(handover.decidedAt).toISOString() : null,
     };
   }
 

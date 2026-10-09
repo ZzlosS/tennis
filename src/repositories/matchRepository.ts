@@ -1,7 +1,7 @@
 import { Match } from "../entities/match";
 import MatchStatus from "../enums/matchStatus";
 import { NotFoundError } from "../errors/appError";
-import { moveMatchStatus, runScript } from "../redis/scripts";
+import { moveStatus, runScript } from "../redis/scripts";
 import { PageQuery } from "../http/pagination";
 import CreateMatchRequest from "../requests/createMatchRequest";
 import UpdateMatchRequest from "../requests/updateMatchRequest";
@@ -36,7 +36,7 @@ export default class MatchRepository extends BaseRepository<Match> {
 
   // Moves the match on only if it is still in the status `from`. False when someone else got there first.
   async moveStatus(matchId: string, from: MatchStatus, to: MatchStatus): Promise<boolean> {
-    const result = await runScript(moveMatchStatus, [`Match:${matchId}`], [from, to]);
+    const result = await runScript(moveStatus, [`Match:${matchId}`], [from, to]);
     if (result === "MISSING") {
       throw new NotFoundError("Match not found");
     }

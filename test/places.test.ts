@@ -79,7 +79,7 @@ describe("places on the map", () => {
     await api().patch(`/courts/${courtId}`).set(bearer(player.accessToken)).send({ active: true }).expect(200);
     expect(await search("")).toHaveLength(1);
 
-    await api().post(`/courts/${courtId}/assign`).set(bearer(player.accessToken)).send({ clubId: club }).expect(200);
+    await api().post(`/courts/${courtId}/assign`).set(bearer(admin.token)).send({ clubId: club }).expect(200);
     expect(await search("")).toEqual([]);
 
     const other = await createClub(admin.token, { name: "TK Gone", ...NEAR });

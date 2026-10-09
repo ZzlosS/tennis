@@ -738,3 +738,31 @@ export const clubScheduleExample = {
     },
   ],
 };
+
+export const handoverExample = {
+  id: "01JBX3K7M2Q8N5R4T6V9W0YZHO",
+  court: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+    name: "Kalemegdan park court",
+    surface: "HARD",
+    clubId: null,
+  },
+  club: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+    name: "TK Banjica",
+    city: "Belgrade",
+  },
+  requestedBy: {
+    id: "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+    nickname: "marko",
+    level: "INTERMEDIATE",
+  },
+  status: "PENDING",
+  createdAt: "2026-10-09T08:00:00.000Z",
+  decidedAt: null,
+};
+
+export const handoverPageExample = {
+  items: [handoverExample],
+  nextCursor: null,
+};

@@ -20,6 +20,7 @@ import {
   availabilityExample,
   courtExample,
   courtPageExample,
+  handoverExample,
   publicCourtExample,
   publicCourtPageExample,
 } from "../http/examples";
@@ -27,7 +28,10 @@ import { COURT_NO_CLUB } from "../consts";
 import { Court } from "../entities/court";
 import CourtKind from "../enums/courtKind";
 import CourtSurface from "../enums/courtSurface";
-import { ConflictError, ValidationError } from "../errors/appError";
+import { ConflictError, ForbiddenError, ValidationError } from "../errors/appError";
+import { ErrorCode } from "../errors/codes";
+import CourtHandoverRepository from "../repositories/courtHandoverRepository";
+import HandoverResponse from "../responses/handoverResponse";
 import { Page } from "../http/pagination";
 import { currentUser } from "../middleware/auth";
 import { validate } from "../middleware/validate";
@@ -39,7 +43,7 @@ import UpdateCourtRequest from "../requests/updateCourtRequest";
 import { ErrorBody } from "../responses/common";
 import AvailabilityResponse from "../responses/availabilityResponse";
 import CourtResponse from "../responses/courtResponse";
-import { assertClubAdmin, assertSelfOrAdmin } from "../services/access";
+import { assertClubAdmin, assertSelfOrAdmin, isAdmin } from "../services/access";
 import BookingService from "../services/bookingService";
 import Mapper from "../services/mappers";
 import { isIsoDate } from "../services/time";
@@ -61,6 +65,7 @@ export class CourtController {
   private clubRepository = new ClubRepository();
   private mapper = new Mapper();
   private bookingService = new BookingService();
+  private handovers = new CourtHandoverRepository();
 
   /**
    * Courts of every kind, oldest first.
@@ -153,7 +158,36 @@ export class CourtController {
     return await this.mapper.court(await this.repository.findByIdOrThrow(id, "Court"));
   }
 
-  // The court's owner or an ADMIN hands a public or private court over to a club; the club's admins manage it from then on.
+  /**
+   * Asks a club to take over a public or private court. The court's owner (or an ADMIN) asks, and the club's
+   * admins accept or decline; nothing changes until they accept. One request per court at a time.
+   */
+  @Example(handoverExample)
+  @SuccessResponse(201, "Created")
+  @Response<ErrorBody>(409, "HANDOVER_PENDING")
+  @Middlewares(validate({ body: assignCourtBody }))
+  @Post("/{id}/handover")
+  async requestHandover(
+    @Request() req: ExRequest,
+    @Path() id: string,
+    @Body() request: AssignCourtRequest
+  ): Promise<HandoverResponse> {
+    const user = currentUser(req);
+    const court = await this.repository.findByIdOrThrow(id, "Court");
+    await this.clubRepository.findByIdOrThrow(request.clubId, "Club");
+    if (court.club !== COURT_NO_CLUB) {
+      throw new ConflictError("This court already belongs to a club");
+    }
+    assertSelfOrAdmin(user, court.ownerId);
+    if (await this.handovers.findPendingForCourt(id)) {
+      throw new ConflictError("This court already has a handover waiting for an answer", ErrorCode.HANDOVER_PENDING);
+    }
+    const handoverId = await this.handovers.createHandover(id, request.clubId, user.id);
+    return await this.mapper.handover(await this.handovers.findByIdOrThrow(handoverId, "Handover"));
+  }
+
+  // Hands a public or private court to a club straight away, without the club's consent. Only for ADMINs, to fix
+  // things up; everyone else uses the handover request.
   @Example(courtExample)
   @Response<ErrorBody>(409, "CONFLICT")
   @Middlewares(validate({ body: assignCourtBody }))
@@ -168,7 +202,9 @@ export class CourtController {
     if (court.club !== COURT_NO_CLUB) {
       throw new ConflictError("This court already belongs to a club");
     }
-    assertSelfOrAdmin(currentUser(req), court.ownerId);
+    if (!isAdmin(currentUser(req))) {
+      throw new ForbiddenError("Ask the club to take the court over with a handover request");
+    }
 
     await this.repository.assignToClub(id, club);
     return await this.mapper.court(await this.repository.findByIdOrThrow(id, "Court"));
