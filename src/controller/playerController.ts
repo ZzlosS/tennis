@@ -5,7 +5,8 @@ import { Route, Get, Post, Body, Path, Response, Tags, Delete, Patch, Security }
 import RegisterRequest from "../requests/registerRequest";
 import PlayerLevel from "../enums/playerLevel";
 import PlayersResponse from "../responses/playersResponse";
-import AppError, { NotFoundError } from "../errors/appError";
+import AppError, { ConflictError, NotFoundError, ValidationError } from "../errors/appError";
+import { ErrorCode } from "../errors/codes";
 import UpdatePlayerRequest from "../requests/updatePlayerRequest";
 import { Player } from "../entities/player";
 
@@ -27,12 +28,12 @@ export default class PlayerController {
 
     // Validate user input
     if (!(email && password && firstName && lastName)) {
-      throw new AppError(400, 'All input is required!');
+      throw new ValidationError('All input is required!');
     }
 
     const existingUser = await this.repository.findByEmail(email);
     if (existingUser) {
-      throw new AppError(403, 'User already exist!');
+      throw new ConflictError('User already exist!', ErrorCode.EMAIL_TAKEN);
     }
 
     // Todo: ! Add encryption !
@@ -62,7 +63,7 @@ export default class PlayerController {
     // Validate user input
     if (!(email && password)) {
       // raise ValidationError
-      throw new AppError(400, 'Email or password not found!');
+      throw new ValidationError('Email or password not found!');
     }
 
     const player = await this.repository.findByEmail(email);

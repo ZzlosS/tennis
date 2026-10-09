@@ -1,42 +1,43 @@
 import { Request, Response, NextFunction } from "express";
-import AppError, { NotFoundError } from "./appError";
-
-
+import AppError from "./appError";
+import { ErrorCode } from "./codes";
 
 const requestLogger = (request: Request, response: Response, next: NextFunction) => {
-  // console.log('🚀 ~ REQUEST ~ ', request);
   next();
 };
 
 const errorLogger = (error: Error, request: Request, response: Response, next: NextFunction) => {
-  console.log(`error ${error.message}`);
+  if (process.env.NODE_ENV !== "test") {
+    console.log(`error ${error.message}`);
+  }
   next(error);
 };
 
-const errorResponder = (
-  err: Error,
-  request: Request,
-  res: Response,
-  next: NextFunction
-) => {
+// Every error leaves the API in one shape: { error: { code, message, fields? } }
+const errorResponder = (err: Error, request: Request, res: Response, next: NextFunction) => {
   res.header("Content-Type", "application/json");
 
-  if(err instanceof NotFoundError) {
-    return res.status(404).json({error: err.message})
-  }
   if (err instanceof AppError) {
-    // Handle known application errors (e.g., validation errors)
-    return res.status(err.statusCode).json({ error: err.message });
-  } else {
-    // Handle unexpected errors (e.g., unhandled exceptions)
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(err.statusCode).json({
+      error: { code: err.code, message: err.message, ...(err.fields ? { fields: err.fields } : {}) },
+    });
   }
+
+  // body-parser rejects malformed JSON before any route runs
+  if ((err as { type?: string }).type === "entity.parse.failed") {
+    return res.status(400).json({
+      error: { code: ErrorCode.VALIDATION_FAILED, message: "Request body is not valid JSON" },
+    });
+  }
+
+  if (process.env.NODE_ENV !== "test") {
+    console.error(err);
+  }
+  return res.status(500).json({ error: { code: ErrorCode.INTERNAL, message: "Internal Server Error" } });
 };
 
 const invalidPathHandler = (request: Request, response: Response, next: NextFunction) => {
-  response.status(404);
-  return response.json({ message: "invalid path" });
+  return response.status(404).json({ error: { code: ErrorCode.NOT_FOUND, message: "Invalid path" } });
 };
 
 export { errorLogger, errorResponder, invalidPathHandler, requestLogger };

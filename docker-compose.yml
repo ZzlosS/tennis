@@ -12,12 +12,18 @@ services:
   #     - 8787:8787
 
   redis_stack:
-    image: redis/redis-stack:latest 
+    image: redis/redis-stack:7.4.0-v3
     ports:
       - '6379:6379'
       - '8001:8001'
     volumes:
       - redis_data:/data
+
+  # Throwaway Redis for `npm test`: port 6380, no volume, wiped on restart.
+  redis_test:
+    image: redis/redis-stack-server:7.4.0-v3
+    ports:
+      - '6380:6379'
 
 volumes:
   redis_data:
