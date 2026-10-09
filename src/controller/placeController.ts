@@ -19,6 +19,7 @@ const MAX_PLACES = 500;
 @Route("places")
 @Security("jwt")
 @Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(429, "RATE_LIMITED")
 @Response<ErrorBody>(401, "UNAUTHENTICATED")
 export class PlaceController {
   private clubs = new ClubRepository();

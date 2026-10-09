@@ -17,6 +17,7 @@ import { consumeRefreshToken, revokeRefreshToken } from "../services/tokenServic
 @Tags("Auth")
 @Route("auth")
 @Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(429, "RATE_LIMITED")
 export class AuthController {
   repository: PlayerRepository;
 

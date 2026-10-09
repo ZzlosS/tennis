@@ -61,6 +61,7 @@ import { changePasswordBody, deleteAccountBody, updatePlayerBody } from "../vali
 @Route("me")
 @Security("jwt")
 @Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(429, "RATE_LIMITED")
 @Response<ErrorBody>(401, "UNAUTHENTICATED")
 @Response<ErrorBody>(403, "FORBIDDEN")
 export class MeController {

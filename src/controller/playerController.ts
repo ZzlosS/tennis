@@ -34,6 +34,7 @@ import { updatePlayerBody } from "../validation/auth";
 @Route("players")
 @Security("jwt")
 @Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(429, "RATE_LIMITED")
 @Response<ErrorBody>(401, "UNAUTHENTICATED")
 @Response<ErrorBody>(403, "FORBIDDEN")
 @Response<ErrorBody>(404, "NOT_FOUND")

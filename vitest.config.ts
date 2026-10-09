@@ -12,6 +12,10 @@ export default defineConfig({
       REDIS_URL: process.env.REDIS_URL ?? "redis://localhost:6380",
       JWT_SECRET: "test-secret-test-secret-test-secret-0123456789",
       BCRYPT_ROUNDS: "4",
+      LOG_LEVEL: "silent",
+      // Tests make far more requests than a real client; the rate limit has its own tests.
+      RATE_LIMIT_PER_MINUTE: "1000000",
+      RATE_LIMIT_AUTH_PER_MINUTE: "1000000",
       CORS_ORIGINS: "http://localhost:8081",
     },
   },

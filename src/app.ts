@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { config } from "./config";
+import { httpLogger, requestId } from "./logger";
+import { rateLimit } from "./middleware/rateLimit";
 import healthRouter from "./router/healthRouter";
 import { errorLogger, errorResponder, invalidPathHandler } from "./errors/errorHandlers";
 import { RegisterRoutes } from "./generated/routes";
@@ -10,6 +12,11 @@ import { RegisterRoutes } from "./generated/routes";
 export function createApp(): Application {
   const app: Application = express();
 
+  if (config.TRUST_PROXY > 0) {
+    app.set("trust proxy", config.TRUST_PROXY);
+  }
+  app.use(requestId);
+  app.use(httpLogger);
   app.use(cors({ origin: config.CORS_ORIGINS }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -31,6 +38,12 @@ export function createApp(): Application {
   });
 
   app.use(healthRouter);
+  // Sign-up and login get a tighter limit than the rest of the API, since they are what guessing passwords goes through.
+  app.use(
+    "/v1/auth",
+    rateLimit({ scope: "auth", limit: () => config.RATE_LIMIT_AUTH_PER_MINUTE, keyOf: (req) => `ip:${req.ip}` })
+  );
+  app.use("/v1", rateLimit({ scope: "api", limit: () => config.RATE_LIMIT_PER_MINUTE }));
   RegisterRoutes(app);
 
   // Error handlers

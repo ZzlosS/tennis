@@ -1,5 +1,6 @@
 import { config } from "./config";
 import { createApp } from "./app";
+import { logger } from "./logger";
 import RedisClient from "./services/redisClient";
 
 async function main() {
@@ -7,11 +8,11 @@ async function main() {
 
   const app = createApp();
   app.listen(config.PORT, () => {
-    console.log(`Server is running on PORT ${config.PORT} 🚀 `);
+    logger.info(`Server is running on PORT ${config.PORT}`);
   });
 }
 
 main().catch((error) => {
-  console.error(error);
+  logger.fatal({ err: error }, "could not start");
   process.exit(1);
 });
