@@ -406,9 +406,8 @@ describe("every write route needs a login", () => {
   ];
 
   it.each(routes)("%s %s answers 401 without a token", async (method, path) => {
-    const response = await (api() as unknown as Record<string, (p: string) => import("supertest").Test>)
-      [method](path)
-      .send({});
+    const client = api() as unknown as Record<string, (p: string) => import("supertest").Test>;
+    const response = await client[method](path).send({});
     expect(response.status).toBe(401);
   });
 });
