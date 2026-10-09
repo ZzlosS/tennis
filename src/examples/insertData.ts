@@ -24,13 +24,13 @@ function capitalizeFirstLetter(s: string) {
 
 export async function insertCourt(): Promise<string> {
   const repo = new CourtRepository();
-  const dto: CourtDto= {
+  const dto: CourtDto = {
     name: `Court - ${capitalizeFirstLetter(faker.color.human())} ${faker.animal.dog()}`,
     surface: faker.helpers.arrayElement(Object.values(CourtSurface)),
     stands: faker.datatype.boolean(),
     double: faker.datatype.boolean(),
     roof: faker.datatype.boolean(),
-    pricePerHour: faker.datatype.number({"min":500, "max": 3000, "precision": 50})
+    pricePerHour: faker.datatype.number({ min: 500, max: 3000, precision: 50 }),
   };
   console.log("CourtDto");
   console.table(dto);
@@ -74,7 +74,7 @@ export async function insertPlayer(): Promise<string> {
     level: faker.helpers.arrayElement(Object.values(PlayerLevel)),
     address: faker.address.streetAddress(),
     city: faker.address.cityName(),
-    country: faker.address.country()
+    country: faker.address.country(),
   };
   console.table(dto);
 
@@ -112,7 +112,7 @@ export async function insertRequest(): Promise<string> {
     playerEntityID: "01GVKB4S5JZRW4934ZFF4KD7HT",
     numberOfPlayersNeeded: 1,
     acceptedBy: [],
-    active: true
+    active: true,
   };
   const entityId = await requestRepo.createEnemyRequest(dto);
   return entityId;
@@ -127,9 +127,9 @@ export async function insertBooking(): Promise<string> {
     totalPrice: 1950 * 2,
     player: "01HBRXA2H3A38GWP8JWZ5BX98A",
     bookingType: BookingType.ONE_TIME,
-    date: (new Date()).toDateString()
+    date: new Date().toDateString(),
   };
-  const entityId= bookingRepo.createBooking(dto);
+  const entityId = bookingRepo.createBooking(dto);
   return entityId;
 }
 
@@ -155,8 +155,7 @@ async function assignUnassigned() {
     console.log("🚀 r:", r);
     console.log("🚀 r2:", r2);
     console.log("*".repeat(100));
-  };
-
+  }
 }
 
 export default async function insert() {
@@ -165,7 +164,7 @@ export default async function insert() {
   // await insertPlayer();
   await insertBooking();
 }
-async function insertRackets ()  {
+async function insertRackets() {
   // const playerRepository = new PlayerRepository();
   const racketRepository = new RacketRepository();
   // const player = await playerRepository.findByEmail("test@test.com");
@@ -269,7 +268,7 @@ async function insertRackets ()  {
   //   "01GTSQBR5HZYVHDA8VJEXKQ8D4",
   // ]);
   // racketsData.forEach((e) => console.log(e.entityId));
-};
+}
 
 // const client = await new Client().open("redis://@127.0.0.1:6379");
 // console.log("🚀 ~ client.isOpen()", client.isOpen());

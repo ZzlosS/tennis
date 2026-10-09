@@ -12,8 +12,7 @@ import { Player } from "../entities/player";
 
 require("dotenv").config();
 
-
-@Tags('Players')
+@Tags("Players")
 @Route("players")
 export default class PlayerController {
   repository: PlayerRepository;
@@ -28,18 +27,18 @@ export default class PlayerController {
 
     // Validate user input
     if (!(email && password && firstName && lastName)) {
-      throw new ValidationError('All input is required!');
+      throw new ValidationError("All input is required!");
     }
 
     const existingUser = await this.repository.findByEmail(email);
     if (existingUser) {
-      throw new ConflictError('User already exist!', ErrorCode.EMAIL_TAKEN);
+      throw new ConflictError("User already exist!", ErrorCode.EMAIL_TAKEN);
     }
 
     // Todo: ! Add encryption !
-    const encryptedPassword = password; 
+    const encryptedPassword = password;
     registerRequest.password = encryptedPassword;
-    
+
     const entityId = await this.repository.createPlayer(registerRequest);
 
     // Create token
@@ -51,7 +50,7 @@ export default class PlayerController {
       token: token,
       email: email,
       entityId: entityId,
-    }
+    };
   }
 
   @Response<AppError>(400, "Validation Failed")
@@ -63,14 +62,14 @@ export default class PlayerController {
     // Validate user input
     if (!(email && password)) {
       // raise ValidationError
-      throw new ValidationError('Email or password not found!');
+      throw new ValidationError("Email or password not found!");
     }
 
     const player = await this.repository.findByEmail(email);
 
     if (!player) {
       // raise NotFoundError
-      throw new NotFoundError('Player not found');
+      throw new NotFoundError("Player not found");
     }
 
     // Todo: ! Add encryption !
@@ -92,7 +91,7 @@ export default class PlayerController {
   @Get("/")
   async getAll(): Promise<PlayersResponse[]> {
     const players = await this.repository.findAll();
-    const data = players.map(async player  => {
+    const data = players.map(async (player) => {
       return await this.convertPlayerModelToResponse(player);
     });
 
@@ -101,15 +100,15 @@ export default class PlayerController {
 
   @Security("jwt")
   @Get("/{entityId}")
-  async getByEntityId(@Path()  entityId: string): Promise<PlayersResponse> {
+  async getByEntityId(@Path() entityId: string): Promise<PlayersResponse> {
     return await this.convertPlayerModelToResponse(await this.repository.findByEntityID(entityId));
   }
 
   @Security("jwt")
   @Get("/city/{city}")
-  async getPlayersByCity(@Path() city: string): Promise<PlayersResponse[]>  {
+  async getPlayersByCity(@Path() city: string): Promise<PlayersResponse[]> {
     const players = await this.repository.findPlayersByCity(city);
-    const data = players.map(async player  => {
+    const data = players.map(async (player) => {
       return await this.convertPlayerModelToResponse(player);
     });
 
@@ -120,8 +119,8 @@ export default class PlayerController {
   @Get("/level/{level}")
   async getPlayersByLevel(@Path() level: PlayerLevel): Promise<PlayersResponse[]> {
     const players = await this.repository.findPlayersByLevel(level);
-    const data = players.map(async player => {
-        return await this.convertPlayerModelToResponse(player);
+    const data = players.map(async (player) => {
+      return await this.convertPlayerModelToResponse(player);
     });
 
     return await Promise.all(data);
@@ -135,11 +134,11 @@ export default class PlayerController {
 
   @Security("jwt")
   @Patch("/{entityId}")
-  async updatePlayer(@Body() updateRequest: UpdatePlayerRequest, @Path()  entityId: string): Promise<string> {
+  async updatePlayer(@Body() updateRequest: UpdatePlayerRequest, @Path() entityId: string): Promise<string> {
     return await this.repository.updatePlayer(entityId, updateRequest);
   }
 
-  private async convertPlayerModelToResponse(player: Player): Promise<PlayersResponse>{
+  private async convertPlayerModelToResponse(player: Player): Promise<PlayersResponse> {
     return {
       entityId: player.entityId,
       firstName: player.firstName,

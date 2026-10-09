@@ -1,4 +1,4 @@
 export default interface AcceptEnemyRequest {
-    requestEntityID: string;
-    playerEntityID: string;
+  requestEntityID: string;
+  playerEntityID: string;
 }

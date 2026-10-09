@@ -10,5 +10,4 @@ router.get("/ping", authenticateToken, async (_req, res) => {
   return res.send(response);
 });
 
-
 export default router;

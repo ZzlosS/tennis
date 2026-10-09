@@ -6,7 +6,6 @@ import UpdatePlayerRequest from "../requests/updatePlayerRequest";
 import { playerSchema } from "../schemas/playerSchema";
 import BaseRepository from "./baseRepository";
 
-
 export default class PlayerRepository extends BaseRepository<Player> {
   constructor() {
     super(playerSchema);
@@ -17,22 +16,22 @@ export default class PlayerRepository extends BaseRepository<Player> {
   }
 
   async findPlayersByLevel(level: PlayerLevel): Promise<Player[]> {
-    return await this.findAllByField(level, 'level');
+    return await this.findAllByField(level, "level");
   }
 
   async findPlayersByCity(city: string): Promise<Player[]> {
-    return await this.findAllByField(city, 'city');
+    return await this.findAllByField(city, "city");
   }
 
   async assignRacketToPlayer(player: Player, racketEID: string): Promise<string> {
-    if(player.rackets === null) {
+    if (player.rackets === null) {
       player.rackets = [];
     }
 
     if (!player.rackets.includes(racketEID)) {
       player.rackets.push(racketEID);
     }
-    
+
     return await this.save(player);
   }
 
@@ -49,29 +48,29 @@ export default class PlayerRepository extends BaseRepository<Player> {
     player.city = registerRequest.city;
     player.country = registerRequest.country;
     player.deleted = false;
-    
+
     return await this.save(player);
   }
 
   async updatePlayer(entityId: string, updateRequest: UpdatePlayerRequest) {
     const player = await this.findByEntityID(entityId);
 
-    if(updateRequest.firstName){
+    if (updateRequest.firstName) {
       player.firstName = updateRequest.firstName;
     }
-    if(updateRequest.lastName){
+    if (updateRequest.lastName) {
       player.lastName = updateRequest.lastName;
     }
-    if(updateRequest.level){
+    if (updateRequest.level) {
       player.level = updateRequest.level;
     }
-    if(updateRequest.address){
+    if (updateRequest.address) {
       player.address = updateRequest.address;
     }
-    if(updateRequest.city){
+    if (updateRequest.city) {
       player.city = updateRequest.city;
     }
-    if(updateRequest.country){
+    if (updateRequest.country) {
       player.country = updateRequest.country;
     }
 

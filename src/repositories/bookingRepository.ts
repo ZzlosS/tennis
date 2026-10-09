@@ -22,7 +22,7 @@ export default class BookingRepository extends BaseRepository<Booking> {
     booking.bookingType = createRequest.bookingType;
     booking.totalPrice = createRequest.totalPrice || 1000;
     booking.date = new Date(createRequest.date);
-    
+
     return await this.save(booking);
   }
 
@@ -30,7 +30,7 @@ export default class BookingRepository extends BaseRepository<Booking> {
     await this.initializeRepository();
 
     let bookings = this.repository.search();
-    
+
     if (bookingFilterDto.court) {
       bookings = bookings.where("court").equals(bookingFilterDto.court);
     }
@@ -54,27 +54,25 @@ export default class BookingRepository extends BaseRepository<Booking> {
     return bookings.return.all();
   }
 
-
   async updateBooking(entityId: string, updateRequest: UpdateBookingRequest) {
     const booking = await this.findByEntityID(entityId);
 
-    if(updateRequest.court){
+    if (updateRequest.court) {
       booking.court = updateRequest.court;
     }
-    if(updateRequest.from){
+    if (updateRequest.from) {
       booking.from = updateRequest.from;
     }
-    if(updateRequest.to){
+    if (updateRequest.to) {
       booking.to = updateRequest.to;
     }
-    if(updateRequest.totalPrice){
+    if (updateRequest.totalPrice) {
       booking.totalPrice = updateRequest.totalPrice;
     }
-    if(updateRequest.date){
+    if (updateRequest.date) {
       booking.date = new Date(updateRequest.date);
     }
 
     return await this.save(booking);
   }
-
 }

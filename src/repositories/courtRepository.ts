@@ -42,37 +42,36 @@ export default class CourtRepository extends BaseRepository<Court> {
     await this.initializeRepository();
 
     let courts = this.repository.search();
-    
+
     courts = courts.where("pricePerHour").greaterThanOrEqualTo(from);
-    
+
     courts = courts.where("pricePerHour").lessThanOrEqualTo(to);
-    
+
     return await courts.return.all();
   }
 
   async updateCourt(entityId: string, updateRequest: UpdateCourtRequest) {
     const court = await this.findByEntityID(entityId);
 
-    if(updateRequest.name){
+    if (updateRequest.name) {
       court.name = updateRequest.name;
     }
-    if(updateRequest.surface){
+    if (updateRequest.surface) {
       court.surface = updateRequest.surface;
     }
-    if(updateRequest.stands){
+    if (updateRequest.stands) {
       court.stands = updateRequest.stands;
     }
-    if(updateRequest.roof){
+    if (updateRequest.roof) {
       court.roof = updateRequest.roof;
     }
-    if(updateRequest.double){
+    if (updateRequest.double) {
       court.double = updateRequest.double;
     }
-    if(updateRequest.pricePerHour){
+    if (updateRequest.pricePerHour) {
       court.pricePerHour = updateRequest.pricePerHour;
     }
 
     return await this.save(court);
   }
-
 }

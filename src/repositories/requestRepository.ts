@@ -27,11 +27,11 @@ export default class EnemyRequestRepository extends BaseRepository<EnemyRequest>
     const enemyRequest = await this.repository.fetch(requestEntityID);
 
     enemyRequest.acceptedBy.push(playerEntityID);
-    
+
     if (enemyRequest.acceptedBy.length == enemyRequest.numberOfPlayersNeeded) {
       enemyRequest.active = false;
     }
-    
+
     enemyRequest.acceptedBy = [...new Set(enemyRequest.acceptedBy)];
 
     return await this.repository.save(enemyRequest);
@@ -50,13 +50,13 @@ export default class EnemyRequestRepository extends BaseRepository<EnemyRequest>
   async updateEnemyRequest(entityId: string, updateRequest: UpdateEnemyRequest) {
     const player = await this.findByEntityID(entityId);
 
-    if(updateRequest.bookingEntityID){
+    if (updateRequest.bookingEntityID) {
       player.bookingEntityID = updateRequest.bookingEntityID;
     }
-    if(updateRequest.numberOfPlayersNeeded){
+    if (updateRequest.numberOfPlayersNeeded) {
       player.numberOfPlayersNeeded = updateRequest.numberOfPlayersNeeded;
     }
-    if(updateRequest.acceptedBy){
+    if (updateRequest.acceptedBy) {
       player.acceptedBy = updateRequest.acceptedBy;
     }
 

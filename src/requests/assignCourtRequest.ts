@@ -1,5 +1,4 @@
-
 export default interface AssignCourtRequest {
-    courtEntityID: string;
-    clubEntityID: string;
+  courtEntityID: string;
+  clubEntityID: string;
 }

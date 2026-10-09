@@ -5,13 +5,13 @@ import { clubSchema } from "../schemas/clubSchema";
 import BaseRepository from "./baseRepository";
 
 export default class ClubRepository extends BaseRepository<Club> {
-  constructor(){
-    super(clubSchema)
+  constructor() {
+    super(clubSchema);
   }
 
   async createClub(createRequest: ClubCreateRequest) {
     const club = await this.createEntity();
-    
+
     club.name = createRequest.name;
     club.address = createRequest.address;
     club.description = createRequest.description;
@@ -30,9 +30,8 @@ export default class ClubRepository extends BaseRepository<Club> {
   async findClubsByCity(city: string) {
     return await this.findAllByField(city, "city");
   }
-  
+
   async updateClub(entityId: string, updateRequest: UpdateClubRequest) {
     return "";
-}
-
+  }
 }
