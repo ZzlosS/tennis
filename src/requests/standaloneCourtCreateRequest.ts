@@ -20,4 +20,7 @@ export default interface StandaloneCourtCreateRequest {
   openingHours?: OpeningHours;
   // Leave out for a free court.
   pricePerHourMinor?: number;
+  // Where it is on the map. Give both or neither.
+  latitude?: number;
+  longitude?: number;
 }

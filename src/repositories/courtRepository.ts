@@ -10,6 +10,7 @@ import CourtCreateRequest from "../requests/courtCreateRequest";
 import StandaloneCourtCreateRequest from "../requests/standaloneCourtCreateRequest";
 import UpdateCourtRequest from "../requests/updateCourtRequest";
 import { courtSchema } from "../schemas/courtSchema";
+import { formatLocation, PlaceIndex } from "../services/geo";
 import { DEFAULT_TIME_ZONE } from "../services/time";
 import BaseRepository from "./baseRepository";
 
@@ -54,6 +55,7 @@ export default class CourtRepository extends BaseRepository<Court> {
     // A club court follows its club's zone and hours until it is given hours of its own.
     court.timeZone = "";
     court.openingHours = "";
+    court.location = "";
     return await this.save(court);
   }
 
@@ -69,7 +71,25 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.currency = request.currency ?? DEFAULT_CURRENCY;
     court.timeZone = request.timeZone ?? DEFAULT_TIME_ZONE;
     court.openingHours = request.openingHours ? JSON.stringify(request.openingHours) : "";
-    return await this.save(court);
+    court.location =
+      request.latitude !== undefined && request.longitude !== undefined
+        ? formatLocation(request.latitude, request.longitude)
+        : "";
+    return await this.saveAndIndex(court);
+  }
+
+  // A court without a club is on the map while it is open for booking; a club court is on the map as its club.
+  private async saveAndIndex(court: Court) {
+    const id = await this.save(court);
+    const standalone = court.club === COURT_NO_CLUB;
+    await PlaceIndex.sync("COURT", id, court.location, standalone && court.active !== false);
+    return id;
+  }
+
+  async deleteEntity(entityID: string) {
+    const id = await super.deleteEntity(entityID);
+    await PlaceIndex.remove("COURT", entityID);
+    return id;
   }
 
   private matching(filters: CourtFilters) {
@@ -128,7 +148,11 @@ export default class CourtRepository extends BaseRepository<Court> {
     // From now on the club's zone and hours apply.
     court.timeZone = "";
     court.openingHours = "";
-    return await this.save(court);
+    // On the map from now on as part of the club.
+    court.location = "";
+    const id = await this.save(court);
+    await PlaceIndex.remove("COURT", courtId);
+    return id;
   }
 
   // Keeps the copied place and currency of a club's courts in step when the club changes them.
@@ -187,7 +211,10 @@ export default class CourtRepository extends BaseRepository<Court> {
     if (updateRequest.followClubHours) {
       court.openingHours = "";
     }
+    if (updateRequest.latitude !== undefined && updateRequest.longitude !== undefined) {
+      court.location = formatLocation(updateRequest.latitude, updateRequest.longitude);
+    }
 
-    return await this.save(court);
+    return await this.saveAndIndex(court);
   }
 }

@@ -16,6 +16,8 @@ type Club = BaseEntity & {
   cancelCutoffHours: number;
   // "YYYY-MM-DD", the last day a season booking runs to. Empty when not set.
   seasonEndsOn: string;
+  // "latitude,longitude" for the map, or empty.
+  location: string;
 };
 
 export { Club };

@@ -331,6 +331,82 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"CourtKind": {
+				"enum": [
+					"CLUB",
+					"PUBLIC",
+					"PRIVATE"
+				],
+				"type": "string"
+			},
+			"PlaceResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"kind": {
+						"$ref": "#/components/schemas/CourtKind"
+					},
+					"name": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"distanceKm": {
+						"type": "number",
+						"format": "double"
+					},
+					"courtCount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"kind",
+					"name",
+					"address",
+					"city",
+					"latitude",
+					"longitude",
+					"distanceKm",
+					"courtCount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Page_PlaceResponse_": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/PlaceResponse"
+						},
+						"type": "array"
+					},
+					"nextCursor": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"items",
+					"nextCursor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CourtSurface": {
 				"enum": [
 					"GRASS",
@@ -687,14 +763,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"CourtKind": {
-				"enum": [
-					"CLUB",
-					"PUBLIC",
-					"PRIVATE"
-				],
-				"type": "string"
-			},
 			"Money": {
 				"properties": {
 					"amountMinor": {
@@ -799,6 +867,16 @@
 					},
 					"openingHours": {
 						"$ref": "#/components/schemas/OpeningHours"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -817,7 +895,9 @@
 					"pricePerHour",
 					"active",
 					"timeZone",
-					"openingHours"
+					"openingHours",
+					"latitude",
+					"longitude"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -882,6 +962,16 @@
 					"seasonEndsOn": {
 						"type": "string",
 						"nullable": true
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -896,7 +986,9 @@
 					"timeZone",
 					"openingHours",
 					"cancelCutoffHours",
-					"seasonEndsOn"
+					"seasonEndsOn",
+					"latitude",
+					"longitude"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1228,6 +1320,14 @@
 					"pricePerHourMinor": {
 						"type": "number",
 						"format": "double"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -1369,6 +1469,14 @@
 					},
 					"followClubHours": {
 						"type": "boolean"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"type": "object",
@@ -1438,6 +1546,14 @@
 					},
 					"seasonEndsOn": {
 						"type": "string"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -1491,6 +1607,16 @@
 						"type": "string",
 						"nullable": true
 					},
+					"latitude": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"courts": {
 						"items": {
 							"$ref": "#/components/schemas/CourtResponse"
@@ -1511,6 +1637,8 @@
 					"openingHours",
 					"cancelCutoffHours",
 					"seasonEndsOn",
+					"latitude",
+					"longitude",
 					"courts"
 				],
 				"type": "object",
@@ -1548,6 +1676,14 @@
 					},
 					"seasonEndsOn": {
 						"type": "string"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "double"
+					},
+					"longitude": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"type": "object",
@@ -2801,6 +2937,152 @@
 				]
 			}
 		},
+		"/places": {
+			"get": {
+				"operationId": "GetPlaces",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Page_PlaceResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"items": [
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+													"kind": "CLUB",
+													"name": "TK Banjica",
+													"address": "Banjicka 1",
+													"city": "Belgrade",
+													"latitude": 44.7616,
+													"longitude": 20.4647,
+													"distanceKm": 1.3,
+													"courtCount": 6
+												},
+												{
+													"id": "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+													"kind": "PUBLIC",
+													"name": "Kalemegdan park court",
+													"address": "Kalemegdan",
+													"city": "Belgrade",
+													"latitude": 44.8231,
+													"longitude": 20.4505,
+													"distanceKm": 8.4,
+													"courtCount": 1
+												}
+											],
+											"nextCursor": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Clubs and public or private courts within a radius of a point, nearest first. Club courts are not listed on\ntheir own: they are part of their club's pin. Clubs and courts without coordinates are not on the map.",
+				"tags": [
+					"Places"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "Latitude of the centre, -90 to 90.",
+						"in": "query",
+						"name": "lat",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "Longitude of the centre, -180 to 180.",
+						"in": "query",
+						"name": "lng",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "Search radius in kilometres, up to 200. Default 10.",
+						"in": "query",
+						"name": "radiusKm",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "Only pins of this kind: CLUB, PUBLIC or PRIVATE.",
+						"in": "query",
+						"name": "kind",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/CourtKind"
+						}
+					},
+					{
+						"description": "Only places whose name or city contains this text.",
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Page size, 1 to 100. Default 20.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The nextCursor of the previous page.",
+						"in": "query",
+						"name": "cursor",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/partner-requests": {
 			"post": {
 				"operationId": "CreatePartnerRequest",
@@ -3805,7 +4087,9 @@
 															"open": "06:00",
 															"close": "23:00"
 														}
-													]
+													],
+													"latitude": 44.7616,
+													"longitude": 20.4647
 												}
 											],
 											"nextCursor": null
@@ -3934,7 +4218,9 @@
 														}
 													],
 													"cancelCutoffHours": 24,
-													"seasonEndsOn": null
+													"seasonEndsOn": null,
+													"latitude": 44.7616,
+													"longitude": 20.4647
 												}
 											],
 											"nextCursor": null
@@ -4794,7 +5080,9 @@
 															"open": "06:00",
 															"close": "23:00"
 														}
-													]
+													],
+													"latitude": 44.7616,
+													"longitude": 20.4647
 												}
 											],
 											"nextCursor": null
@@ -4978,7 +5266,9 @@
 													"open": "06:00",
 													"close": "23:00"
 												}
-											]
+											],
+											"latitude": 44.7616,
+											"longitude": 20.4647
 										}
 									}
 								}
@@ -5107,7 +5397,9 @@
 															"open": "06:00",
 															"close": "23:00"
 														}
-													]
+													],
+													"latitude": 44.7616,
+													"longitude": 20.4647
 												}
 											],
 											"nextCursor": null
@@ -5381,7 +5673,9 @@
 													"open": "06:00",
 													"close": "23:00"
 												}
-											]
+											],
+											"latitude": 44.7616,
+											"longitude": 20.4647
 										}
 									}
 								}
@@ -5512,7 +5806,9 @@
 													"open": "06:00",
 													"close": "23:00"
 												}
-											]
+											],
+											"latitude": 44.7616,
+											"longitude": 20.4647
 										}
 									}
 								}
@@ -5721,7 +6017,9 @@
 													"open": "06:00",
 													"close": "23:00"
 												}
-											]
+											],
+											"latitude": 44.7616,
+											"longitude": 20.4647
 										}
 									}
 								}
@@ -5876,7 +6174,9 @@
 															"open": "06:00",
 															"close": "23:00"
 														}
-													]
+													],
+													"latitude": 44.7616,
+													"longitude": 20.4647
 												}
 											],
 											"nextCursor": null
@@ -6030,7 +6330,9 @@
 													"open": "06:00",
 													"close": "23:00"
 												}
-											]
+											],
+											"latitude": 44.7616,
+											"longitude": 20.4647
 										}
 									}
 								}
@@ -6166,7 +6468,9 @@
 														}
 													],
 													"cancelCutoffHours": 24,
-													"seasonEndsOn": null
+													"seasonEndsOn": null,
+													"latitude": 44.7616,
+													"longitude": 20.4647
 												}
 											],
 											"nextCursor": null
@@ -6309,7 +6613,9 @@
 												}
 											],
 											"cancelCutoffHours": 24,
-											"seasonEndsOn": null
+											"seasonEndsOn": null,
+											"latitude": 44.7616,
+											"longitude": 20.4647
 										}
 									}
 								}
@@ -6435,6 +6741,8 @@
 											],
 											"cancelCutoffHours": 24,
 											"seasonEndsOn": null,
+											"latitude": 44.7616,
+											"longitude": 20.4647,
 											"courts": [
 												{
 													"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
@@ -6488,7 +6796,9 @@
 															"open": "06:00",
 															"close": "23:00"
 														}
-													]
+													],
+													"latitude": 44.7616,
+													"longitude": 20.4647
 												}
 											]
 										}
@@ -6610,7 +6920,9 @@
 												}
 											],
 											"cancelCutoffHours": 24,
-											"seasonEndsOn": null
+											"seasonEndsOn": null,
+											"latitude": 44.7616,
+											"longitude": 20.4647
 										}
 									}
 								}

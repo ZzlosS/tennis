@@ -12,4 +12,7 @@ export default interface UpdateClubRequest {
   cancelCutoffHours?: number;
   // An empty string clears it.
   seasonEndsOn?: string;
+  // Where it is on the map. Give both or neither.
+  latitude?: number;
+  longitude?: number;
 }

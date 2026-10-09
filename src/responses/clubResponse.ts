@@ -18,6 +18,9 @@ export default interface ClubResponse {
   cancelCutoffHours: number;
   // "YYYY-MM-DD". Season bookings repeat weekly up to this day; null when not set.
   seasonEndsOn: string | null;
+  // Where the club is on the map; null when not set.
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface ClubDetailResponse extends ClubResponse {

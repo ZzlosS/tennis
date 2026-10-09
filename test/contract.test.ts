@@ -133,6 +133,8 @@ describe("the response checker", () => {
     openingHours: [null, null, null, null, null, null, null],
     cancelCutoffHours: 24,
     seasonEndsOn: null,
+    latitude: null,
+    longitude: null,
   };
   const page = (item: object) => ({ items: [item], nextCursor: null });
 

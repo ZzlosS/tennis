@@ -23,10 +23,16 @@ import MeResponse from "../responses/meResponse";
 import PlayerResponse from "../responses/playerResponse";
 import RacketResponse from "../responses/racketResponse";
 import BookingStatus from "../enums/bookingStatus";
+import { parseLocation } from "./geo";
 import { DEFAULT_CANCEL_CUTOFF_HOURS, scheduleOf } from "./courtSchedule";
 import { DEFAULT_TIME_ZONE } from "./time";
 import { AuthUser } from "./tokenService";
 import { isAdmin } from "./access";
+
+function coordinatesOf(location: string | undefined) {
+  const place = parseLocation(location);
+  return { latitude: place?.latitude ?? null, longitude: place?.longitude ?? null };
+}
 
 // Turns stored records into API responses, looking up the players, clubs and courts they mention.
 export default class Mapper {
@@ -80,6 +86,7 @@ export default class Mapper {
       active: schedule.active,
       timeZone: schedule.timeZone,
       openingHours: schedule.openingHours,
+      ...coordinatesOf(club ? club.location : court.location),
     };
   }
 
@@ -97,6 +104,7 @@ export default class Mapper {
       openingHours: scheduleOf({} as Court, club).openingHours,
       cancelCutoffHours: club.cancelCutoffHours ?? DEFAULT_CANCEL_CUTOFF_HOURS,
       seasonEndsOn: club.seasonEndsOn || null,
+      ...coordinatesOf(club.location),
     };
   }
 

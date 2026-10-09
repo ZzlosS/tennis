@@ -25,6 +25,8 @@ type Court = BaseEntity & {
   timeZone: string;
   // JSON text of OpeningHours. Empty means the club's (or the default) apply.
   openingHours: string;
+  // "latitude,longitude" for the map. Only courts without a club have their own; empty when not set.
+  location: string;
 };
 
 export { Court };

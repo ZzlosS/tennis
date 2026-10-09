@@ -105,6 +105,8 @@ export const clubDetailExample = {
   ],
   cancelCutoffHours: 24,
   seasonEndsOn: null,
+  latitude: 44.7616,
+  longitude: 20.4647,
   courts: [
     {
       id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
@@ -138,6 +140,8 @@ export const clubDetailExample = {
         { open: "06:00", close: "23:00" },
         { open: "06:00", close: "23:00" },
       ],
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
 };
@@ -163,6 +167,8 @@ export const clubExample = {
   ],
   cancelCutoffHours: 24,
   seasonEndsOn: null,
+  latitude: 44.7616,
+  longitude: 20.4647,
 };
 
 export const clubPageExample = {
@@ -188,6 +194,8 @@ export const clubPageExample = {
       ],
       cancelCutoffHours: 24,
       seasonEndsOn: null,
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
   nextCursor: null,
@@ -231,6 +239,8 @@ export const courtExample = {
     { open: "06:00", close: "23:00" },
     { open: "06:00", close: "23:00" },
   ],
+  latitude: 44.7616,
+  longitude: 20.4647,
 };
 
 export const courtPageExample = {
@@ -267,6 +277,8 @@ export const courtPageExample = {
         { open: "06:00", close: "23:00" },
         { open: "06:00", close: "23:00" },
       ],
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
   nextCursor: null,
@@ -493,6 +505,8 @@ export const publicCourtExample = {
     { open: "06:00", close: "23:00" },
     { open: "06:00", close: "23:00" },
   ],
+  latitude: 44.7616,
+  longitude: 20.4647,
 };
 
 export const publicCourtPageExample = {
@@ -522,6 +536,8 @@ export const publicCourtPageExample = {
         { open: "06:00", close: "23:00" },
         { open: "06:00", close: "23:00" },
       ],
+      latitude: 44.7616,
+      longitude: 20.4647,
     },
   ],
   nextCursor: null,
@@ -599,4 +615,32 @@ export const meExample = {
   address: "Knez Mihailova 5",
   city: "Belgrade",
   country: "Serbia",
+};
+
+export const placePageExample = {
+  items: [
+    {
+      id: "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+      kind: "CLUB",
+      name: "TK Banjica",
+      address: "Banjicka 1",
+      city: "Belgrade",
+      latitude: 44.7616,
+      longitude: 20.4647,
+      distanceKm: 1.3,
+      courtCount: 6,
+    },
+    {
+      id: "01JBX3K7M2Q8N5R4T6V9W0YZIJ",
+      kind: "PUBLIC",
+      name: "Kalemegdan park court",
+      address: "Kalemegdan",
+      city: "Belgrade",
+      latitude: 44.8231,
+      longitude: 20.4505,
+      distanceKm: 8.4,
+      courtCount: 1,
+    },
+  ],
+  nextCursor: null,
 };

@@ -187,7 +187,7 @@ export class CourtController {
     // A club court takes its place and currency from the club.
     if (court.club !== COURT_NO_CLUB) {
       const fields = Object.fromEntries(
-        (["address", "city", "country", "currency", "timeZone"] as const)
+        (["address", "city", "country", "currency", "timeZone", "latitude", "longitude"] as const)
           .filter((field) => updateRequest[field] !== undefined)
           .map((field) => [field, ["Change this on the club, not on its court"]])
       );

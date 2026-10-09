@@ -25,4 +25,7 @@ export default interface CourtResponse {
   timeZone: string;
   // The hours that apply: the court's own, else its club's, else 06:00 to 23:00.
   openingHours: OpeningHours;
+  // Where the court is on the map. A club court is where its club is. Null when not set.
+  latitude: number | null;
+  longitude: number | null;
 }

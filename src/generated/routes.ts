@@ -10,6 +10,8 @@ import { PlayerRacketController } from './../controller/playerRacketController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PlayerController } from './../controller/playerController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { PlaceController } from './../controller/placeController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PartnerRequestController } from './../controller/partnerRequestController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { MeController } from './../controller/meController';
@@ -151,6 +153,36 @@ const models: TsoaRoute.Models = {
             "address": {"dataType":"string"},
             "city": {"dataType":"string"},
             "country": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CourtKind": {
+        "dataType": "refEnum",
+        "enums": ["CLUB","PUBLIC","PRIVATE"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PlaceResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "kind": {"ref":"CourtKind","required":true},
+            "name": {"dataType":"string","required":true},
+            "address": {"dataType":"string","required":true},
+            "city": {"dataType":"string","required":true},
+            "latitude": {"dataType":"double","required":true},
+            "longitude": {"dataType":"double","required":true},
+            "distanceKm": {"dataType":"double","required":true},
+            "courtCount": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Page_PlaceResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "items": {"dataType":"array","array":{"dataType":"refObject","ref":"PlaceResponse"},"required":true},
+            "nextCursor": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -315,11 +347,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CourtKind": {
-        "dataType": "refEnum",
-        "enums": ["CLUB","PUBLIC","PRIVATE"],
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Money": {
         "dataType": "refObject",
         "properties": {
@@ -362,6 +389,8 @@ const models: TsoaRoute.Models = {
             "active": {"dataType":"boolean","required":true},
             "timeZone": {"dataType":"string","required":true},
             "openingHours": {"ref":"OpeningHours","required":true},
+            "latitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "longitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -390,6 +419,8 @@ const models: TsoaRoute.Models = {
             "openingHours": {"ref":"OpeningHours","required":true},
             "cancelCutoffHours": {"dataType":"double","required":true},
             "seasonEndsOn": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "latitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "longitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -517,6 +548,8 @@ const models: TsoaRoute.Models = {
             "timeZone": {"dataType":"string"},
             "openingHours": {"ref":"OpeningHours"},
             "pricePerHourMinor": {"dataType":"double"},
+            "latitude": {"dataType":"double"},
+            "longitude": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -574,6 +607,8 @@ const models: TsoaRoute.Models = {
             "active": {"dataType":"boolean"},
             "openingHours": {"ref":"OpeningHours"},
             "followClubHours": {"dataType":"boolean"},
+            "latitude": {"dataType":"double"},
+            "longitude": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -604,6 +639,8 @@ const models: TsoaRoute.Models = {
             "openingHours": {"ref":"OpeningHours"},
             "cancelCutoffHours": {"dataType":"double"},
             "seasonEndsOn": {"dataType":"string"},
+            "latitude": {"dataType":"double"},
+            "longitude": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -623,6 +660,8 @@ const models: TsoaRoute.Models = {
             "openingHours": {"ref":"OpeningHours","required":true},
             "cancelCutoffHours": {"dataType":"double","required":true},
             "seasonEndsOn": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "latitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "longitude": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "courts": {"dataType":"array","array":{"dataType":"refObject","ref":"CourtResponse"},"required":true},
         },
         "additionalProperties": false,
@@ -641,6 +680,8 @@ const models: TsoaRoute.Models = {
             "openingHours": {"ref":"OpeningHours"},
             "cancelCutoffHours": {"dataType":"double"},
             "seasonEndsOn": {"dataType":"string"},
+            "latitude": {"dataType":"double"},
+            "longitude": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -1102,6 +1143,43 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deletePlayer',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPlaceController_getPlaces: Record<string, TsoaRoute.ParameterSchema> = {
+                lat: {"in":"query","name":"lat","required":true,"dataType":"double"},
+                lng: {"in":"query","name":"lng","required":true,"dataType":"double"},
+                radiusKm: {"in":"query","name":"radiusKm","dataType":"double"},
+                kind: {"in":"query","name":"kind","ref":"CourtKind"},
+                q: {"in":"query","name":"q","dataType":"string"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                cursor: {"in":"query","name":"cursor","dataType":"string"},
+        };
+        app.get('/v1/places',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PlaceController)),
+            ...(fetchMiddlewares<RequestHandler>(PlaceController.prototype.getPlaces)),
+
+            async function PlaceController_getPlaces(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPlaceController_getPlaces, request, response });
+
+                const controller = new PlaceController();
+
+              await templateService.apiHandler({
+                methodName: 'getPlaces',
                 controller,
                 response,
                 next,

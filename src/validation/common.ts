@@ -47,6 +47,14 @@ export const openingHours = z
   )
   .length(7, "Give seven days, Monday first");
 
+export const latitude = z.number().min(-90).max(90);
+export const longitude = z.number().min(-180).max(180);
+
+// A place on the map needs both coordinates.
+export const bothCoordinates = (body: { latitude?: number; longitude?: number }) =>
+  (body.latitude === undefined) === (body.longitude === undefined);
+export const bothCoordinatesMessage = { message: "Give latitude and longitude together", path: ["latitude"] };
+
 // "YYYY-MM-DD", or an empty string to clear it.
 export const dateOrEmpty = z.union([
   z.literal(""),

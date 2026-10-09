@@ -18,6 +18,7 @@ const courtSchema = new Schema("Court", {
   active: { type: "boolean" },
   timeZone: { type: "string" },
   openingHours: { type: "string" },
+  location: { type: "string" },
   createdAt: { type: "number", sortable: true },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },

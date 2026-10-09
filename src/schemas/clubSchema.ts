@@ -13,6 +13,7 @@ const clubSchema = new Schema("Club", {
   openingHours: { type: "string" },
   cancelCutoffHours: { type: "number" },
   seasonEndsOn: { type: "string" },
+  location: { type: "string" },
   createdAt: { type: "number", sortable: true },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },

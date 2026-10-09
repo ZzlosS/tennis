@@ -4,6 +4,7 @@ import CourtRepository from "../repositories/courtRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import BookingService from "./bookingService";
 import { now } from "./clock";
+import { PlaceIndex } from "./geo";
 import { revokeAllRefreshTokens } from "./tokenService";
 
 // Everything that has to happen when a player's account goes away.
@@ -23,6 +24,7 @@ export default class AccountService {
     for (const court of await this.courts.findOwnedCourts(playerId)) {
       court.active = false;
       await this.courts.save(court);
+      await PlaceIndex.remove("COURT", court.entityId);
     }
     await revokeAllRefreshTokens(playerId);
     await this.players.deletePlayer(playerId);

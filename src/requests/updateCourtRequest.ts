@@ -21,4 +21,7 @@ export default interface UpdateCourtRequest {
   openingHours?: OpeningHours;
   // True removes the court's own hours, so a club court follows its club again.
   followClubHours?: boolean;
+  // Where it is on the map. Give both or neither.
+  latitude?: number;
+  longitude?: number;
 }

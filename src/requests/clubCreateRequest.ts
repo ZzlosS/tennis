@@ -16,4 +16,7 @@ export default interface ClubCreateRequest {
   cancelCutoffHours?: number;
   // "YYYY-MM-DD": season bookings run weekly up to this day.
   seasonEndsOn?: string;
+  // Where it is on the map. Give both or neither.
+  latitude?: number;
+  longitude?: number;
 }
