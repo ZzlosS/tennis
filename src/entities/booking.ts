@@ -1,7 +1,7 @@
 import BookingType from "../enums/bookingType";
 import BaseEntity from "./baseEntity";
 
-interface Booking {
+type Booking = BaseEntity & {
   court: string;
   from: number;
   to: number;
@@ -9,7 +9,6 @@ interface Booking {
   player: string;
   bookingType: BookingType;
   date: Date;
-}
+};
 
-class Booking extends BaseEntity {}
 export { Booking };

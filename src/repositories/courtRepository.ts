@@ -10,7 +10,7 @@ export default class CourtRepository extends BaseRepository<Court> {
     super(courtSchema);
   }
 
-  async createCourt(createRequest: CourtCreateRequest) {
+  async createCourt(createRequest: CourtCreateRequest, clubEntityID: string = COURT_UNASSIGNED_CLUB) {
     const court = await this.createEntity();
 
     court.name = createRequest.name;
@@ -19,9 +19,9 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.roof = createRequest.roof;
     court.double = createRequest.double;
     court.pricePerHour = createRequest.pricePerHour;
-    court.club = COURT_UNASSIGNED_CLUB;
+    court.club = clubEntityID;
 
-    return await this.repository.save(court);
+    return await this.save(court);
   }
 
   async findClubCourts(clubEntityID: string) {
@@ -29,9 +29,9 @@ export default class CourtRepository extends BaseRepository<Court> {
   }
 
   async assignToClub(courtEntityID: string, clubEntityID: string) {
-    const court = await this.findByEntityID(courtEntityID);
+    const court = await this.findByIdOrThrow(courtEntityID, "Court");
     court.club = clubEntityID;
-    return await this.repository.save(court);
+    return await this.save(court);
   }
 
   async findUnassignedCourts() {
@@ -42,37 +42,38 @@ export default class CourtRepository extends BaseRepository<Court> {
     await this.initializeRepository();
 
     let courts = this.repository.search();
-    
+
     courts = courts.where("pricePerHour").greaterThanOrEqualTo(from);
-    
+
     courts = courts.where("pricePerHour").lessThanOrEqualTo(to);
-    
-    return await courts.return.all();
+
+    courts = courts.and("deleted").false();
+
+    return this.withIds(await courts.return.all());
   }
 
   async updateCourt(entityId: string, updateRequest: UpdateCourtRequest) {
-    const court = await this.findByEntityID(entityId);
+    const court = await this.findByIdOrThrow(entityId, "Court");
 
-    if(updateRequest.name){
+    if (updateRequest.name) {
       court.name = updateRequest.name;
     }
-    if(updateRequest.surface){
+    if (updateRequest.surface) {
       court.surface = updateRequest.surface;
     }
-    if(updateRequest.stands){
+    if (updateRequest.stands) {
       court.stands = updateRequest.stands;
     }
-    if(updateRequest.roof){
+    if (updateRequest.roof) {
       court.roof = updateRequest.roof;
     }
-    if(updateRequest.double){
+    if (updateRequest.double) {
       court.double = updateRequest.double;
     }
-    if(updateRequest.pricePerHour){
+    if (updateRequest.pricePerHour) {
       court.pricePerHour = updateRequest.pricePerHour;
     }
 
     return await this.save(court);
   }
-
 }

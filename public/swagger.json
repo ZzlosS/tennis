@@ -16,6 +16,140 @@
 				],
 				"type": "string"
 			},
+			"Role": {
+				"enum": [
+					"PLAYER",
+					"CLUB_ADMIN",
+					"ADMIN"
+				],
+				"type": "string"
+			},
+			"AuthPlayerResponse": {
+				"properties": {
+					"entityId": {
+						"type": "string"
+					},
+					"firstName": {
+						"type": "string"
+					},
+					"lastName": {
+						"type": "string"
+					},
+					"nickname": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"level": {
+						"$ref": "#/components/schemas/PlayerLevel"
+					},
+					"role": {
+						"$ref": "#/components/schemas/Role"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"entityId",
+					"firstName",
+					"lastName",
+					"nickname",
+					"email",
+					"level",
+					"role",
+					"address",
+					"city",
+					"country"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AuthResponse": {
+				"properties": {
+					"accessToken": {
+						"type": "string"
+					},
+					"expiresIn": {
+						"type": "number",
+						"format": "double"
+					},
+					"refreshToken": {
+						"type": "string"
+					},
+					"player": {
+						"$ref": "#/components/schemas/AuthPlayerResponse"
+					}
+				},
+				"required": [
+					"accessToken",
+					"expiresIn",
+					"refreshToken",
+					"player"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ErrorCode": {
+				"type": "string",
+				"enum": [
+					"VALIDATION_FAILED",
+					"UNAUTHENTICATED",
+					"TOKEN_EXPIRED",
+					"INVALID_CREDENTIALS",
+					"FORBIDDEN",
+					"NOT_FOUND",
+					"EMAIL_TAKEN",
+					"CONFLICT",
+					"INTERNAL"
+				]
+			},
+			"Record_string.string-Array_": {
+				"properties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"FieldErrors": {
+				"$ref": "#/components/schemas/Record_string.string-Array_"
+			},
+			"AppError": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"stack": {
+						"type": "string"
+					},
+					"statusCode": {
+						"type": "number",
+						"format": "double"
+					},
+					"code": {
+						"$ref": "#/components/schemas/ErrorCode"
+					},
+					"fields": {
+						"$ref": "#/components/schemas/FieldErrors"
+					}
+				},
+				"required": [
+					"name",
+					"message",
+					"statusCode",
+					"code"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"RegisterRequest": {
 				"properties": {
 					"firstName": {
@@ -51,7 +185,6 @@
 					"lastName",
 					"email",
 					"password",
-					"nickname",
 					"level",
 					"address",
 					"city",
@@ -60,8 +193,39 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"LoginRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RefreshRequest": {
+				"properties": {
+					"refreshToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"refreshToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"PlayersResponse": {
 				"properties": {
+					"entityId": {
+						"type": "string"
+					},
 					"firstName": {
 						"type": "string"
 					},
@@ -88,78 +252,14 @@
 					}
 				},
 				"required": [
+					"entityId",
 					"firstName",
 					"lastName",
 					"nickname",
 					"level",
 					"address",
-					"email",
 					"city",
 					"country"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"AppError": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"message": {
-						"type": "string"
-					},
-					"stack": {
-						"type": "string"
-					},
-					"statusCode": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"name",
-					"message",
-					"statusCode"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"NotFoundError": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"message": {
-						"type": "string"
-					},
-					"stack": {
-						"type": "string"
-					},
-					"statusCode": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"name",
-					"message",
-					"statusCode"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ILoginRequest": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"password": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"email",
-					"password"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -306,15 +406,11 @@
 			},
 			"AssignRacketRequest": {
 				"properties": {
-					"playerEid": {
-						"type": "string"
-					},
 					"racketEid": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"playerEid",
 					"racketEid"
 				],
 				"type": "object",
@@ -499,20 +595,8 @@
 					},
 					"country": {
 						"type": "string"
-					},
-					"courts": {
-						"type": "number",
-						"format": "double"
 					}
 				},
-				"required": [
-					"name",
-					"address",
-					"description",
-					"city",
-					"country",
-					"courts"
-				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -536,6 +620,9 @@
 					"pricePerHour": {
 						"type": "number",
 						"format": "double"
+					},
+					"clubId": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -619,13 +706,6 @@
 						"type": "number",
 						"format": "double"
 					},
-					"totalPrice": {
-						"type": "number",
-						"format": "double"
-					},
-					"player": {
-						"type": "string"
-					},
 					"bookingType": {
 						"$ref": "#/components/schemas/BookingType"
 					},
@@ -637,7 +717,6 @@
 					"court",
 					"from",
 					"to",
-					"player",
 					"bookingType",
 					"date"
 				],
@@ -721,22 +800,11 @@
 						"type": "number",
 						"format": "double"
 					},
-					"totalPrice": {
-						"type": "number",
-						"format": "double"
-					},
 					"date": {
 						"type": "string",
 						"format": "date-time"
 					}
 				},
-				"required": [
-					"court",
-					"from",
-					"to",
-					"totalPrice",
-					"date"
-				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -861,9 +929,6 @@
 					"bookingEntityID": {
 						"type": "string"
 					},
-					"playerEntityID": {
-						"type": "string"
-					},
 					"numberOfPlayersNeeded": {
 						"type": "number",
 						"format": "double"
@@ -871,7 +936,6 @@
 				},
 				"required": [
 					"bookingEntityID",
-					"playerEntityID",
 					"numberOfPlayersNeeded"
 				],
 				"type": "object",
@@ -881,14 +945,10 @@
 				"properties": {
 					"requestEntityID": {
 						"type": "string"
-					},
-					"playerEntityID": {
-						"type": "string"
 					}
 				},
 				"required": [
-					"requestEntityID",
-					"playerEntityID"
+					"requestEntityID"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -969,19 +1029,8 @@
 					"numberOfPlayersNeeded": {
 						"type": "number",
 						"format": "double"
-					},
-					"acceptedBy": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
 					}
 				},
-				"required": [
-					"bookingEntityID",
-					"numberOfPlayersNeeded",
-					"acceptedBy"
-				],
 				"type": "object",
 				"additionalProperties": false
 			}
@@ -1004,21 +1053,33 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/players/register": {
+		"/auth/register": {
 			"post": {
 				"operationId": "Register",
 				"responses": {
-					"200": {
-						"description": "Ok",
+					"201": {
+						"description": "Created",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"$ref": "#/components/schemas/AuthResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "EMAIL_TAKEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AppError"
+								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Players"
+					"Auth"
 				],
 				"security": [],
 				"parameters": [],
@@ -1034,7 +1095,7 @@
 				}
 			}
 		},
-		"/players/login": {
+		"/auth/login": {
 			"post": {
 				"operationId": "Login",
 				"responses": {
@@ -1043,18 +1104,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/PlayersResponse"
-										},
-										{}
-									]
+									"$ref": "#/components/schemas/AuthResponse"
 								}
 							}
 						}
 					},
-					"400": {
-						"description": "Validation Failed",
+					"401": {
+						"description": "INVALID_CREDENTIALS",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1062,20 +1118,10 @@
 								}
 							}
 						}
-					},
-					"404": {
-						"description": "User not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/NotFoundError"
-								}
-							}
-						}
 					}
 				},
 				"tags": [
-					"Players"
+					"Auth"
 				],
 				"security": [],
 				"parameters": [],
@@ -1084,7 +1130,74 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ILoginRequest"
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/refresh": {
+			"post": {
+				"operationId": "Refresh",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AppError"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RefreshRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/logout": {
+			"post": {
+				"operationId": "Logout",
+				"responses": {
+					"204": {
+						"description": "Logged out"
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RefreshRequest"
 							}
 						}
 					}

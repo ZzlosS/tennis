@@ -12,17 +12,17 @@ export default class BookingRepository extends BaseRepository<Booking> {
   constructor() {
     super(bookingSchema);
   }
-  async createBooking(createRequest: BookingCreateRequest) {
+  async createBooking(createRequest: BookingCreateRequest, playerId: string, totalPrice: number) {
     const booking = await this.createEntity();
 
     booking.court = createRequest.court;
     booking.from = createRequest.from;
     booking.to = createRequest.to;
-    booking.player = createRequest.player;
+    booking.player = playerId;
     booking.bookingType = createRequest.bookingType;
-    booking.totalPrice = createRequest.totalPrice || 1000;
+    booking.totalPrice = totalPrice;
     booking.date = new Date(createRequest.date);
-    
+
     return await this.save(booking);
   }
 
@@ -30,7 +30,7 @@ export default class BookingRepository extends BaseRepository<Booking> {
     await this.initializeRepository();
 
     let bookings = this.repository.search();
-    
+
     if (bookingFilterDto.court) {
       bookings = bookings.where("court").equals(bookingFilterDto.court);
     }
@@ -51,30 +51,31 @@ export default class BookingRepository extends BaseRepository<Booking> {
       bookings = bookings.where("date").equals(new Date(bookingFilterDto.date));
     }
 
-    return bookings.return.all();
+    bookings = bookings.and("deleted").false();
+
+    return this.withIds(await bookings.return.all());
   }
 
+  // The total price is recalculated by the caller when the court or the hours change.
+  async updateBooking(entityId: string, updateRequest: UpdateBookingRequest, totalPrice?: number) {
+    const booking = await this.findByIdOrThrow(entityId, "Booking");
 
-  async updateBooking(entityId: string, updateRequest: UpdateBookingRequest) {
-    const booking = await this.findByEntityID(entityId);
-
-    if(updateRequest.court){
+    if (updateRequest.court) {
       booking.court = updateRequest.court;
     }
-    if(updateRequest.from){
+    if (updateRequest.from) {
       booking.from = updateRequest.from;
     }
-    if(updateRequest.to){
+    if (updateRequest.to) {
       booking.to = updateRequest.to;
     }
-    if(updateRequest.totalPrice){
-      booking.totalPrice = updateRequest.totalPrice;
+    if (totalPrice !== undefined) {
+      booking.totalPrice = totalPrice;
     }
-    if(updateRequest.date){
+    if (updateRequest.date) {
       booking.date = new Date(updateRequest.date);
     }
 
     return await this.save(booking);
   }
-
 }

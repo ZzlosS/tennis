@@ -5,51 +5,63 @@ import UpdateMatchRequest from "../requests/updateMatchRequest";
 import { matchSchema } from "../schemas/matchSchema";
 import BaseRepository from "./baseRepository";
 
+// Teams and results arrive as comma-separated strings.
+export const splitIds = (value: string) =>
+  value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
 export default class MatchRepository extends BaseRepository<Match> {
   constructor() {
-    super(matchSchema)
+    super(matchSchema);
   }
 
   async createMatch(createMatchRequest: CreateMatchRequest) {
     const match = await this.createEntity();
 
-    match.firstTeam = createMatchRequest.firstTeam.split(',');
-    match.secondTeam = createMatchRequest.secondTeam.split(',');
-    match.result = createMatchRequest.result.split(',');
+    match.firstTeam = splitIds(createMatchRequest.firstTeam);
+    match.secondTeam = splitIds(createMatchRequest.secondTeam);
+    match.result = splitIds(createMatchRequest.result);
     match.court = createMatchRequest.court;
     match.date = new Date(createMatchRequest.date);
 
     return await this.save(match);
   }
-  
+
   async findMatchesByCourt(courtEntityID: string) {
     return await this.findAllByField(courtEntityID, "court");
   }
 
   async findPlayerMatches(playerEntityID: string) {
     await this.initializeRepository();
-    return await this.repository.search()
-                .where('firstTeam').contains(playerEntityID)
-                .or('secondTeam').contains(playerEntityID).return.all();
+    // Filtered in code: in a query, AND binds tighter than OR and would change the meaning.
+    const matches = await this.repository
+      .search()
+      .where("firstTeam")
+      .contains(playerEntityID)
+      .or("secondTeam")
+      .contains(playerEntityID)
+      .return.all();
+    return this.withIds(matches.filter((match) => !match.deleted));
   }
 
-
   async updateMatch(entityId: string, updateRequest: UpdateMatchRequest) {
-    const match = await this.findByEntityID(entityId);
+    const match = await this.findByIdOrThrow(entityId, "Match");
 
-    if(updateRequest.firstTeam){
+    if (updateRequest.firstTeam) {
       match.firstTeam = updateRequest.firstTeam;
     }
-    if(updateRequest.secondTeam){
+    if (updateRequest.secondTeam) {
       match.secondTeam = updateRequest.secondTeam;
     }
-    if(updateRequest.result){
+    if (updateRequest.result) {
       match.result = updateRequest.result;
     }
-    if(updateRequest.court){
+    if (updateRequest.court) {
       match.court = updateRequest.court;
     }
-    if(updateRequest.date){
+    if (updateRequest.date) {
       match.date = new Date(updateRequest.date);
     }
 

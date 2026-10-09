@@ -1,59 +1,57 @@
-import express, { NextFunction, Request, Response } from "express";
-import { authenticateToken } from "../middleware/auth";
-import CreateEnemyRequest from "../requests/createEnemyRequest";
+import express from "express";
+import { authenticateToken, currentUser } from "../middleware/auth";
 import EnemyRequestController from "../controller/enemyRequestController";
-import AcceptEnemyRequest from "../requests/acceptEnemyRequest";
+import { handle } from "./handle";
+import { validate } from "../middleware/validate";
+import { acceptRequestBody, createRequestBody, updateRequestBody } from "../validation/requests";
 
 const enemyRequestRouter = express.Router();
 
-enemyRequestRouter.post("/", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new EnemyRequestController();
-        const response = await controller.createRequest(req.body as CreateEnemyRequest);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+const controller = (req: express.Request) => new EnemyRequestController(currentUser(req));
 
-enemyRequestRouter.get("/", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new EnemyRequestController();
-        const response = await controller.getActiveRequests();
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+enemyRequestRouter.post(
+  "/",
+  authenticateToken,
+  validate({ body: createRequestBody }),
+  handle((req) => controller(req).createRequest(req.body))
+);
 
-enemyRequestRouter.get("/inactive", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new EnemyRequestController();
-        const response = await controller.getInactiveRequests();
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+enemyRequestRouter.get(
+  "/",
+  authenticateToken,
+  handle((req) => controller(req).getActiveRequests())
+);
 
-enemyRequestRouter.post("/accept", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new EnemyRequestController();
-        const response = await controller.acceptRequest(req.body as AcceptEnemyRequest);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+enemyRequestRouter.get(
+  "/inactive",
+  authenticateToken,
+  handle((req) => controller(req).getInactiveRequests())
+);
 
-enemyRequestRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new EnemyRequestController();
-        const response = await controller.deleteEnemyRequest(req.params['entityId']);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+enemyRequestRouter.post(
+  "/accept",
+  authenticateToken,
+  validate({ body: acceptRequestBody }),
+  handle((req) => controller(req).acceptRequest(req.body))
+);
+
+enemyRequestRouter.get(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).getEnemyRequest(req.params["entityId"]))
+);
+
+enemyRequestRouter.patch(
+  "/:entityId",
+  authenticateToken,
+  validate({ body: updateRequestBody }),
+  handle((req) => controller(req).updateEnemyRequest(req.body, req.params["entityId"]))
+);
+
+enemyRequestRouter.delete(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).deleteEnemyRequest(req.params["entityId"]))
+);
 
 export default enemyRequestRouter;

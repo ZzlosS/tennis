@@ -1,92 +1,116 @@
-import { Client, Entity, EntityData, Repository, Schema } from "redis-om";
+import { EntityId, Repository, Schema } from "redis-om";
 import crypto from "crypto";
 import RedisClient from "../services/redisClient";
 import BaseEntity from "../entities/baseEntity";
+import { NotFoundError } from "../errors/appError";
 
 export default class BaseRepository<T extends BaseEntity> {
   protected repository!: Repository<T>;
-  protected schema: Schema<T>;
-  private client: Client;
+  protected schema: Schema;
 
-  constructor(schema: Schema<T>) {
-    this.client = RedisClient.getInstance();
+  // The schema lists the stored fields only; `entityId` is added on load, so it is not part of it.
+  constructor(schema: Schema) {
     this.schema = schema;
   }
 
-  async openConnection() {
-    if (!this.client.isOpen()) {
-      this.client = await this.client.open("redis://localhost:6379");
-    }
-  }
-
-  async createIndex() {
-    this.repository.createIndex();
-  }
-
   async initializeRepository() {
-    await this.openConnection();
-    this.repository = this.client.fetchRepository(this.schema);
+    this.repository = new Repository(this.schema as unknown as Schema<T>, await RedisClient.connect());
     await this.repository.createIndex();
   }
 
-  async save(entity: T): Promise<string> {
-    await this.initializeRepository();
-    return await this.repository.save(entity);
+  // redis-om keeps a record's id under a symbol. Copy it to a plain property so callers can read `entityId`.
+  protected withId(entity: T): T {
+    entity.entityId = (entity as { [EntityId]?: string })[EntityId] as string;
+    return entity;
   }
 
-  async findFirstByField(value: string, field: string) {
+  protected withIds(entities: T[]): T[] {
+    return entities.map((entity) => this.withId(entity));
+  }
+
+  // Saves and returns the record's id. `entityId` is the key, so it is not stored inside the record too.
+  async save(entity: T): Promise<string> {
     await this.initializeRepository();
-    return (await this.repository.search().where(field).equal(value).return.all())[0];
+    const { entityId, ...stored } = entity;
+    const data = stored as unknown as T;
+    const saved = entityId ? await this.repository.save(entityId, data) : await this.repository.save(data);
+    return (saved as { [EntityId]?: string })[EntityId] as string;
+  }
+
+  // Searches never return soft-deleted records.
+  async findFirstByField(value: string, field: string) {
+    return (await this.findAllByField(value, field))[0];
   }
 
   async findAllByField(value: string, field: string) {
     await this.initializeRepository();
-    return await this.repository.search().where(field).equal(value).return.all();
+    const found = await this.repository
+      .search()
+      .where(field as never)
+      .equal(value)
+      .and("deleted" as never)
+      .false()
+      .return.all();
+    return this.withIds(found);
   }
 
   async findAllByDate(value: Date | string | number, field: string) {
     await this.initializeRepository();
-    return await this.repository.search().where(field).on(value).return.all();
+    const found = await this.repository
+      .search()
+      .where(field as never)
+      .on(value)
+      .and("deleted" as never)
+      .false()
+      .return.all();
+    return this.withIds(found);
   }
 
   async findByUUID(uuid: string) {
-    await this.initializeRepository();
     return this.findFirstByField(uuid, "uuid");
   }
 
-  async createAndSave(data: EntityData) {
-    await this.initializeRepository();
-    data.uuid = crypto.randomUUID();
-    data.createdAt = new Date().getTime();
-    let u = await this.repository.createAndSave(data);
-    return u;
-  }
-
   async createEntity() {
-    await this.initializeRepository();
-    const e = this.repository.createEntity();
+    const e = {} as T;
     e.uuid = crypto.randomUUID();
     e.createdAt = new Date().getTime();
+    e.deleted = false;
     return e;
   }
 
   async findAll() {
     await this.initializeRepository();
-    return await this.repository.search().where("deleted").false().return.all();
+    return this.withIds(
+      await this.repository
+        .search()
+        .where("deleted" as never)
+        .false()
+        .return.all()
+    );
   }
 
+  // redis-om returns an empty entity for an unknown id, so this does not tell you whether it exists.
+  // Use findByIdOrThrow when the record must exist.
   async findByEntityID(entityID: string) {
     await this.initializeRepository();
-    return await this.repository.fetch(entityID);
+    return this.withId(await this.repository.fetch(entityID));
+  }
+
+  // Unknown, malformed and soft-deleted ids all become the same 404.
+  async findByIdOrThrow(entityID: string, label: string = "Record"): Promise<T> {
+    const entity = entityID ? await this.findByEntityID(entityID) : undefined;
+    if (!entity || entity.uuid == null || entity.deleted) {
+      throw new NotFoundError(`${label} not found`);
+    }
+    return entity;
   }
 
   async deleteEntity(entityID: string) {
-    await this.initializeRepository();
-    const entity = await this.repository.fetch(entityID);
+    const entity = await this.findByIdOrThrow(entityID);
 
     entity.deleted = true;
     entity.deletedAt = new Date().getTime();
 
-    return await this.repository.save(entity);
+    return await this.save(entity);
   }
 }

@@ -1,4 +1,3 @@
-
 export default interface BookingFilterDto {
   court: string | undefined;
   from: number | undefined;

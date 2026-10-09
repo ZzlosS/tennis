@@ -1,5 +1,4 @@
-
-export default interface MatchDto { 
+export default interface MatchDto {
   firstTeam: string[];
   secondTeam: string[];
   result: string[];

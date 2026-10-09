@@ -7,7 +7,6 @@ interface PingResponse {
 @Tags("Ping")
 @Route("ping")
 export default class PingController {
-
   @Security("jwt")
   @Get("/")
   public async getMessage(): Promise<PingResponse> {

@@ -1,7 +1,6 @@
 import { Schema } from "redis-om";
-import { Racket } from "../entities/racket";
 
-let racketSchema = new Schema(Racket, {
+const racketSchema = new Schema("Racket", {
   uuid: { type: "string" },
   brand: { type: "string" },
   model: { type: "string" },

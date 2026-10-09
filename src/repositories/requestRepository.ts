@@ -1,5 +1,5 @@
-import EnemyRequestDto from "../dtos/enemyRequestDto";
 import { EnemyRequest } from "../entities/requestEnemy";
+import { ConflictError } from "../errors/appError";
 import CreateEnemyRequest from "../requests/createEnemyRequest";
 import UpdateEnemyRequest from "../requests/updateEnemyRequest";
 import { enemyRequestSchema } from "../schemas/enemyRequestSchema";
@@ -10,56 +10,54 @@ export default class EnemyRequestRepository extends BaseRepository<EnemyRequest>
     super(enemyRequestSchema);
   }
 
-  async createEnemyRequest(createEnemyRequest: CreateEnemyRequest) {
+  async createEnemyRequest(createEnemyRequest: CreateEnemyRequest, playerEntityID: string) {
     const enemyRequest = await this.createEntity();
 
     enemyRequest.bookingEntityID = createEnemyRequest.bookingEntityID;
-    enemyRequest.playerEntityID = createEnemyRequest.playerEntityID;
+    enemyRequest.playerEntityID = playerEntityID;
     enemyRequest.numberOfPlayersNeeded = createEnemyRequest.numberOfPlayersNeeded;
     enemyRequest.active = true;
     enemyRequest.acceptedBy = [];
 
-    return await this.repository.save(enemyRequest);
+    return await this.save(enemyRequest);
   }
 
   async enemyRequestAccepted(requestEntityID: string, playerEntityID: string) {
-    await this.initializeRepository();
-    const enemyRequest = await this.repository.fetch(requestEntityID);
+    const enemyRequest = await this.findByIdOrThrow(requestEntityID, "Request");
 
-    enemyRequest.acceptedBy.push(playerEntityID);
-    
-    if (enemyRequest.acceptedBy.length == enemyRequest.numberOfPlayersNeeded) {
+    if (!enemyRequest.active) {
+      throw new ConflictError("This request is already full");
+    }
+
+    enemyRequest.acceptedBy = [...new Set([...(enemyRequest.acceptedBy ?? []), playerEntityID])];
+
+    if (enemyRequest.acceptedBy.length >= enemyRequest.numberOfPlayersNeeded) {
       enemyRequest.active = false;
     }
-    
-    enemyRequest.acceptedBy = [...new Set(enemyRequest.acceptedBy)];
 
-    return await this.repository.save(enemyRequest);
+    return await this.save(enemyRequest);
   }
 
   async allActiveEnemyRequests() {
     await this.initializeRepository();
-    return await this.repository.search().where("active").true().return.all();
+    return this.withIds(await this.repository.search().where("active").true().and("deleted").false().return.all());
   }
 
   async allInactiveEnemyRequests() {
     await this.initializeRepository();
-    return await this.repository.search().where("active").false().return.all();
+    return this.withIds(await this.repository.search().where("active").false().and("deleted").false().return.all());
   }
 
   async updateEnemyRequest(entityId: string, updateRequest: UpdateEnemyRequest) {
-    const player = await this.findByEntityID(entityId);
+    const enemyRequest = await this.findByIdOrThrow(entityId, "Request");
 
-    if(updateRequest.bookingEntityID){
-      player.bookingEntityID = updateRequest.bookingEntityID;
+    if (updateRequest.bookingEntityID) {
+      enemyRequest.bookingEntityID = updateRequest.bookingEntityID;
     }
-    if(updateRequest.numberOfPlayersNeeded){
-      player.numberOfPlayersNeeded = updateRequest.numberOfPlayersNeeded;
-    }
-    if(updateRequest.acceptedBy){
-      player.acceptedBy = updateRequest.acceptedBy;
+    if (updateRequest.numberOfPlayersNeeded) {
+      enemyRequest.numberOfPlayersNeeded = updateRequest.numberOfPlayersNeeded;
     }
 
-    return await this.save(player);
+    return await this.save(enemyRequest);
   }
 }

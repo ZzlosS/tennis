@@ -14,7 +14,7 @@ export default class RacketRepository extends BaseRepository<Racket> {
     let rackets: Racket[] = [];
     try {
       await this.initializeRepository();
-      rackets = await this.repository.fetch(racketsArray);
+      rackets = this.withIds(await this.repository.fetch(racketsArray));
     } catch (error) {
       console.log("🚀 ~ RacketRepository ~ getUserRackets ~ error:", error);
     }
@@ -27,7 +27,7 @@ export default class RacketRepository extends BaseRepository<Racket> {
     racket.brand = dto.brand;
     racket.model = dto.model;
     racket.year = dto.year;
-    racket.brand = dto.brand;
+    racket.weight = dto.weight;
     racket.level = dto.level;
     racket.headSizeInch = dto.headSizeInch;
     racket.balance = dto.balance;
@@ -38,33 +38,33 @@ export default class RacketRepository extends BaseRepository<Racket> {
   }
 
   async updateRacket(entityId: string, updateRequest: UpdateRacketRequest) {
-    const racket = await this.findByEntityID(entityId);
+    const racket = await this.findByIdOrThrow(entityId, "Racket");
 
-    if(updateRequest.brand){
+    if (updateRequest.brand) {
       racket.brand = updateRequest.brand;
     }
-    if(updateRequest.model){
+    if (updateRequest.model) {
       racket.model = updateRequest.model;
     }
-    if(updateRequest.level){
+    if (updateRequest.level) {
       racket.level = updateRequest.level;
     }
-    if(updateRequest.year){
+    if (updateRequest.year) {
       racket.year = updateRequest.year;
     }
-    if(updateRequest.weight){
+    if (updateRequest.weight) {
       racket.weight = updateRequest.weight;
     }
-    if(updateRequest.headSizeInch){
+    if (updateRequest.headSizeInch) {
       racket.headSizeInch = updateRequest.headSizeInch;
     }
-    if(updateRequest.balance){
+    if (updateRequest.balance) {
       racket.balance = updateRequest.balance;
     }
-    if(updateRequest.stringPattern){
+    if (updateRequest.stringPattern) {
       racket.stringPattern = updateRequest.stringPattern;
     }
-    if(updateRequest.recommendedStrings){
+    if (updateRequest.recommendedStrings) {
       racket.recommendedStrings = updateRequest.recommendedStrings;
     }
 

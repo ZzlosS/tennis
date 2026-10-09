@@ -1,7 +1,6 @@
 node_modules
 .vscode/settings.json
 PROJECT_SETUP
-package-lock.json
 .env
 build
 gitfix.sh

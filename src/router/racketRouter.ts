@@ -1,81 +1,57 @@
-import express, { NextFunction, Request, Response } from "express";
-import { authenticateToken } from "../middleware/auth";
+import express from "express";
+import { authenticateToken, currentUser } from "../middleware/auth";
 import RacketController from "../controller/racketController";
-import AssignRacketRequest from "../requests/assignRacketRequest";
-import CreateRacketRequest from "../requests/createRacketRequest";
+import { handle } from "./handle";
+import { validate } from "../middleware/validate";
+import { assignRacketBody, createRacketBody, updateRacketBody } from "../validation/rackets";
 
 const racketRouter = express.Router();
 
-racketRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new RacketController(req.entityId || '');
-        const response = await controller.deleteRacket(req.params['entityId']);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+const controller = (req: express.Request) => new RacketController(currentUser(req));
 
-racketRouter.get("/", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new RacketController(req.entityId || '');
-        const response = await controller.getRackets();
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+racketRouter.delete(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).deleteRacket(req.params["entityId"]))
+);
 
-racketRouter.get("/all", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new RacketController(req.entityId || '');
-        const response = await controller.getAllRackets();
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+racketRouter.get(
+  "/",
+  authenticateToken,
+  handle((req) => controller(req).getRackets())
+);
 
-racketRouter.post("/", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new RacketController(req.entityId || '');
-        const response = await controller.createRacket(req.body as CreateRacketRequest);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+racketRouter.get(
+  "/all",
+  authenticateToken,
+  handle((req) => controller(req).getAllRackets())
+);
 
-racketRouter.post("/assign", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new RacketController(req.entityId || '');
-        const response = await controller.assignRacketToPlayer(req.body as AssignRacketRequest);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+racketRouter.post(
+  "/",
+  authenticateToken,
+  validate({ body: createRacketBody }),
+  handle((req) => controller(req).createRacket(req.body))
+);
 
-racketRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new RacketController(req.entityId || '');
-        const response = await controller.updateRacket(req.body, req.params['entityId']);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+racketRouter.post(
+  "/assign",
+  authenticateToken,
+  validate({ body: assignRacketBody }),
+  handle((req) => controller(req).assignRacketToPlayer(req.body))
+);
 
+racketRouter.patch(
+  "/:entityId",
+  authenticateToken,
+  validate({ body: updateRacketBody }),
+  handle((req) => controller(req).updateRacket(req.body, req.params["entityId"]))
+);
 
-racketRouter.get("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const controller = new RacketController(req.entityId || '');
-        const response = await controller.getRacket(req.params['entityId']);
-        return res.send(response);
-    } catch (error) {
-        next(error)
-    }
-});
+racketRouter.get(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).getRacket(req.params["entityId"]))
+);
 
 export default racketRouter;
-

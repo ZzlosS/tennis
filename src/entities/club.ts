@@ -1,16 +1,13 @@
 import BaseEntity from "./baseEntity";
 
-interface Club {
+type Club = BaseEntity & {
   name: string;
   address: string;
   description: string;
   city: string;
   country: string;
   courts: number;
-}
-
-class Club extends BaseEntity {
-  courts: number = 0;
-}
+  admins: string[];
+};
 
 export { Club };
