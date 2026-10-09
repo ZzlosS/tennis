@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { config } from "./config";
+import authRouter from "./router/authRouter";
+import healthRouter from "./router/healthRouter";
 import playerRouter from "./router/playerRouter";
 import pingRouter from "./router/pingRouter";
 import racketRouter from "./router/racketRouter";
@@ -35,6 +37,8 @@ export function createApp(): Application {
     res.send("TS App is Running");
   });
 
+  app.use(healthRouter);
+  app.use("/auth", authRouter);
   app.use("/players", playerRouter);
   app.use("/rackets", racketRouter);
   app.use("/clubs", clubRouter);

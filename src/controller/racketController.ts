@@ -7,18 +7,21 @@ import AssignRacketRequest from "../requests/assignRacketRequest";
 import CreateRacketRequest from "../requests/createRacketRequest";
 import { Racket } from "../entities/racket";
 import UpdateRacketRequest from "../requests/updateRacketRequest";
+import Role from "../enums/role";
+import { requireRole } from "../services/access";
+import { AuthUser } from "../services/tokenService";
 
 @Tags("Rackets")
 @Route("rackets")
 export default class RacketController {
   repository: RacketRepository;
   playerRepository: PlayerRepository;
-  userId: string;
+  user: AuthUser;
 
-  constructor(userId: string) {
+  constructor(user: AuthUser) {
     this.repository = new RacketRepository();
     this.playerRepository = new PlayerRepository();
-    this.userId = userId;
+    this.user = user;
   }
 
   private async convertPlayerModelToResponse(racket: Racket): Promise<RacketResponse> {
@@ -39,10 +42,10 @@ export default class RacketController {
   @Security("jwt")
   @Get("/")
   async getRackets(): Promise<RacketResponse[]> {
-    let player = await this.playerRepository.findByEntityID(this.userId);
+    let player = await this.playerRepository.findByIdOrThrow(this.user.id, "Player");
 
-    if (!player.rackets) {
-      throw new NotFoundError("No racket for this player!");
+    if (!player.rackets || player.rackets.length === 0) {
+      return [];
     }
 
     let rackets = await this.repository.getUserRackets(player.rackets);
@@ -73,6 +76,7 @@ export default class RacketController {
   @Post("/")
   @Security("jwt")
   async createRacket(@Body() createRacket: CreateRacketRequest): Promise<string> {
+    requireRole(this.user, Role.ADMIN);
     let racketEID = await this.repository.createRacket(createRacket);
 
     return racketEID;
@@ -81,8 +85,9 @@ export default class RacketController {
   @Post("/assign")
   @Security("jwt")
   async assignRacketToPlayer(@Body() assignRequest: AssignRacketRequest): Promise<any> {
-    let player = await this.playerRepository.findByEntityID(assignRequest.playerEid);
-    let playerEID = await this.playerRepository.assignRacketToPlayer(player, assignRequest.racketEid);
+    await this.repository.findByIdOrThrow(assignRequest.racketEid, "Racket");
+    const player = await this.playerRepository.findByIdOrThrow(this.user.id, "Player");
+    await this.playerRepository.assignRacketToPlayer(player, assignRequest.racketEid);
 
     return { assigned: true };
   }
@@ -90,18 +95,20 @@ export default class RacketController {
   @Delete("/{entityId}")
   @Security("jwt")
   async deleteRacket(@Path() entityId: string): Promise<string> {
+    requireRole(this.user, Role.ADMIN);
     return await this.repository.deleteEntity(entityId);
   }
 
   @Get("/{entityId}")
   @Security("jwt")
   async getRacket(@Path() entityId: string): Promise<RacketResponse> {
-    return await this.convertPlayerModelToResponse(await this.repository.findByEntityID(entityId));
+    return await this.convertPlayerModelToResponse(await this.repository.findByIdOrThrow(entityId, "Racket"));
   }
 
   @Patch("/{entityId}")
   @Security("jwt")
   async updateRacket(@Body() updateRequest: UpdateRacketRequest, @Path() entityId: string): Promise<string> {
+    requireRole(this.user, Role.ADMIN);
     return await this.repository.updateRacket(entityId, updateRequest);
   }
 }

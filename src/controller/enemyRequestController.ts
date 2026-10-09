@@ -8,6 +8,9 @@ import EnemyRequestResponse from "../responses/enemyRequestResponse";
 import CourtRepository from "../repositories/courtRepository";
 import AcceptEnemyRequest from "../requests/acceptEnemyRequest";
 import UpdateEnemyRequest from "../requests/updateEnemyRequest";
+import { ForbiddenError } from "../errors/appError";
+import { assertSelfOrAdmin } from "../services/access";
+import { AuthUser } from "../services/tokenService";
 
 @Tags("Requests")
 @Route("requests")
@@ -16,8 +19,10 @@ export default class EnemyRequestController {
   playerRepository: PlayerRepository;
   bookingRepository: BookingRepository;
   courtRepository: CourtRepository;
+  user: AuthUser;
 
-  constructor() {
+  constructor(user: AuthUser) {
+    this.user = user;
     this.repository = new EnemyRequestRepository();
     this.bookingRepository = new BookingRepository();
     this.playerRepository = new PlayerRepository();
@@ -28,13 +33,18 @@ export default class EnemyRequestController {
   @Post("/")
   @Security("jwt")
   async createRequest(@Body() createRequest: CreateEnemyRequest) {
-    return await this.repository.createEnemyRequest(createRequest);
+    await this.assertOwnsBooking(createRequest.bookingEntityID);
+    return await this.repository.createEnemyRequest(createRequest, this.user.id);
   }
 
   @Post("/accept")
   @Security("jwt")
   async acceptRequest(@Body() acceptRequest: AcceptEnemyRequest) {
-    return await this.repository.enemyRequestAccepted(acceptRequest.requestEntityID, acceptRequest.playerEntityID);
+    const request = await this.repository.findByIdOrThrow(acceptRequest.requestEntityID, "Request");
+    if (request.playerEntityID === this.user.id) {
+      throw new ForbiddenError("You cannot accept your own request");
+    }
+    return await this.repository.enemyRequestAccepted(acceptRequest.requestEntityID, this.user.id);
   }
 
   @Get("/")
@@ -91,18 +101,32 @@ export default class EnemyRequestController {
   @Delete("/{entityId}")
   @Security("jwt")
   async deleteEnemyRequest(@Path() entityId: string): Promise<string> {
+    assertSelfOrAdmin(this.user, (await this.repository.findByIdOrThrow(entityId, "Request")).playerEntityID);
     return await this.repository.deleteEntity(entityId);
   }
 
   @Get("/{entityId}")
   @Security("jwt")
   async getEnemyRequest(@Path() entityId: string): Promise<EnemyRequestResponse> {
-    return await this.convertMatchModelToResponse(await this.repository.findByEntityID(entityId));
+    return await this.convertMatchModelToResponse(await this.repository.findByIdOrThrow(entityId, "Request"));
   }
 
   @Patch("/{entityId}")
   @Security("jwt")
   async updateEnemyRequest(@Body() updateRequest: UpdateEnemyRequest, @Path() entityId: string): Promise<string> {
+    const request = await this.repository.findByIdOrThrow(entityId, "Request");
+    assertSelfOrAdmin(this.user, request.playerEntityID);
+    if (updateRequest.bookingEntityID) {
+      await this.assertOwnsBooking(updateRequest.bookingEntityID);
+    }
     return await this.repository.updateEnemyRequest(entityId, updateRequest);
+  }
+
+  // Only the person who holds a booking can look for a partner for it.
+  private async assertOwnsBooking(bookingEntityID: string) {
+    const booking = await this.bookingRepository.findByIdOrThrow(bookingEntityID, "Booking");
+    if (booking.player !== this.user.id) {
+      throw new ForbiddenError("You can only look for a partner for your own booking");
+    }
   }
 }

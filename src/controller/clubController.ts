@@ -6,21 +6,27 @@ import CourtRepository from "../repositories/courtRepository";
 import CourtResponse from "../responses/courtResponse";
 import { Club } from "../entities/club";
 import UpdateClubRequest from "../requests/updateClubRequest";
+import Role from "../enums/role";
+import { AuthUser } from "../services/tokenService";
+import { assertClubAdmin, requireRole } from "../services/access";
 
 @Tags("Clubs")
 @Route("clubs")
 export default class ClubsController {
   repository: ClubRepository;
   courtRepository: CourtRepository;
+  user: AuthUser;
 
-  constructor() {
+  constructor(user: AuthUser) {
     this.repository = new ClubRepository();
     this.courtRepository = new CourtRepository();
+    this.user = user;
   }
 
   @Security("jwt")
   @Post("/")
   async createClub(@Body() createClub: ClubCreateRequest): Promise<any> {
+    requireRole(this.user, Role.ADMIN);
     let clubEID = await this.repository.createClub(createClub);
 
     return { entityId: clubEID };
@@ -51,7 +57,7 @@ export default class ClubsController {
   @Security("jwt")
   @Get("/{entityId}")
   async getById(@Path() entityId: string): Promise<ClubResponse> {
-    const club = await this.repository.findByEntityID(entityId);
+    const club = await this.repository.findByIdOrThrow(entityId, "Club");
     const clubCourts = await this.courtRepository.findClubCourts(club.entityId);
     const courts = clubCourts.map((court) => {
       return {
@@ -79,12 +85,14 @@ export default class ClubsController {
   @Security("jwt")
   @Delete("/{entityId}")
   async deleteClub(@Path() entityId: string): Promise<string> {
+    assertClubAdmin(this.user, await this.repository.findByIdOrThrow(entityId, "Club"));
     return await this.repository.deleteEntity(entityId);
   }
 
   @Security("jwt")
   @Patch("/{entityId}")
   async updateClub(@Body() updateRequest: UpdateClubRequest, @Path() entityId: string): Promise<string> {
+    assertClubAdmin(this.user, await this.repository.findByIdOrThrow(entityId, "Club"));
     return await this.repository.updateClub(entityId, updateRequest);
   }
 

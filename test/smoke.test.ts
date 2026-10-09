@@ -22,7 +22,7 @@ describe("smoke", () => {
   });
 
   it("answers malformed JSON with VALIDATION_FAILED", async () => {
-    const response = await api().post("/players/login").set("Content-Type", "application/json").send("{not json");
+    const response = await api().post("/auth/login").set("Content-Type", "application/json").send("{not json");
     expect(response.status).toBe(400);
     expect(response.body.error.code).toBe("VALIDATION_FAILED");
   });

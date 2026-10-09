@@ -7,6 +7,10 @@ import CreateMatchRequest from "../requests/createMatchRequest";
 import PlayerRepository from "../repositories/playerRepository";
 import { Match } from "../entities/match";
 import UpdateMatchRequest from "../requests/updateMatchRequest";
+import { splitIds } from "../repositories/matchRepository";
+import { ForbiddenError } from "../errors/appError";
+import { isAdmin } from "../services/access";
+import { AuthUser } from "../services/tokenService";
 
 @Tags("Matches")
 @Route("matches")
@@ -15,8 +19,10 @@ export default class MatchController {
   courtRepository: CourtRepository;
   clubRepository: ClubRepository;
   playerRepository: PlayerRepository;
+  user: AuthUser;
 
-  constructor() {
+  constructor(user: AuthUser) {
+    this.user = user;
     this.repository = new MatchRepository();
     this.courtRepository = new CourtRepository();
     this.clubRepository = new ClubRepository();
@@ -50,25 +56,31 @@ export default class MatchController {
   @Get("/{entityId}")
   @Security("jwt")
   async getById(@Path() entityId: string): Promise<MatchResponse> {
-    const match = await this.repository.findByEntityID(entityId);
+    const match = await this.repository.findByIdOrThrow(entityId, "Match");
     return await this.convertMatchModelToResponse(match);
   }
 
   @Post("/")
   @Security("jwt")
   async createMatch(@Body() createMatch: CreateMatchRequest): Promise<string> {
+    const players = [...splitIds(createMatch.firstTeam), ...splitIds(createMatch.secondTeam)];
+    if (!isAdmin(this.user) && !players.includes(this.user.id)) {
+      throw new ForbiddenError("You can only record matches you played in");
+    }
     return await this.repository.createMatch(createMatch);
   }
 
   @Delete("/{entityId}")
   @Security("jwt")
   async deleteMatch(@Path() entityId: string): Promise<string> {
+    this.assertPlayedIn(await this.repository.findByIdOrThrow(entityId, "Match"));
     return await this.repository.deleteEntity(entityId);
   }
 
   @Patch("/{entityId}")
   @Security("jwt")
   async updateMatch(@Body() updateRequest: UpdateMatchRequest, @Path() entityId: string): Promise<string> {
+    this.assertPlayedIn(await this.repository.findByIdOrThrow(entityId, "Match"));
     return await this.repository.updateMatch(entityId, updateRequest);
   }
 
@@ -98,5 +110,13 @@ export default class MatchController {
       courtName: court.name,
       courtSurface: court.surface,
     } as MatchResponse;
+  }
+
+  // Only the players in a match, or an ADMIN, can change or remove it.
+  private assertPlayedIn(match: Match) {
+    const players = [...(match.firstTeam ?? []), ...(match.secondTeam ?? [])];
+    if (!isAdmin(this.user) && !players.includes(this.user.id)) {
+      throw new ForbiddenError();
+    }
   }
 }

@@ -5,7 +5,7 @@ export default interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
-  nickname: string;
+  nickname?: string;
   level: PlayerLevel;
   address: string;
   city: string;

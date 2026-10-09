@@ -1,15 +1,20 @@
 version: "3.7"
 
 services:
-  # app:
-  #   container_name: app
-  #   restart: always
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   env_file: env/local.env
-  #   ports:
-  #     - 8787:8787
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 8787:8787
+    environment:
+      REDIS_URL: redis://redis_stack:6379
+      # Docker Compose reads these from .env (see example.env).
+      # Required: the app stops at startup with a clear message if it is empty.
+      JWT_SECRET: ${JWT_SECRET:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+    depends_on:
+      redis_stack:
+        condition: service_healthy
 
   redis_stack:
     image: redis/redis-stack:7.4.0-v3
@@ -18,6 +23,11 @@ services:
       - '8001:8001'
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   # Throwaway Redis for `npm test`: port 6380, no volume, wiped on restart.
   redis_test:

@@ -1,88 +1,50 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import PlayerController from "../controller/playerController";
 import PlayerLevel from "../enums/playerLevel";
-import { authenticateToken } from "../middleware/auth";
+import { authenticateToken, currentUser } from "../middleware/auth";
+import { handle } from "./handle";
+import { validate } from "../middleware/validate";
+import { updatePlayerBody } from "../validation/auth";
 
 const playerRouter = express.Router();
 
-playerRouter.post("/login", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.login(req.body);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+const controller = (req: express.Request) => new PlayerController(currentUser(req));
 
-playerRouter.post("/register", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.register(req.body);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+playerRouter.get(
+  "/level/:level",
+  authenticateToken,
+  handle((req) => controller(req).getPlayersByLevel(req.params["level"] as PlayerLevel))
+);
 
-playerRouter.get("/level/:level", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.getPlayersByLevel(req.params["level"] as PlayerLevel);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+playerRouter.get(
+  "/city/:city",
+  authenticateToken,
+  handle((req) => controller(req).getPlayersByCity(req.params["city"]))
+);
 
-playerRouter.get("/city/:city", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.getPlayersByCity(req.params["city"]);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+playerRouter.delete(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).deletePlayer(req.params["entityId"]))
+);
 
-playerRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.deletePlayer(req.params["entityId"]);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+playerRouter.patch(
+  "/:entityId",
+  authenticateToken,
+  validate({ body: updatePlayerBody }),
+  handle((req) => controller(req).updatePlayer(req.body, req.params["entityId"]))
+);
 
-playerRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.updatePlayer(req.body, req.params["entityId"]);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+playerRouter.get(
+  "/",
+  authenticateToken,
+  handle((req) => controller(req).getAll())
+);
 
-playerRouter.get("/", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.getAll();
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
-
-playerRouter.get("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new PlayerController();
-    const response = await controller.getByEntityId(req.params["entityId"]);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+playerRouter.get(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).getByEntityId(req.params["entityId"]))
+);
 
 export default playerRouter;

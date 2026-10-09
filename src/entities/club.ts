@@ -7,6 +7,7 @@ interface Club {
   city: string;
   country: string;
   courts: number;
+  admins: string[];
 }
 
 class Club extends BaseEntity {

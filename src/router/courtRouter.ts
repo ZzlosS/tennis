@@ -1,94 +1,64 @@
-import express, { NextFunction, Request, Response } from "express";
-import { authenticateToken } from "../middleware/auth";
+import express from "express";
+import { authenticateToken, currentUser } from "../middleware/auth";
 import CourtController from "../controller/courtController";
-import CourtCreateRequest from "../requests/courtCreateRequest";
-import AssignCourtRequest from "../requests/assignCourtRequest";
+import { handle } from "./handle";
+import { validate } from "../middleware/validate";
+import { assignCourtBody, courtPriceQuery, createCourtBody, updateCourtBody } from "../validation/clubs";
 
 const courtRouter = express.Router();
 
-courtRouter.post("/", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
-    const response = await controller.createCourt(req.body as CourtCreateRequest);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+const controller = (req: express.Request) => new CourtController(currentUser(req));
 
-courtRouter.get("/price", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
+courtRouter.post(
+  "/",
+  authenticateToken,
+  validate({ body: createCourtBody }),
+  handle((req) => controller(req).createCourt(req.body))
+);
 
-    const from: number = parseInt(req.query["from"] as string);
-    const to: number = parseInt(req.query["to"] as string);
+courtRouter.get(
+  "/price",
+  authenticateToken,
+  validate({ query: courtPriceQuery }),
+  handle((req) => controller(req).findByPrice(Number(req.query["from"]), Number(req.query["to"])))
+);
 
-    const response = await controller.findByPrice(from, to);
+courtRouter.post(
+  "/assign",
+  authenticateToken,
+  validate({ body: assignCourtBody }),
+  handle((req) => controller(req).assignCourtToClub(req.body))
+);
 
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+courtRouter.get(
+  "/all",
+  authenticateToken,
+  handle((req) => controller(req).getAllCourts())
+);
 
-courtRouter.post("/assign", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
-    const response = await controller.assignCourtToClub(req.body as AssignCourtRequest);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+courtRouter.get(
+  "/unassigned",
+  authenticateToken,
+  handle((req) => controller(req).getUnassignedCourts())
+);
 
-courtRouter.get("/all", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
-    const response = await controller.getAllCourts();
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+courtRouter.get(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).getById(req.params["entityId"]))
+);
 
-courtRouter.get("/unassigned", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
-    const response = await controller.getUnassignedCourts();
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+courtRouter.delete(
+  "/:entityId",
+  authenticateToken,
+  handle((req) => controller(req).deleteCourt(req.params["entityId"]))
+);
 
-courtRouter.get("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
-    const response = await controller.getById(req.params["entityId"]);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
-
-courtRouter.delete("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
-    const response = await controller.deleteCourt(req.params["entityId"]);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
-
-courtRouter.patch("/:entityId", authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const controller = new CourtController();
-    const response = await controller.updateCourt(req.body, req.params["entityId"]);
-    return res.send(response);
-  } catch (error) {
-    next(error);
-  }
-});
+courtRouter.patch(
+  "/:entityId",
+  authenticateToken,
+  validate({ body: updateCourtBody }),
+  handle((req) => controller(req).updateCourt(req.body, req.params["entityId"]))
+);
 
 export default courtRouter;

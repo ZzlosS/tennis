@@ -5,6 +5,13 @@ import UpdateMatchRequest from "../requests/updateMatchRequest";
 import { matchSchema } from "../schemas/matchSchema";
 import BaseRepository from "./baseRepository";
 
+// Teams and results arrive as comma-separated strings.
+export const splitIds = (value: string) =>
+  value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
 export default class MatchRepository extends BaseRepository<Match> {
   constructor() {
     super(matchSchema);
@@ -13,9 +20,9 @@ export default class MatchRepository extends BaseRepository<Match> {
   async createMatch(createMatchRequest: CreateMatchRequest) {
     const match = await this.createEntity();
 
-    match.firstTeam = createMatchRequest.firstTeam.split(",");
-    match.secondTeam = createMatchRequest.secondTeam.split(",");
-    match.result = createMatchRequest.result.split(",");
+    match.firstTeam = splitIds(createMatchRequest.firstTeam);
+    match.secondTeam = splitIds(createMatchRequest.secondTeam);
+    match.result = splitIds(createMatchRequest.result);
     match.court = createMatchRequest.court;
     match.date = new Date(createMatchRequest.date);
 
@@ -28,17 +35,19 @@ export default class MatchRepository extends BaseRepository<Match> {
 
   async findPlayerMatches(playerEntityID: string) {
     await this.initializeRepository();
-    return await this.repository
+    // Filtered in code: in a query, AND binds tighter than OR and would change the meaning.
+    const matches = await this.repository
       .search()
       .where("firstTeam")
       .contains(playerEntityID)
       .or("secondTeam")
       .contains(playerEntityID)
       .return.all();
+    return matches.filter((match) => !match.deleted);
   }
 
   async updateMatch(entityId: string, updateRequest: UpdateMatchRequest) {
-    const match = await this.findByEntityID(entityId);
+    const match = await this.findByIdOrThrow(entityId, "Match");
 
     if (updateRequest.firstTeam) {
       match.firstTeam = updateRequest.firstTeam;

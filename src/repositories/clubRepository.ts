@@ -17,13 +17,28 @@ export default class ClubRepository extends BaseRepository<Club> {
     club.description = createRequest.description;
     club.city = createRequest.city;
     club.country = createRequest.country;
+    club.admins = [];
 
     return await this.repository.save(club);
   }
 
   async incrementClubCourtCount(clubEntityID: string) {
-    const club = await this.findByEntityID(clubEntityID);
+    const club = await this.findByIdOrThrow(clubEntityID, "Club");
     club.courts++;
+    return await this.repository.save(club);
+  }
+
+  async decrementClubCourtCount(clubEntityID: string) {
+    const club = await this.findByEntityID(clubEntityID);
+    if (club.uuid != null && club.courts > 0) {
+      club.courts--;
+      return await this.repository.save(club);
+    }
+  }
+
+  async addAdmin(clubEntityID: string, playerEntityID: string) {
+    const club = await this.findByIdOrThrow(clubEntityID, "Club");
+    club.admins = [...new Set([...(club.admins ?? []), playerEntityID])];
     return await this.repository.save(club);
   }
 
@@ -32,6 +47,24 @@ export default class ClubRepository extends BaseRepository<Club> {
   }
 
   async updateClub(entityId: string, updateRequest: UpdateClubRequest) {
-    return "";
+    const club = await this.findByIdOrThrow(entityId, "Club");
+
+    if (updateRequest.name) {
+      club.name = updateRequest.name;
+    }
+    if (updateRequest.address) {
+      club.address = updateRequest.address;
+    }
+    if (updateRequest.description) {
+      club.description = updateRequest.description;
+    }
+    if (updateRequest.city) {
+      club.city = updateRequest.city;
+    }
+    if (updateRequest.country) {
+      club.country = updateRequest.country;
+    }
+
+    return await this.repository.save(club);
   }
 }

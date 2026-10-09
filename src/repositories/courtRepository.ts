@@ -10,7 +10,7 @@ export default class CourtRepository extends BaseRepository<Court> {
     super(courtSchema);
   }
 
-  async createCourt(createRequest: CourtCreateRequest) {
+  async createCourt(createRequest: CourtCreateRequest, clubEntityID: string = COURT_UNASSIGNED_CLUB) {
     const court = await this.createEntity();
 
     court.name = createRequest.name;
@@ -19,7 +19,7 @@ export default class CourtRepository extends BaseRepository<Court> {
     court.roof = createRequest.roof;
     court.double = createRequest.double;
     court.pricePerHour = createRequest.pricePerHour;
-    court.club = COURT_UNASSIGNED_CLUB;
+    court.club = clubEntityID;
 
     return await this.repository.save(court);
   }
@@ -29,7 +29,7 @@ export default class CourtRepository extends BaseRepository<Court> {
   }
 
   async assignToClub(courtEntityID: string, clubEntityID: string) {
-    const court = await this.findByEntityID(courtEntityID);
+    const court = await this.findByIdOrThrow(courtEntityID, "Court");
     court.club = clubEntityID;
     return await this.repository.save(court);
   }
@@ -47,11 +47,13 @@ export default class CourtRepository extends BaseRepository<Court> {
 
     courts = courts.where("pricePerHour").lessThanOrEqualTo(to);
 
+    courts = courts.and("deleted").false();
+
     return await courts.return.all();
   }
 
   async updateCourt(entityId: string, updateRequest: UpdateCourtRequest) {
-    const court = await this.findByEntityID(entityId);
+    const court = await this.findByIdOrThrow(entityId, "Court");
 
     if (updateRequest.name) {
       court.name = updateRequest.name;

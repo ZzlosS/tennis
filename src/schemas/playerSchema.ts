@@ -7,6 +7,7 @@ let playerSchema = new Schema(Player, {
   lastName: { type: "string" },
   email: { type: "string" },
   password: { type: "string" },
+  role: { type: "string" },
   nickname: { type: "string" },
   level: { type: "string" },
   rackets: { type: "string[]" },

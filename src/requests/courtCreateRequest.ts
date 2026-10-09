@@ -7,4 +7,6 @@ export default interface CourtCreateRequest {
   roof: boolean;
   double: boolean;
   pricePerHour: number;
+  // Club admins must name their club. Without it an ADMIN creates an unassigned court.
+  clubId?: string;
 }

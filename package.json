@@ -10,13 +10,14 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.check.json",
-    "format": "prettier --write src test scripts",
+    "format": "prettier --write src test",
     "start": "node build/server.js",
     "predev": "npm run swagger",
     "prebuild": "npm run swagger",
     "build": "tsc",
     "dev": "concurrently \"nodemon src/server.ts\" \"nodemon -x tsoa spec\"",
-    "swagger": "tsoa spec"
+    "swagger": "tsoa spec",
+    "grant-role": "ts-node src/scripts/grantRole.ts"
   },
   "keywords": [],
   "author": "",

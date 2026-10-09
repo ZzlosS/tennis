@@ -27,7 +27,7 @@ export default class RacketRepository extends BaseRepository<Racket> {
     racket.brand = dto.brand;
     racket.model = dto.model;
     racket.year = dto.year;
-    racket.brand = dto.brand;
+    racket.weight = dto.weight;
     racket.level = dto.level;
     racket.headSizeInch = dto.headSizeInch;
     racket.balance = dto.balance;
@@ -38,7 +38,7 @@ export default class RacketRepository extends BaseRepository<Racket> {
   }
 
   async updateRacket(entityId: string, updateRequest: UpdateRacketRequest) {
-    const racket = await this.findByEntityID(entityId);
+    const racket = await this.findByIdOrThrow(entityId, "Racket");
 
     if (updateRequest.brand) {
       racket.brand = updateRequest.brand;

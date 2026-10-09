@@ -9,6 +9,7 @@ let clubSchema = new Schema(Club, {
   city: { type: "string" },
   country: { type: "string" },
   courts: { type: "number" },
+  admins: { type: "string[]" },
   createdAt: { type: "number" },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },

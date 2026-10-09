@@ -17,6 +17,7 @@ import { EnemyRequest } from "../entities/requestEnemy";
 import EnemyRequestRepository from "../repositories/requestRepository";
 import EnemyRequestDto from "../dtos/enemyRequestDto";
 import BookingCreateRequest from "../requests/bookingCreateRequest";
+import { hashPassword } from "../services/passwordService";
 
 function capitalizeFirstLetter(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -78,7 +79,7 @@ export async function insertPlayer(): Promise<string> {
   };
   console.table(dto);
 
-  const entityId = await repo.createPlayer(dto);
+  const entityId = await repo.createPlayer(dto, await hashPassword(dto.password));
   return entityId;
 }
 
@@ -114,7 +115,7 @@ export async function insertRequest(): Promise<string> {
     acceptedBy: [],
     active: true,
   };
-  const entityId = await requestRepo.createEnemyRequest(dto);
+  const entityId = await requestRepo.createEnemyRequest(dto, dto.playerEntityID);
   return entityId;
 }
 
@@ -124,12 +125,10 @@ export async function insertBooking(): Promise<string> {
     court: "01HBWM14MP0N1P6HHY4EZT8ZPH",
     from: 15,
     to: 17,
-    totalPrice: 1950 * 2,
-    player: "01HBRXA2H3A38GWP8JWZ5BX98A",
     bookingType: BookingType.ONE_TIME,
     date: new Date().toDateString(),
   };
-  const entityId = bookingRepo.createBooking(dto);
+  const entityId = bookingRepo.createBooking(dto, "01HBRXA2H3A38GWP8JWZ5BX98A", 1950 * 2);
   return entityId;
 }
 
