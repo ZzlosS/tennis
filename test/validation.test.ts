@@ -100,15 +100,12 @@ describe("bookings", () => {
 
   it("names the field that is wrong", async () => {
     const { court, player } = await setup();
-    const response = await api()
-      .post("/bookings")
-      .set(bearer(player.accessToken))
-      .send({
-        courtId: court,
-        startsAt: "2026-11-01T10:30:00Z",
-        endsAt: "2026-11-01T12:00:00Z",
-        bookingType: "ONE_TIME",
-      });
+    const response = await api().post("/bookings").set(bearer(player.accessToken)).send({
+      courtId: court,
+      startsAt: "2026-11-01T10:30:00Z",
+      endsAt: "2026-11-01T12:00:00Z",
+      bookingType: "ONE_TIME",
+    });
     expect(Object.keys(response.body.error.fields)).toEqual(["startsAt"]);
   });
 
