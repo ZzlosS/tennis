@@ -1,4 +1,6 @@
 import { Club } from "../entities/club";
+import { DEFAULT_CURRENCY } from "../http/money";
+import { PageQuery } from "../http/pagination";
 import ClubCreateRequest from "../requests/clubCreateRequest";
 import UpdateClubRequest from "../requests/updateClubRequest";
 import { clubSchema } from "../schemas/clubSchema";
@@ -17,24 +19,10 @@ export default class ClubRepository extends BaseRepository<Club> {
     club.description = createRequest.description;
     club.city = createRequest.city;
     club.country = createRequest.country;
+    club.currency = createRequest.currency ?? DEFAULT_CURRENCY;
     club.admins = [];
-    club.courts = 0;
 
     return await this.save(club);
-  }
-
-  async incrementClubCourtCount(clubEntityID: string) {
-    const club = await this.findByIdOrThrow(clubEntityID, "Club");
-    club.courts = (club.courts ?? 0) + 1;
-    return await this.save(club);
-  }
-
-  async decrementClubCourtCount(clubEntityID: string) {
-    const club = await this.findByEntityID(clubEntityID);
-    if (club.uuid != null && (club.courts ?? 0) > 0) {
-      club.courts--;
-      return await this.save(club);
-    }
   }
 
   async addAdmin(clubEntityID: string, playerEntityID: string) {
@@ -43,8 +31,8 @@ export default class ClubRepository extends BaseRepository<Club> {
     return await this.save(club);
   }
 
-  async findClubsByCity(city: string) {
-    return await this.findAllByField(city, "city");
+  async findClubsPage(city: string | undefined, query: PageQuery) {
+    return await this.findPage((search) => (city ? search.where("city").equals(city) : search), query);
   }
 
   async updateClub(entityId: string, updateRequest: UpdateClubRequest) {
@@ -56,7 +44,7 @@ export default class ClubRepository extends BaseRepository<Club> {
     if (updateRequest.address) {
       club.address = updateRequest.address;
     }
-    if (updateRequest.description) {
+    if (updateRequest.description !== undefined) {
       club.description = updateRequest.description;
     }
     if (updateRequest.city) {
@@ -64,6 +52,9 @@ export default class ClubRepository extends BaseRepository<Club> {
     }
     if (updateRequest.country) {
       club.country = updateRequest.country;
+    }
+    if (updateRequest.currency) {
+      club.currency = updateRequest.currency;
     }
 
     return await this.save(club);

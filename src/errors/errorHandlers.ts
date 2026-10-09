@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { ValidateError } from "tsoa";
 import AppError from "./appError";
 import { ErrorCode } from "./codes";
 
@@ -20,6 +21,18 @@ const errorResponder = (err: Error, request: Request, res: Response, next: NextF
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       error: { code: err.code, message: err.message, ...(err.fields ? { fields: err.fields } : {}) },
+    });
+  }
+
+  // tsoa checks the types of every body, query and path value after zod has checked the rules.
+  if (err instanceof ValidateError) {
+    const fields: Record<string, string[]> = {};
+    for (const [key, detail] of Object.entries(err.fields)) {
+      const name = key.replace(/^(body|requestBody)\.?/, "") || "_";
+      (fields[name] ??= []).push(detail.message);
+    }
+    return res.status(400).json({
+      error: { code: ErrorCode.VALIDATION_FAILED, message: "Validation failed", fields },
     });
   }
 

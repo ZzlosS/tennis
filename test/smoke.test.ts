@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { api } from "./helpers";
+import { api, raw } from "./helpers";
 import RedisClient from "../src/services/redisClient";
 
 describe("smoke", () => {
   it("serves the root route", async () => {
-    const response = await api().get("/");
+    const response = await raw().get("/");
     expect(response.status).toBe(200);
   });
 
@@ -15,7 +15,7 @@ describe("smoke", () => {
   });
 
   it("answers unknown paths with the standard error shape", async () => {
-    const response = await api().get("/does-not-exist");
+    const response = await raw().get("/does-not-exist");
     expect(response.status).toBe(404);
     expect(response.body.error.code).toBe("NOT_FOUND");
     expect(typeof response.body.error.message).toBe("string");

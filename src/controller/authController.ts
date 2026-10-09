@@ -1,8 +1,12 @@
-import { Body, Post, Response, Route, SuccessResponse, Tags } from "tsoa";
+import { Body, Example, Middlewares, Post, Response, Route, SuccessResponse, Tags } from "tsoa";
+import { authExample } from "../http/examples";
 import { Player } from "../entities/player";
 import Role from "../enums/role";
-import AppError, { ConflictError, UnauthorizedError } from "../errors/appError";
+import { ConflictError, UnauthorizedError } from "../errors/appError";
 import { ErrorCode } from "../errors/codes";
+import { validate } from "../middleware/validate";
+import { ErrorBody } from "../responses/common";
+import { loginBody, refreshBody, registerBody } from "../validation/auth";
 import PlayerRepository from "../repositories/playerRepository";
 import LoginRequest from "../requests/loginRequest";
 import RefreshRequest from "../requests/refreshRequest";
@@ -13,15 +17,18 @@ import { consumeRefreshToken, issueRefreshToken, revokeRefreshToken, signAccessT
 
 @Tags("Auth")
 @Route("auth")
-export default class AuthController {
+@Response<ErrorBody>(400, "VALIDATION_FAILED")
+export class AuthController {
   repository: PlayerRepository;
 
   constructor() {
     this.repository = new PlayerRepository();
   }
 
+  @Example(authExample)
   @SuccessResponse(201, "Created")
-  @Response<AppError>(409, "EMAIL_TAKEN")
+  @Response<ErrorBody>(409, "EMAIL_TAKEN")
+  @Middlewares(validate({ body: registerBody }))
   @Post("/register")
   async register(@Body() request: RegisterRequest): Promise<AuthResponse> {
     if (!(await this.repository.claimEmail(request.email))) {
@@ -42,7 +49,9 @@ export default class AuthController {
   }
 
   // Unknown email, wrong password and deleted account all give the same answer.
-  @Response<AppError>(401, "INVALID_CREDENTIALS")
+  @Example(authExample)
+  @Response<ErrorBody>(401, "INVALID_CREDENTIALS")
+  @Middlewares(validate({ body: loginBody }))
   @Post("/login")
   async login(@Body() request: LoginRequest): Promise<AuthResponse> {
     const player = await this.repository.findByEmail(request.email);
@@ -59,7 +68,9 @@ export default class AuthController {
   }
 
   // Each refresh token works once: using it returns a new pair.
-  @Response<AppError>(401, "UNAUTHENTICATED")
+  @Example(authExample)
+  @Response<ErrorBody>(401, "UNAUTHENTICATED")
+  @Middlewares(validate({ body: refreshBody }))
   @Post("/refresh")
   async refresh(@Body() request: RefreshRequest): Promise<AuthResponse> {
     const playerId = await consumeRefreshToken(request.refreshToken ?? "");
@@ -76,6 +87,7 @@ export default class AuthController {
   }
 
   @SuccessResponse(204, "Logged out")
+  @Middlewares(validate({ body: refreshBody }))
   @Post("/logout")
   async logout(@Body() request: RefreshRequest): Promise<void> {
     await revokeRefreshToken(request.refreshToken ?? "");
@@ -90,7 +102,7 @@ export default class AuthController {
       expiresIn,
       refreshToken: await issueRefreshToken(player.entityId),
       player: {
-        entityId: player.entityId,
+        id: player.entityId,
         firstName: player.firstName,
         lastName: player.lastName,
         nickname: player.nickname,

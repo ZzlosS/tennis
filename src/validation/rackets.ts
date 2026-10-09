@@ -1,6 +1,6 @@
 import { z } from "zod";
 import RacketLevels from "../enums/racketLevels";
-import { id, text } from "./common";
+import { text } from "./common";
 
 export const createRacketBody = z.object({
   brand: text(100),
@@ -15,7 +15,3 @@ export const createRacketBody = z.object({
 });
 
 export const updateRacketBody = createRacketBody.partial();
-
-export const assignRacketBody = z.object({
-  racketEid: id,
-});

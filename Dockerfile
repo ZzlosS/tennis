@@ -19,7 +19,7 @@ WORKDIR /app
 COPY package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/build ./build
-COPY --from=build /app/public ./public
+COPY --from=build /app/openapi ./openapi
 EXPOSE 8787
 USER node
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \

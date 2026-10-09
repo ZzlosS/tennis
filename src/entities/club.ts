@@ -6,7 +6,7 @@ type Club = BaseEntity & {
   description: string;
   city: string;
   country: string;
-  courts: number;
+  currency: string;
   admins: string[];
 };
 

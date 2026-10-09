@@ -2,17 +2,9 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { config } from "./config";
-import authRouter from "./router/authRouter";
 import healthRouter from "./router/healthRouter";
-import playerRouter from "./router/playerRouter";
-import pingRouter from "./router/pingRouter";
-import racketRouter from "./router/racketRouter";
-import clubRouter from "./router/clubRouter";
-import courtRouter from "./router/courtRouter";
 import { errorLogger, errorResponder, invalidPathHandler } from "./errors/errorHandlers";
-import bookingRouter from "./router/bookingRouter";
-import matchRouter from "./router/matchRouter";
-import enemyRequestRouter from "./router/enemyRequestRouter";
+import { RegisterRoutes } from "./generated/routes";
 
 // Builds the Express app without starting it, so tests can import it.
 export function createApp(): Application {
@@ -21,14 +13,15 @@ export function createApp(): Application {
   app.use(cors({ origin: config.CORS_ORIGINS }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.use(express.static("public"));
+  // The committed OpenAPI spec (openapi/v1.json), which Swagger UI and the app's generated client read.
+  app.use("/openapi", express.static("openapi"));
 
   app.use(
     "/docs",
     swaggerUi.serve,
     swaggerUi.setup(undefined, {
       swaggerOptions: {
-        url: "/swagger.json",
+        url: "/openapi/v1.json",
       },
     })
   );
@@ -38,15 +31,7 @@ export function createApp(): Application {
   });
 
   app.use(healthRouter);
-  app.use("/auth", authRouter);
-  app.use("/players", playerRouter);
-  app.use("/rackets", racketRouter);
-  app.use("/clubs", clubRouter);
-  app.use("/courts", courtRouter);
-  app.use("/bookings", bookingRouter);
-  app.use("/matches", matchRouter);
-  app.use("/requests", enemyRequestRouter);
-  app.use("/", pingRouter);
+  RegisterRoutes(app);
 
   // Error handlers
   app.use(errorLogger);

@@ -1,77 +1,85 @@
-import PlayerRepository from "../repositories/playerRepository";
-import { Route, Get, Path, Tags, Delete, Patch, Body, Security } from "tsoa";
+import { Request as ExRequest } from "express";
+import {
+  Body,
+  Delete,
+  Example,
+  Get,
+  Middlewares,
+  Patch,
+  Path,
+  Query,
+  Request,
+  Response,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
+import { playerExample, playerPageExample } from "../http/examples";
 import PlayerLevel from "../enums/playerLevel";
-import PlayersResponse from "../responses/playersResponse";
+import { Page } from "../http/pagination";
+import { currentUser } from "../middleware/auth";
+import { validate } from "../middleware/validate";
+import PlayerRepository from "../repositories/playerRepository";
 import UpdatePlayerRequest from "../requests/updatePlayerRequest";
-import { Player } from "../entities/player";
-import { AuthUser } from "../services/tokenService";
-import { assertSelfOrAdmin, isAdmin } from "../services/access";
+import { ErrorBody } from "../responses/common";
+import PlayerResponse from "../responses/playerResponse";
+import { assertSelfOrAdmin } from "../services/access";
+import Mapper from "../services/mappers";
+import { updatePlayerBody } from "../validation/auth";
 
 @Tags("Players")
 @Route("players")
-export default class PlayerController {
-  repository: PlayerRepository;
-  user: AuthUser;
+@Security("jwt")
+@Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(401, "UNAUTHENTICATED")
+@Response<ErrorBody>(403, "FORBIDDEN")
+@Response<ErrorBody>(404, "NOT_FOUND")
+export class PlayerController {
+  private repository = new PlayerRepository();
+  private mapper = new Mapper();
 
-  constructor(user: AuthUser) {
-    this.repository = new PlayerRepository();
-    this.user = user;
-  }
-
-  @Security("jwt")
+  /**
+   * Players, oldest first.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(playerPageExample)
   @Get("/")
-  async getAll(): Promise<PlayersResponse[]> {
-    const players = await this.repository.findAll();
-    return players.map((player) => this.convertPlayerModelToResponse(player));
+  async getPlayers(
+    @Request() req: ExRequest,
+    @Query() city?: string,
+    @Query() level?: PlayerLevel,
+    @Query() limit?: number,
+    @Query() cursor?: string
+  ): Promise<Page<PlayerResponse>> {
+    const user = currentUser(req);
+    const { entities, nextCursor } = await this.repository.findPlayersPage({ city, level }, { limit, cursor });
+    return { items: entities.map((player) => this.mapper.player(player, user)), nextCursor };
   }
 
-  @Security("jwt")
-  @Get("/{entityId}")
-  async getByEntityId(@Path() entityId: string): Promise<PlayersResponse> {
-    return this.convertPlayerModelToResponse(await this.repository.findByIdOrThrow(entityId, "Player"));
+  @Example(playerExample)
+  @Get("/{id}")
+  async getPlayer(@Request() req: ExRequest, @Path() id: string): Promise<PlayerResponse> {
+    return this.mapper.player(await this.repository.findByIdOrThrow(id, "Player"), currentUser(req));
   }
 
-  @Security("jwt")
-  @Get("/city/{city}")
-  async getPlayersByCity(@Path() city: string): Promise<PlayersResponse[]> {
-    const players = await this.repository.findPlayersByCity(city);
-    return players.map((player) => this.convertPlayerModelToResponse(player));
+  @Example(playerExample)
+  @Middlewares(validate({ body: updatePlayerBody }))
+  @Patch("/{id}")
+  async updatePlayer(
+    @Request() req: ExRequest,
+    @Path() id: string,
+    @Body() updateRequest: UpdatePlayerRequest
+  ): Promise<PlayerResponse> {
+    const user = currentUser(req);
+    assertSelfOrAdmin(user, id);
+    await this.repository.updatePlayer(id, updateRequest);
+    return this.mapper.player(await this.repository.findByIdOrThrow(id, "Player"), user);
   }
 
-  @Security("jwt")
-  @Get("/level/{level}")
-  async getPlayersByLevel(@Path() level: PlayerLevel): Promise<PlayersResponse[]> {
-    const players = await this.repository.findPlayersByLevel(level);
-    return players.map((player) => this.convertPlayerModelToResponse(player));
-  }
-
-  @Security("jwt")
-  @Delete("/{entityId}")
-  async deletePlayer(@Path() entityId: string): Promise<string> {
-    assertSelfOrAdmin(this.user, entityId);
-    return await this.repository.deletePlayer(entityId);
-  }
-
-  @Security("jwt")
-  @Patch("/{entityId}")
-  async updatePlayer(@Body() updateRequest: UpdatePlayerRequest, @Path() entityId: string): Promise<string> {
-    assertSelfOrAdmin(this.user, entityId);
-    return await this.repository.updatePlayer(entityId, updateRequest);
-  }
-
-  // Passwords never leave the API, and an email is only shown to its owner and admins.
-  private convertPlayerModelToResponse(player: Player): PlayersResponse {
-    const canSeeEmail = isAdmin(this.user) || this.user.id === player.entityId;
-    return {
-      entityId: player.entityId,
-      firstName: player.firstName,
-      lastName: player.lastName,
-      nickname: player.nickname,
-      level: player.level,
-      ...(canSeeEmail ? { email: player.email } : {}),
-      city: player.city,
-      address: player.address,
-      country: player.country,
-    } as PlayersResponse;
+  @Delete("/{id}")
+  async deletePlayer(@Request() req: ExRequest, @Path() id: string): Promise<void> {
+    assertSelfOrAdmin(currentUser(req), id);
+    await this.repository.deletePlayer(id);
   }
 }

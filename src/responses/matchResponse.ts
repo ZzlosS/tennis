@@ -1,10 +1,17 @@
+import { ClubSummary, CourtSummary, PlayerSummary } from "./common";
+
+export interface SetScore {
+  firstTeam: number;
+  secondTeam: number;
+}
+
 export default interface MatchResponse {
-  entityId: string;
-  firstTeam: string[];
-  secondTeam: string[];
-  result: string[];
-  date: Date;
-  clubName: string;
-  courtName: string;
-  courtSurface: string;
+  id: string;
+  firstTeam: PlayerSummary[];
+  secondTeam: PlayerSummary[];
+  sets: SetScore[];
+  // ISO 8601 in UTC.
+  playedAt: string;
+  court: CourtSummary;
+  club: ClubSummary | null;
 }

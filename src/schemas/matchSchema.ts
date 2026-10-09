@@ -4,10 +4,10 @@ const matchSchema = new Schema("Match", {
   uuid: { type: "string" },
   firstTeam: { type: "string[]" },
   secondTeam: { type: "string[]" },
-  result: { type: "string[]" },
+  sets: { type: "string" },
   court: { type: "string" },
-  createdAt: { type: "number" },
-  date: { type: "date" },
+  createdAt: { type: "number", sortable: true },
+  playedAt: { type: "date" },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },
 });

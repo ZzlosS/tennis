@@ -1,8 +1,9 @@
-import { EntityId, Repository, Schema } from "redis-om";
+import { EntityId, Repository, Schema, Search } from "redis-om";
 import crypto from "crypto";
 import RedisClient from "../services/redisClient";
 import BaseEntity from "../entities/baseEntity";
 import { NotFoundError } from "../errors/appError";
+import { closePage, PageOfEntities, PageQuery, readPageQuery } from "../http/pagination";
 
 export default class BaseRepository<T extends BaseEntity> {
   protected repository!: Repository<T>;
@@ -64,6 +65,35 @@ export default class BaseRepository<T extends BaseEntity> {
       .false()
       .return.all();
     return this.withIds(found);
+  }
+
+  // One page of a search, oldest first. `filter` adds the where clauses; soft-deleted records are always left out.
+  async findPage(filter: (search: Search<T>) => Search<T>, query: PageQuery): Promise<PageOfEntities<T>> {
+    const { limit, offset } = readPageQuery(query);
+    await this.initializeRepository();
+    const search = filter(this.repository.search())
+      .and("deleted" as never)
+      .false();
+    // One extra row tells whether there is a next page.
+    const rows = await search.sortAscending("createdAt" as never).return.page(offset, limit + 1);
+    return closePage(this.withIds(rows), limit, offset);
+  }
+
+  // Every match of a search, oldest first, for lists that are filtered further in code before they are paged.
+  async findAllMatching(filter: (search: Search<T>) => Search<T>): Promise<T[]> {
+    await this.initializeRepository();
+    const search = filter(this.repository.search())
+      .and("deleted" as never)
+      .false();
+    return this.withIds(await search.sortAscending("createdAt" as never).return.all());
+  }
+
+  async count(filter: (search: Search<T>) => Search<T>): Promise<number> {
+    await this.initializeRepository();
+    return await filter(this.repository.search())
+      .and("deleted" as never)
+      .false()
+      .count();
   }
 
   async findByUUID(uuid: string) {

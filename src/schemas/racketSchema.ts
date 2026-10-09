@@ -11,7 +11,7 @@ const racketSchema = new Schema("Racket", {
   balance: { type: "number" },
   stringPattern: { type: "string" },
   recommendedStrings: { type: "string" },
-  createdAt: { type: "number" },
+  createdAt: { type: "number", sortable: true },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },
 });

@@ -4,4 +4,5 @@ export default interface UpdateClubRequest {
   description?: string;
   city?: string;
   country?: string;
+  currency?: string;
 }

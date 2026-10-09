@@ -1,121 +1,138 @@
-import { Tags, Route, Get, Path, Post, Body, Delete, Patch, Security } from "tsoa";
-import ClubRepository from "../repositories/clubRepository";
+import { Request as ExRequest } from "express";
+import {
+  Body,
+  Delete,
+  Example,
+  Get,
+  Middlewares,
+  Patch,
+  Path,
+  Post,
+  Query,
+  Request,
+  Response,
+  Route,
+  Security,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
+import { matchExample, matchPageExample } from "../http/examples";
+import { Match } from "../entities/match";
+import { ForbiddenError, ValidationError } from "../errors/appError";
+import { Page, pageOfArray } from "../http/pagination";
+import { currentUser } from "../middleware/auth";
+import { validate } from "../middleware/validate";
 import CourtRepository from "../repositories/courtRepository";
 import MatchRepository from "../repositories/matchRepository";
-import MatchResponse from "../responses/matchResponse";
-import CreateMatchRequest from "../requests/createMatchRequest";
 import PlayerRepository from "../repositories/playerRepository";
-import { Match } from "../entities/match";
+import CreateMatchRequest from "../requests/createMatchRequest";
 import UpdateMatchRequest from "../requests/updateMatchRequest";
-import { splitIds } from "../repositories/matchRepository";
-import { ForbiddenError } from "../errors/appError";
+import { ErrorBody } from "../responses/common";
+import MatchResponse from "../responses/matchResponse";
 import { isAdmin } from "../services/access";
+import Mapper from "../services/mappers";
 import { AuthUser } from "../services/tokenService";
+import { createMatchBody, updateMatchBody } from "../validation/matches";
 
 @Tags("Matches")
 @Route("matches")
-export default class MatchController {
-  repository: MatchRepository;
-  courtRepository: CourtRepository;
-  clubRepository: ClubRepository;
-  playerRepository: PlayerRepository;
-  user: AuthUser;
+@Security("jwt")
+@Response<ErrorBody>(400, "VALIDATION_FAILED")
+@Response<ErrorBody>(401, "UNAUTHENTICATED")
+@Response<ErrorBody>(403, "FORBIDDEN")
+@Response<ErrorBody>(404, "NOT_FOUND")
+export class MatchController {
+  private repository = new MatchRepository();
+  private courtRepository = new CourtRepository();
+  private playerRepository = new PlayerRepository();
+  private mapper = new Mapper();
 
-  constructor(user: AuthUser) {
-    this.user = user;
-    this.repository = new MatchRepository();
-    this.courtRepository = new CourtRepository();
-    this.clubRepository = new ClubRepository();
-    this.playerRepository = new PlayerRepository();
-  }
-
-  @Get("/all")
-  @Security("jwt")
-  async getAllMatches(): Promise<MatchResponse[]> {
-    let matches = await this.repository.findAll();
-    let data: MatchResponse[] = [];
-    for (let index = 0; index < matches.length; index++) {
-      data.push(await this.convertMatchModelToResponse(matches[index]));
+  /**
+   * Matches, oldest first.
+   * @param playerId Only matches this player played in.
+   * @param limit Page size, 1 to 100. Default 20.
+   * @param cursor The nextCursor of the previous page.
+   */
+  @Example(matchPageExample)
+  @Get("/")
+  async getMatches(
+    @Query() playerId?: string,
+    @Query() limit?: number,
+    @Query() cursor?: string
+  ): Promise<Page<MatchResponse>> {
+    if (playerId) {
+      return await pageOfArray(await this.repository.findPlayerMatches(playerId), { limit, cursor }, (match) =>
+        this.mapper.match(match)
+      );
     }
-
-    return data;
+    const { entities, nextCursor } = await this.repository.findMatchesPage({ limit, cursor });
+    return { items: await Promise.all(entities.map((match) => this.mapper.match(match))), nextCursor };
   }
 
-  @Get("/player/{entityId}")
-  @Security("jwt")
-  async getPlayersMatches(@Path() entityId: string): Promise<MatchResponse[]> {
-    const matches = await this.repository.findPlayerMatches(entityId);
-    let data: MatchResponse[] = [];
-    for (let index = 0; index < matches.length; index++) {
-      data.push(await this.convertMatchModelToResponse(matches[index]));
-    }
-
-    return data;
+  @Example(matchExample)
+  @Get("/{id}")
+  async getMatch(@Path() id: string): Promise<MatchResponse> {
+    return await this.mapper.match(await this.repository.findByIdOrThrow(id, "Match"));
   }
 
-  @Get("/{entityId}")
-  @Security("jwt")
-  async getById(@Path() entityId: string): Promise<MatchResponse> {
-    const match = await this.repository.findByIdOrThrow(entityId, "Match");
-    return await this.convertMatchModelToResponse(match);
-  }
-
+  @Example(matchExample)
+  @SuccessResponse(201, "Created")
+  @Middlewares(validate({ body: createMatchBody }))
   @Post("/")
-  @Security("jwt")
-  async createMatch(@Body() createMatch: CreateMatchRequest): Promise<string> {
-    const players = [...splitIds(createMatch.firstTeam), ...splitIds(createMatch.secondTeam)];
-    if (!isAdmin(this.user) && !players.includes(this.user.id)) {
+  async createMatch(@Request() req: ExRequest, @Body() createMatch: CreateMatchRequest): Promise<MatchResponse> {
+    const user = currentUser(req);
+    const players = [...createMatch.firstTeam, ...createMatch.secondTeam];
+    if (!isAdmin(user) && !players.includes(user.id)) {
       throw new ForbiddenError("You can only record matches you played in");
     }
-    return await this.repository.createMatch(createMatch);
+    await this.courtRepository.findByIdOrThrow(createMatch.courtId, "Court");
+    await Promise.all(players.map((playerId) => this.playerRepository.findByIdOrThrow(playerId, "Player")));
+
+    const id = await this.repository.createMatch(createMatch);
+    return await this.mapper.match(await this.repository.findByIdOrThrow(id, "Match"));
   }
 
-  @Delete("/{entityId}")
-  @Security("jwt")
-  async deleteMatch(@Path() entityId: string): Promise<string> {
-    this.assertPlayedIn(await this.repository.findByIdOrThrow(entityId, "Match"));
-    return await this.repository.deleteEntity(entityId);
-  }
+  @Example(matchExample)
+  @Middlewares(validate({ body: updateMatchBody }))
+  @Patch("/{id}")
+  async updateMatch(
+    @Request() req: ExRequest,
+    @Path() id: string,
+    @Body() updateRequest: UpdateMatchRequest
+  ): Promise<MatchResponse> {
+    const match = await this.repository.findByIdOrThrow(id, "Match");
+    this.assertPlayedIn(currentUser(req), match);
 
-  @Patch("/{entityId}")
-  @Security("jwt")
-  async updateMatch(@Body() updateRequest: UpdateMatchRequest, @Path() entityId: string): Promise<string> {
-    this.assertPlayedIn(await this.repository.findByIdOrThrow(entityId, "Match"));
-    return await this.repository.updateMatch(entityId, updateRequest);
-  }
-
-  private async convertMatchModelToResponse(match: Match): Promise<MatchResponse> {
-    const court = await this.courtRepository.findByEntityID(match.court);
-    const club = await this.clubRepository.findByEntityID(court.club);
-
-    let firstTeamPlayers = await Promise.all(
-      match.firstTeam.map(
-        async (playerEntityID) => (await this.playerRepository.findByEntityID(playerEntityID)).nickname
+    const players = [
+      ...(updateRequest.firstTeam ?? match.firstTeam),
+      ...(updateRequest.secondTeam ?? match.secondTeam),
+    ];
+    if (new Set(players).size !== players.length) {
+      throw new ValidationError("Validation failed", { secondTeam: ["A player can only be on one team"] });
+    }
+    if (updateRequest.courtId) {
+      await this.courtRepository.findByIdOrThrow(updateRequest.courtId, "Court");
+    }
+    await Promise.all(
+      [...(updateRequest.firstTeam ?? []), ...(updateRequest.secondTeam ?? [])].map((playerId) =>
+        this.playerRepository.findByIdOrThrow(playerId, "Player")
       )
     );
 
-    let secondTeamPlayers = await Promise.all(
-      match.secondTeam.map(
-        async (playerEntityID) => (await this.playerRepository.findByEntityID(playerEntityID)).nickname
-      )
-    );
+    await this.repository.updateMatch(id, updateRequest);
+    return await this.mapper.match(await this.repository.findByIdOrThrow(id, "Match"));
+  }
 
-    return {
-      entityId: match.entityId,
-      firstTeam: firstTeamPlayers,
-      secondTeam: secondTeamPlayers,
-      result: match.result,
-      date: match.date,
-      clubName: club.name,
-      courtName: court.name,
-      courtSurface: court.surface,
-    } as MatchResponse;
+  @Delete("/{id}")
+  async deleteMatch(@Request() req: ExRequest, @Path() id: string): Promise<void> {
+    this.assertPlayedIn(currentUser(req), await this.repository.findByIdOrThrow(id, "Match"));
+    await this.repository.deleteEntity(id);
   }
 
   // Only the players in a match, or an ADMIN, can change or remove it.
-  private assertPlayedIn(match: Match) {
+  private assertPlayedIn(user: AuthUser, match: Match) {
     const players = [...(match.firstTeam ?? []), ...(match.secondTeam ?? [])];
-    if (!isAdmin(this.user) && !players.includes(this.user.id)) {
+    if (!isAdmin(user) && !players.includes(user.id)) {
       throw new ForbiddenError();
     }
   }

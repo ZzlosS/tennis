@@ -4,4 +4,6 @@ export default interface ClubCreateRequest {
   description: string;
   city: string;
   country: string;
+  // ISO 4217 code, for example RSD. Defaults to RSD.
+  currency?: string;
 }

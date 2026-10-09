@@ -1,49 +1,45 @@
-import MatchDto from "../dtos/matchDto";
 import { Match } from "../entities/match";
+import { PageQuery } from "../http/pagination";
 import CreateMatchRequest from "../requests/createMatchRequest";
 import UpdateMatchRequest from "../requests/updateMatchRequest";
+import { SetScore } from "../responses/matchResponse";
 import { matchSchema } from "../schemas/matchSchema";
 import BaseRepository from "./baseRepository";
 
-// Teams and results arrive as comma-separated strings.
-export const splitIds = (value: string) =>
-  value
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean);
+export const parseSets = (match: Match): SetScore[] => JSON.parse(match.sets || "[]");
 
 export default class MatchRepository extends BaseRepository<Match> {
   constructor() {
     super(matchSchema);
   }
 
-  async createMatch(createMatchRequest: CreateMatchRequest) {
+  async createMatch(request: CreateMatchRequest) {
     const match = await this.createEntity();
 
-    match.firstTeam = splitIds(createMatchRequest.firstTeam);
-    match.secondTeam = splitIds(createMatchRequest.secondTeam);
-    match.result = splitIds(createMatchRequest.result);
-    match.court = createMatchRequest.court;
-    match.date = new Date(createMatchRequest.date);
+    match.firstTeam = request.firstTeam;
+    match.secondTeam = request.secondTeam;
+    match.sets = JSON.stringify(request.sets);
+    match.court = request.courtId;
+    match.playedAt = new Date(request.playedAt);
 
     return await this.save(match);
   }
 
-  async findMatchesByCourt(courtEntityID: string) {
-    return await this.findAllByField(courtEntityID, "court");
+  async findMatchesPage(query: PageQuery) {
+    return await this.findPage((search) => search, query);
   }
 
-  async findPlayerMatches(playerEntityID: string) {
+  // Oldest first. The OR is filtered in code because in a query AND binds tighter than OR and would change the meaning.
+  async findPlayerMatches(playerId: string) {
     await this.initializeRepository();
-    // Filtered in code: in a query, AND binds tighter than OR and would change the meaning.
     const matches = await this.repository
       .search()
       .where("firstTeam")
-      .contains(playerEntityID)
+      .contains(playerId)
       .or("secondTeam")
-      .contains(playerEntityID)
+      .contains(playerId)
       .return.all();
-    return this.withIds(matches.filter((match) => !match.deleted));
+    return this.withIds(matches.filter((match) => !match.deleted)).sort((a, b) => a.createdAt! - b.createdAt!);
   }
 
   async updateMatch(entityId: string, updateRequest: UpdateMatchRequest) {
@@ -55,14 +51,14 @@ export default class MatchRepository extends BaseRepository<Match> {
     if (updateRequest.secondTeam) {
       match.secondTeam = updateRequest.secondTeam;
     }
-    if (updateRequest.result) {
-      match.result = updateRequest.result;
+    if (updateRequest.sets) {
+      match.sets = JSON.stringify(updateRequest.sets);
     }
-    if (updateRequest.court) {
-      match.court = updateRequest.court;
+    if (updateRequest.courtId) {
+      match.court = updateRequest.courtId;
     }
-    if (updateRequest.date) {
-      match.date = new Date(updateRequest.date);
+    if (updateRequest.playedAt) {
+      match.playedAt = new Date(updateRequest.playedAt);
     }
 
     return await this.save(match);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { api } from "./helpers";
+import { api, raw } from "./helpers";
 
 describe("CORS", () => {
   it("lets an allowed origin call the API", async () => {
@@ -13,7 +13,7 @@ describe("CORS", () => {
   });
 
   it("gives no access to any other origin", async () => {
-    const response = await api().get("/").set("Origin", "https://evil.example.com");
+    const response = await raw().get("/").set("Origin", "https://evil.example.com");
     expect(response.headers["access-control-allow-origin"]).toBeUndefined();
   });
 });
