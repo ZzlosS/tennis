@@ -15,6 +15,7 @@ const playerSchema = new Schema("Player", {
   country: { type: "string" },
   emailVerifiedAt: { type: "number" },
   language: { type: "string" },
+  searchName: { type: "text" },
   createdAt: { type: "number", sortable: true },
   deleted: { type: "boolean" },
   deletedAt: { type: "number" },

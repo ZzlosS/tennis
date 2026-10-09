@@ -72,6 +72,7 @@ describe("the OpenAPI contract", () => {
   const notCollections = [
     "/me",
     "/me/stats",
+    "/me/notifications/unread",
     "/players/{id}/stats",
     "/courts/{id}/availability",
     "/clubs/{id}/schedule",
@@ -164,6 +165,7 @@ describe("the response checker", () => {
       status: "CONFIRMED",
       seriesId: null,
       paidAt: null,
+      partnerRequest: null,
     };
     checkResponse("get", "/v1/bookings/1", 200, booking, "{}");
     expect(violations.splice(0)).toEqual([]);

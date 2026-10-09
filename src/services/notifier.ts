@@ -1,10 +1,13 @@
 import PlayerRepository from "../repositories/playerRepository";
+import { now } from "./clock";
 import { devicesOf, unregisterDevice } from "./deviceService";
+import { addToInbox } from "./inboxService";
 import { getPushClient, logPushFailure, PushMessage } from "./pushClient";
 import { Language, NotificationType, Params, render } from "./pushTemplates";
 
-// Sends a push notification to every phone of some players, in each player's own language. A notification is never
-// worth failing a request over, so errors are logged and swallowed.
+// Sends a push notification to every phone of some players, in each player's own language, and keeps a copy in each
+// player's inbox (also for players with no phone registered). A notification is never worth failing a request over,
+// so errors are logged and swallowed.
 export default class Notifier {
   private players = new PlayerRepository();
 
@@ -21,6 +24,7 @@ export default class Notifier {
         if (player.uuid == null || player.deleted) continue;
         const language: Language = player.language === "sr" ? "sr" : "en";
         const { title, body } = render(type, language, params);
+        await addToInbox(playerId, { type, title, body, data, createdAt: now().getTime() });
         for (const token of await devicesOf(playerId)) {
           messages.push({ to: token, title, body, data: { type, ...data }, playerId });
         }

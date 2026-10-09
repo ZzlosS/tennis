@@ -45,6 +45,7 @@ export class PlayerController {
 
   /**
    * Players, oldest first.
+   * @param q Only players whose first name, last name or nickname start with these words.
    * @param limit Page size, 1 to 100. Default 20.
    * @param cursor The nextCursor of the previous page.
    */
@@ -54,11 +55,12 @@ export class PlayerController {
     @Request() req: ExRequest,
     @Query() city?: string,
     @Query() level?: PlayerLevel,
+    @Query() q?: string,
     @Query() limit?: number,
     @Query() cursor?: string
   ): Promise<Page<PlayerResponse>> {
     const user = currentUser(req);
-    const { entities, nextCursor } = await this.repository.findPlayersPage({ city, level }, { limit, cursor });
+    const { entities, nextCursor } = await this.repository.findPlayersPage({ city, level, q }, { limit, cursor });
     return { items: entities.map((player) => this.mapper.player(player, user)), nextCursor };
   }
 

@@ -13,9 +13,24 @@ const PENDING = "pending";
 export const normalizeEmail = (email: string) => email.trim().toLowerCase();
 const emailKey = (email: string) => `player:email:${normalizeEmail(email)}`;
 
+// Words of a name search: letters and digits only, so nothing in it is read as query syntax.
+export function nameSearchTerms(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word.length > 0)
+    .slice(0, 5);
+}
+
 export default class PlayerRepository extends BaseRepository<Player> {
   constructor() {
     super(playerSchema);
+  }
+
+  // Every save refreshes the name the search looks in.
+  async save(player: Player): Promise<string> {
+    player.searchName = [player.firstName, player.lastName, player.nickname].filter(Boolean).join(" ");
+    return await super.save(player);
   }
 
   // Emails are unique through a lock key (SET NX), so two parallel sign-ups cannot both win.
@@ -51,8 +66,14 @@ export default class PlayerRepository extends BaseRepository<Player> {
     return player;
   }
 
-  async findPlayersPage(filters: { city?: string; level?: PlayerLevel }, query: PageQuery) {
+  async findPlayersPage(filters: { city?: string; level?: PlayerLevel; q?: string }, query: PageQuery) {
+    // Each word matches the start of a first name, last name or nickname ("mar pet" finds Marko Petrović).
+    // Words of one letter are too short for a prefix search, so they must match a whole word.
+    const terms = nameSearchTerms(filters.q ?? "").map((word) => (word.length > 1 ? `${word}*` : word));
     return await this.findPage((search) => {
+      if (terms.length > 0) {
+        search = search.where("searchName").matches(terms.join(" "));
+      }
       if (filters.city) {
         search = search.where("city").equals(filters.city);
       }
