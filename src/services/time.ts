@@ -5,14 +5,9 @@ export const HOUR_MS = 3_600_000;
 export const DAY_MS = 24 * HOUR_MS;
 export const DEFAULT_TIME_ZONE = "Europe/Belgrade";
 
-export interface DayHours {
-  // Whole hours, "08:00". "24:00" is allowed for close.
-  open: string;
-  close: string;
-}
+import type { OpeningHours } from "../responses/common";
 
-// Monday first, so index 0 is Monday and index 6 is Sunday. Null means closed all day.
-export type OpeningHours = (DayHours | null)[];
+export type { OpeningHours };
 
 export const DEFAULT_OPENING_HOURS: OpeningHours = Array.from({ length: 7 }, () => ({ open: "06:00", close: "23:00" }));
 

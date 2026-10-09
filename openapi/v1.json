@@ -707,6 +707,33 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"OpeningHoursDay": {
+				"properties": {
+					"open": {
+						"type": "string"
+					},
+					"close": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"open",
+					"close"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OpeningHours": {
+				"items": {
+					"allOf": [
+						{
+							"$ref": "#/components/schemas/OpeningHoursDay"
+						}
+					],
+					"nullable": true
+				},
+				"type": "array"
+			},
 			"CourtResponse": {
 				"properties": {
 					"id": {
@@ -758,6 +785,15 @@
 							}
 						],
 						"nullable": true
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
 					}
 				},
 				"required": [
@@ -773,7 +809,10 @@
 					"address",
 					"city",
 					"country",
-					"pricePerHour"
+					"pricePerHour",
+					"active",
+					"timeZone",
+					"openingHours"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -834,6 +873,12 @@
 					"currency": {
 						"type": "string"
 					},
+					"timeZone": {
+						"type": "string"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
+					},
 					"pricePerHourMinor": {
 						"type": "number",
 						"format": "double"
@@ -849,6 +894,75 @@
 					"address",
 					"city",
 					"country"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SlotStatus": {
+				"enum": [
+					"FREE",
+					"BOOKED",
+					"BLOCKED",
+					"CLOSED"
+				],
+				"type": "string"
+			},
+			"AvailabilitySlot": {
+				"properties": {
+					"startsAt": {
+						"type": "string"
+					},
+					"endsAt": {
+						"type": "string"
+					},
+					"localTime": {
+						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/SlotStatus"
+					}
+				},
+				"required": [
+					"startsAt",
+					"endsAt",
+					"localTime",
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AvailabilityResponse": {
+				"properties": {
+					"courtId": {
+						"type": "string"
+					},
+					"date": {
+						"type": "string"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"pricePerHour": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Money"
+							}
+						],
+						"nullable": true
+					},
+					"slots": {
+						"items": {
+							"$ref": "#/components/schemas/AvailabilitySlot"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"courtId",
+					"date",
+					"timeZone",
+					"pricePerHour",
+					"slots"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -897,6 +1011,18 @@
 					},
 					"currency": {
 						"type": "string"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
+					},
+					"followClubHours": {
+						"type": "boolean"
 					}
 				},
 				"type": "object",
@@ -960,6 +1086,20 @@
 					"courtCount": {
 						"type": "number",
 						"format": "double"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
+					},
+					"cancelCutoffHours": {
+						"type": "number",
+						"format": "double"
+					},
+					"seasonEndsOn": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -970,7 +1110,11 @@
 					"city",
 					"country",
 					"currency",
-					"courtCount"
+					"courtCount",
+					"timeZone",
+					"openingHours",
+					"cancelCutoffHours",
+					"seasonEndsOn"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1014,6 +1158,19 @@
 					},
 					"currency": {
 						"type": "string"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
+					},
+					"cancelCutoffHours": {
+						"type": "number",
+						"format": "double"
+					},
+					"seasonEndsOn": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -1053,6 +1210,20 @@
 						"type": "number",
 						"format": "double"
 					},
+					"timeZone": {
+						"type": "string"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
+					},
+					"cancelCutoffHours": {
+						"type": "number",
+						"format": "double"
+					},
+					"seasonEndsOn": {
+						"type": "string",
+						"nullable": true
+					},
 					"courts": {
 						"items": {
 							"$ref": "#/components/schemas/CourtResponse"
@@ -1069,6 +1240,10 @@
 					"country",
 					"currency",
 					"courtCount",
+					"timeZone",
+					"openingHours",
+					"cancelCutoffHours",
+					"seasonEndsOn",
 					"courts"
 				],
 				"type": "object",
@@ -1093,6 +1268,19 @@
 					},
 					"currency": {
 						"type": "string"
+					},
+					"timeZone": {
+						"type": "string"
+					},
+					"openingHours": {
+						"$ref": "#/components/schemas/OpeningHours"
+					},
+					"cancelCutoffHours": {
+						"type": "number",
+						"format": "double"
+					},
+					"seasonEndsOn": {
+						"type": "string"
 					}
 				},
 				"type": "object",
@@ -1103,6 +1291,14 @@
 					"ONE_TIME",
 					"MONTH",
 					"SEASON"
+				],
+				"type": "string"
+			},
+			"BookingStatus": {
+				"enum": [
+					"PENDING",
+					"CONFIRMED",
+					"CANCELLED"
 				],
 				"type": "string"
 			},
@@ -1141,6 +1337,17 @@
 					},
 					"bookingType": {
 						"$ref": "#/components/schemas/BookingType"
+					},
+					"status": {
+						"$ref": "#/components/schemas/BookingStatus"
+					},
+					"seriesId": {
+						"type": "string",
+						"nullable": true
+					},
+					"paidAt": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -1151,7 +1358,23 @@
 					"club",
 					"player",
 					"totalPrice",
-					"bookingType"
+					"bookingType",
+					"status",
+					"seriesId",
+					"paidAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BookingPartnerRequest": {
+				"properties": {
+					"playersNeeded": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"playersNeeded"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1169,6 +1392,9 @@
 					},
 					"bookingType": {
 						"$ref": "#/components/schemas/BookingType"
+					},
+					"partnerRequest": {
+						"$ref": "#/components/schemas/BookingPartnerRequest"
 					}
 				},
 				"required": [
@@ -3750,7 +3976,39 @@
 													"pricePerHour": {
 														"amountMinor": 180000,
 														"currency": "RSD"
-													}
+													},
+													"active": true,
+													"timeZone": "Europe/Belgrade",
+													"openingHours": [
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														}
+													]
 												}
 											],
 											"nextCursor": null
@@ -3902,7 +4160,39 @@
 											"address": "Kalemegdan",
 											"city": "Belgrade",
 											"country": "Serbia",
-											"pricePerHour": null
+											"pricePerHour": null,
+											"active": true,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											]
 										}
 									}
 								}
@@ -3999,7 +4289,39 @@
 													"address": "Kalemegdan",
 													"city": "Belgrade",
 													"country": "Serbia",
-													"pricePerHour": null
+													"pricePerHour": null,
+													"active": true,
+													"timeZone": "Europe/Belgrade",
+													"openingHours": [
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														}
+													]
 												}
 											],
 											"nextCursor": null
@@ -4090,6 +4412,124 @@
 				]
 			}
 		},
+		"/courts/{id}/availability": {
+			"get": {
+				"operationId": "GetAvailability",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AvailabilityResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"courtId": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+											"date": "2026-11-01",
+											"timeZone": "Europe/Belgrade",
+											"pricePerHour": {
+												"amountMinor": 180000,
+												"currency": "RSD"
+											},
+											"slots": [
+												{
+													"startsAt": "2026-11-01T04:00:00.000Z",
+													"endsAt": "2026-11-01T05:00:00.000Z",
+													"localTime": "05:00",
+													"status": "CLOSED"
+												},
+												{
+													"startsAt": "2026-11-01T16:00:00.000Z",
+													"endsAt": "2026-11-01T17:00:00.000Z",
+													"localTime": "17:00",
+													"status": "BOOKED"
+												},
+												{
+													"startsAt": "2026-11-01T17:00:00.000Z",
+													"endsAt": "2026-11-01T18:00:00.000Z",
+													"localTime": "18:00",
+													"status": "FREE"
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Every hour of one local day of a court: FREE, BOOKED, BLOCKED (held by the club) or CLOSED\n(outside opening hours, the court is closed, or the hour is already past).",
+				"tags": [
+					"Courts"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The day in the court's own time zone, \"YYYY-MM-DD\".",
+						"in": "query",
+						"name": "date",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/courts/{id}": {
 			"get": {
 				"operationId": "GetCourt",
@@ -4123,7 +4563,39 @@
 											"pricePerHour": {
 												"amountMinor": 180000,
 												"currency": "RSD"
-											}
+											},
+											"active": true,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											]
 										}
 									}
 								}
@@ -4222,7 +4694,39 @@
 											"pricePerHour": {
 												"amountMinor": 180000,
 												"currency": "RSD"
-											}
+											},
+											"active": true,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											]
 										}
 									}
 								}
@@ -4399,7 +4903,39 @@
 											"pricePerHour": {
 												"amountMinor": 180000,
 												"currency": "RSD"
-											}
+											},
+											"active": true,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											]
 										}
 									}
 								}
@@ -4522,7 +5058,39 @@
 													"pricePerHour": {
 														"amountMinor": 180000,
 														"currency": "RSD"
-													}
+													},
+													"active": true,
+													"timeZone": "Europe/Belgrade",
+													"openingHours": [
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														}
+													]
 												}
 											],
 											"nextCursor": null
@@ -4644,7 +5212,39 @@
 											"pricePerHour": {
 												"amountMinor": 180000,
 												"currency": "RSD"
-											}
+											},
+											"active": true,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											]
 										}
 									}
 								}
@@ -4747,7 +5347,40 @@
 													"city": "Belgrade",
 													"country": "Serbia",
 													"currency": "RSD",
-													"courtCount": 6
+													"courtCount": 6,
+													"timeZone": "Europe/Belgrade",
+													"openingHours": [
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														}
+													],
+													"cancelCutoffHours": 24,
+													"seasonEndsOn": null
 												}
 											],
 											"nextCursor": null
@@ -4857,7 +5490,40 @@
 											"city": "Belgrade",
 											"country": "Serbia",
 											"currency": "RSD",
-											"courtCount": 6
+											"courtCount": 6,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											],
+											"cancelCutoffHours": 24,
+											"seasonEndsOn": null
 										}
 									}
 								}
@@ -4950,6 +5616,39 @@
 											"country": "Serbia",
 											"currency": "RSD",
 											"courtCount": 6,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											],
+											"cancelCutoffHours": 24,
+											"seasonEndsOn": null,
 											"courts": [
 												{
 													"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
@@ -4971,7 +5670,39 @@
 													"pricePerHour": {
 														"amountMinor": 180000,
 														"currency": "RSD"
-													}
+													},
+													"active": true,
+													"timeZone": "Europe/Belgrade",
+													"openingHours": [
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														},
+														{
+															"open": "06:00",
+															"close": "23:00"
+														}
+													]
 												}
 											]
 										}
@@ -5060,7 +5791,40 @@
 											"city": "Belgrade",
 											"country": "Serbia",
 											"currency": "RSD",
-											"courtCount": 6
+											"courtCount": 6,
+											"timeZone": "Europe/Belgrade",
+											"openingHours": [
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												},
+												{
+													"open": "06:00",
+													"close": "23:00"
+												}
+											],
+											"cancelCutoffHours": 24,
+											"seasonEndsOn": null
 										}
 									}
 								}
@@ -5241,7 +6005,10 @@
 												"amountMinor": 360000,
 												"currency": "RSD"
 											},
-											"bookingType": "ONE_TIME"
+											"bookingType": "ONE_TIME",
+											"status": "CONFIRMED",
+											"seriesId": null,
+											"paidAt": null
 										}
 									}
 								}
@@ -5287,8 +6054,19 @@
 								}
 							}
 						}
+					},
+					"409": {
+						"description": "SLOT_TAKEN, COURT_CLOSED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
 					}
 				},
+				"description": "The booking belongs to the logged-in user and the price always comes from the court. All the hours are taken or none:\nif one is already booked the answer is 409 SLOT_TAKEN and `fields.slots` lists the hours that clash.\n`MONTH` makes four weekly bookings and `SEASON` weekly bookings up to the club's season end; they share a `seriesId`\nand the first one is returned. Times must be on the hour, in the future, inside the court's opening hours,\nand at most 90 days ahead.",
 				"tags": [
 					"Bookings"
 				],
@@ -5347,7 +6125,10 @@
 														"amountMinor": 360000,
 														"currency": "RSD"
 													},
-													"bookingType": "ONE_TIME"
+													"bookingType": "ONE_TIME",
+													"status": "CONFIRMED",
+													"seriesId": null,
+													"paidAt": null
 												}
 											],
 											"nextCursor": null
@@ -5398,7 +6179,7 @@
 						}
 					}
 				},
-				"description": "Players see their own bookings, club admins also see their clubs' bookings, ADMINs see all. Oldest first.",
+				"description": "Players see their own bookings, club admins also see their clubs' bookings, ADMINs see all. Oldest first.\nCancelled bookings are left out unless `status` is CANCELLED.",
 				"tags": [
 					"Bookings"
 				],
@@ -5422,6 +6203,23 @@
 						"required": false,
 						"schema": {
 							"type": "string"
+						}
+					},
+					{
+						"description": "Only the bookings made together by one weekly repeat.",
+						"in": "query",
+						"name": "seriesId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/BookingStatus"
 						}
 					},
 					{
@@ -5503,7 +6301,10 @@
 												"amountMinor": 360000,
 												"currency": "RSD"
 											},
-											"bookingType": "ONE_TIME"
+											"bookingType": "ONE_TIME",
+											"status": "CONFIRMED",
+											"seriesId": null,
+											"paidAt": null
 										}
 									}
 								}
@@ -5606,7 +6407,10 @@
 												"amountMinor": 360000,
 												"currency": "RSD"
 											},
-											"bookingType": "ONE_TIME"
+											"bookingType": "ONE_TIME",
+											"status": "CONFIRMED",
+											"seriesId": null,
+											"paidAt": null
 										}
 									}
 								}
@@ -5645,6 +6449,16 @@
 					},
 					"404": {
 						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "SLOT_TAKEN, COURT_CLOSED",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -5745,6 +6559,134 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/bookings/{id}/cancel": {
+			"post": {
+				"operationId": "CancelBooking",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BookingResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "01JBX3K7M2Q8N5R4T6V9W0YZKL",
+											"startsAt": "2026-11-01T16:00:00.000Z",
+											"endsAt": "2026-11-01T18:00:00.000Z",
+											"court": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+												"name": "Court 1",
+												"surface": "CLAY",
+												"clubId": "01JBX3K7M2Q8N5R4T6V9W0YZCD"
+											},
+											"club": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZCD",
+												"name": "TK Banjica",
+												"city": "Belgrade"
+											},
+											"player": {
+												"id": "01JBX3K7M2Q8N5R4T6V9W0YZAB",
+												"nickname": "marko",
+												"level": "INTERMEDIATE"
+											},
+											"totalPrice": {
+												"amountMinor": 360000,
+												"currency": "RSD"
+											},
+											"bookingType": "ONE_TIME",
+											"status": "CONFIRMED",
+											"seriesId": null,
+											"paidAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "VALIDATION_FAILED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "UNAUTHENTICATED",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "FORBIDDEN",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "NOT_FOUND",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "CANCEL_TOO_LATE",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorBody"
+								}
+							}
+						}
+					}
+				},
+				"description": "Cancels a booking and frees its hours. A player can cancel their own booking until the club's cut-off\n(24 hours before the start unless the club says otherwise); club admins, the owner of a court without a club\nand ADMINs can always cancel. Cancelling twice does nothing.",
+				"tags": [
+					"Bookings"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Also cancel every later booking made together with this one.",
+						"in": "query",
+						"name": "series",
+						"required": false,
+						"schema": {
+							"type": "boolean"
 						}
 					}
 				]

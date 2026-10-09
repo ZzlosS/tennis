@@ -1,6 +1,6 @@
 import { z } from "zod";
 import CourtSurface from "../enums/courtSurface";
-import { currency, id, minorUnits, text } from "./common";
+import { currency, dateOrEmpty, id, minorUnits, openingHours, text, timeZone } from "./common";
 
 export const createClubBody = z.object({
   name: text(100),
@@ -9,6 +9,10 @@ export const createClubBody = z.object({
   city: text(100),
   country: text(100),
   currency: currency.optional(),
+  timeZone: timeZone.optional(),
+  openingHours: openingHours.optional(),
+  cancelCutoffHours: z.number().int().min(0).max(168).optional(),
+  seasonEndsOn: dateOrEmpty.optional(),
 });
 
 export const updateClubBody = createClubBody.partial();
@@ -31,6 +35,8 @@ export const createStandaloneCourtBody = z.object({
   city: text(100),
   country: text(100),
   currency: currency.optional(),
+  timeZone: timeZone.optional(),
+  openingHours: openingHours.optional(),
 });
 
 export const updateCourtBody = z.object({
@@ -44,6 +50,10 @@ export const updateCourtBody = z.object({
   city: text(100).optional(),
   country: text(100).optional(),
   currency: currency.optional(),
+  active: z.boolean().optional(),
+  timeZone: timeZone.optional(),
+  openingHours: openingHours.optional(),
+  followClubHours: z.boolean().optional(),
 });
 
 export const assignCourtBody = z.object({

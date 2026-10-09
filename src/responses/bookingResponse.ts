@@ -1,3 +1,4 @@
+import BookingStatus from "../enums/bookingStatus";
 import BookingType from "../enums/bookingType";
 import { Money } from "../http/money";
 import { ClubSummary, CourtSummary, PlayerSummary } from "./common";
@@ -14,4 +15,9 @@ export default interface BookingResponse {
   // Null when the court is free.
   totalPrice: Money | null;
   bookingType: BookingType;
+  status: BookingStatus;
+  // Bookings made together by a weekly repeat share it. Null for a single booking.
+  seriesId: string | null;
+  // When a club admin marked it as paid at the club. Null when not marked.
+  paidAt: string | null;
 }

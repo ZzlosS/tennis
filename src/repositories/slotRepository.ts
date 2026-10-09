@@ -15,18 +15,17 @@ export interface SlotRef {
   holder: string;
 }
 
-// "b:<bookingId>:<claimedAtMs>" for a booking, "x:<blockId>:<claimedAtMs>" for a block put there by a club admin.
-export const makeHolder = (kind: HolderKind, id: string, at: Date) => `${kind}:${id}:${at.getTime()}`;
+// "b:<bookingId>" for a booking, "x:<blockId>" for a block put there by a club admin.
+export const makeHolder = (kind: HolderKind, id: string) => `${kind}:${id}`;
 
 export interface ParsedHolder {
   kind: HolderKind;
   id: string;
-  claimedAt: number;
 }
 
 export function parseHolder(holder: string): ParsedHolder {
-  const [kind, id, claimedAt] = holder.split(":");
-  return { kind: kind as HolderKind, id, claimedAt: Number(claimedAt) };
+  const [kind, id] = holder.split(":");
+  return { kind: kind as HolderKind, id };
 }
 
 const dayKey = (courtId: string, hour: Date) => `slots:{${courtId}}:${hour.toISOString().slice(0, 10)}`;

@@ -44,6 +44,9 @@ export const bookingExample = {
     currency: "RSD",
   },
   bookingType: "ONE_TIME",
+  status: "CONFIRMED",
+  seriesId: null,
+  paidAt: null,
 };
 
 export const bookingPageExample = {
@@ -73,6 +76,9 @@ export const bookingPageExample = {
         currency: "RSD",
       },
       bookingType: "ONE_TIME",
+      status: "CONFIRMED",
+      seriesId: null,
+      paidAt: null,
     },
   ],
   nextCursor: null,
@@ -87,6 +93,18 @@ export const clubDetailExample = {
   country: "Serbia",
   currency: "RSD",
   courtCount: 6,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
+  cancelCutoffHours: 24,
+  seasonEndsOn: null,
   courts: [
     {
       id: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
@@ -109,6 +127,17 @@ export const clubDetailExample = {
         amountMinor: 180000,
         currency: "RSD",
       },
+      active: true,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
     },
   ],
 };
@@ -122,6 +151,18 @@ export const clubExample = {
   country: "Serbia",
   currency: "RSD",
   courtCount: 6,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
+  cancelCutoffHours: 24,
+  seasonEndsOn: null,
 };
 
 export const clubPageExample = {
@@ -135,6 +176,18 @@ export const clubPageExample = {
       country: "Serbia",
       currency: "RSD",
       courtCount: 6,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
+      cancelCutoffHours: 24,
+      seasonEndsOn: null,
     },
   ],
   nextCursor: null,
@@ -167,6 +220,17 @@ export const courtExample = {
     amountMinor: 180000,
     currency: "RSD",
   },
+  active: true,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
 };
 
 export const courtPageExample = {
@@ -192,6 +256,17 @@ export const courtPageExample = {
         amountMinor: 180000,
         currency: "RSD",
       },
+      active: true,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
     },
   ],
   nextCursor: null,
@@ -407,6 +482,17 @@ export const publicCourtExample = {
   city: "Belgrade",
   country: "Serbia",
   pricePerHour: null,
+  active: true,
+  timeZone: "Europe/Belgrade",
+  openingHours: [
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+    { open: "06:00", close: "23:00" },
+  ],
 };
 
 export const publicCourtPageExample = {
@@ -425,6 +511,17 @@ export const publicCourtPageExample = {
       city: "Belgrade",
       country: "Serbia",
       pricePerHour: null,
+      active: true,
+      timeZone: "Europe/Belgrade",
+      openingHours: [
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+        { open: "06:00", close: "23:00" },
+      ],
     },
   ],
   nextCursor: null,
@@ -459,4 +556,34 @@ export const racketPageExample = {
     },
   ],
   nextCursor: null,
+};
+
+export const availabilityExample = {
+  courtId: "01JBX3K7M2Q8N5R4T6V9W0YZEF",
+  date: "2026-11-01",
+  timeZone: "Europe/Belgrade",
+  pricePerHour: {
+    amountMinor: 180000,
+    currency: "RSD",
+  },
+  slots: [
+    {
+      startsAt: "2026-11-01T04:00:00.000Z",
+      endsAt: "2026-11-01T05:00:00.000Z",
+      localTime: "05:00",
+      status: "CLOSED",
+    },
+    {
+      startsAt: "2026-11-01T16:00:00.000Z",
+      endsAt: "2026-11-01T17:00:00.000Z",
+      localTime: "17:00",
+      status: "BOOKED",
+    },
+    {
+      startsAt: "2026-11-01T17:00:00.000Z",
+      endsAt: "2026-11-01T18:00:00.000Z",
+      localTime: "18:00",
+      status: "FREE",
+    },
+  ],
 };

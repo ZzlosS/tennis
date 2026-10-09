@@ -7,4 +7,11 @@ export default interface BookingCreateRequest {
   startsAt: string;
   endsAt: string;
   bookingType: BookingType;
+  // Also ask for partners for this booking (the first one, when it repeats).
+  partnerRequest?: BookingPartnerRequest;
+}
+
+export interface BookingPartnerRequest {
+  // 1 to 3 more players.
+  playersNeeded: number;
 }

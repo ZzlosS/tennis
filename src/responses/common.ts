@@ -34,3 +34,12 @@ export interface ErrorBody {
     fields?: { [field: string]: string[] };
   };
 }
+
+export interface OpeningHoursDay {
+  // Whole hours, for example "08:00". Close may be "24:00".
+  open: string;
+  close: string;
+}
+
+// Seven entries, Monday first. Null means closed all day. Times are in the place's own time zone.
+export type OpeningHours = (OpeningHoursDay | null)[];

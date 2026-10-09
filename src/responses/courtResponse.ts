@@ -1,7 +1,7 @@
 import CourtKind from "../enums/courtKind";
 import CourtSurface from "../enums/courtSurface";
 import { Money } from "../http/money";
-import { ClubSummary } from "./common";
+import { ClubSummary, OpeningHours } from "./common";
 
 export default interface CourtResponse {
   id: string;
@@ -20,4 +20,9 @@ export default interface CourtResponse {
   country: string;
   // Null means free.
   pricePerHour: Money | null;
+  // False when the court is closed and cannot be booked.
+  active: boolean;
+  timeZone: string;
+  // The hours that apply: the court's own, else its club's, else 06:00 to 23:00.
+  openingHours: OpeningHours;
 }

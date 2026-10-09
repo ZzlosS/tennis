@@ -4,6 +4,8 @@ import { PageQuery } from "../http/pagination";
 import ClubCreateRequest from "../requests/clubCreateRequest";
 import UpdateClubRequest from "../requests/updateClubRequest";
 import { clubSchema } from "../schemas/clubSchema";
+import { DEFAULT_CANCEL_CUTOFF_HOURS } from "../services/courtSchedule";
+import { DEFAULT_OPENING_HOURS, DEFAULT_TIME_ZONE } from "../services/time";
 import BaseRepository from "./baseRepository";
 
 export default class ClubRepository extends BaseRepository<Club> {
@@ -21,6 +23,10 @@ export default class ClubRepository extends BaseRepository<Club> {
     club.country = createRequest.country;
     club.currency = createRequest.currency ?? DEFAULT_CURRENCY;
     club.admins = [];
+    club.timeZone = createRequest.timeZone ?? DEFAULT_TIME_ZONE;
+    club.openingHours = JSON.stringify(createRequest.openingHours ?? DEFAULT_OPENING_HOURS);
+    club.cancelCutoffHours = createRequest.cancelCutoffHours ?? DEFAULT_CANCEL_CUTOFF_HOURS;
+    club.seasonEndsOn = createRequest.seasonEndsOn ?? "";
 
     return await this.save(club);
   }
@@ -55,6 +61,18 @@ export default class ClubRepository extends BaseRepository<Club> {
     }
     if (updateRequest.currency) {
       club.currency = updateRequest.currency;
+    }
+    if (updateRequest.timeZone) {
+      club.timeZone = updateRequest.timeZone;
+    }
+    if (updateRequest.openingHours) {
+      club.openingHours = JSON.stringify(updateRequest.openingHours);
+    }
+    if (updateRequest.cancelCutoffHours !== undefined) {
+      club.cancelCutoffHours = updateRequest.cancelCutoffHours;
+    }
+    if (updateRequest.seasonEndsOn !== undefined) {
+      club.seasonEndsOn = updateRequest.seasonEndsOn;
     }
 
     return await this.save(club);

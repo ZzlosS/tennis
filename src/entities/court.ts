@@ -19,6 +19,12 @@ type Court = BaseEntity & {
   // Only used by courts without a club; a club's courts are priced in the club's currency.
   currency: string;
   pricePerHourMinor: number;
+  // A closed court cannot be booked. Courts saved before this field existed count as open.
+  active: boolean;
+  // Courts without a club have their own time zone; a club court uses its club's.
+  timeZone: string;
+  // JSON text of OpeningHours. Empty means the club's (or the default) apply.
+  openingHours: string;
 };
 
 export { Court };

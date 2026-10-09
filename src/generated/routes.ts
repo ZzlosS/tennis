@@ -315,6 +315,20 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OpeningHoursDay": {
+        "dataType": "refObject",
+        "properties": {
+            "open": {"dataType":"string","required":true},
+            "close": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OpeningHours": {
+        "dataType": "refAlias",
+        "type": {"dataType":"array","array":{"dataType":"union","subSchemas":[{"ref":"OpeningHoursDay"},{"dataType":"enum","enums":[null]}]},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "CourtResponse": {
         "dataType": "refObject",
         "properties": {
@@ -331,6 +345,9 @@ const models: TsoaRoute.Models = {
             "city": {"dataType":"string","required":true},
             "country": {"dataType":"string","required":true},
             "pricePerHour": {"dataType":"union","subSchemas":[{"ref":"Money"},{"dataType":"enum","enums":[null]}],"required":true},
+            "active": {"dataType":"boolean","required":true},
+            "timeZone": {"dataType":"string","required":true},
+            "openingHours": {"ref":"OpeningHours","required":true},
         },
         "additionalProperties": false,
     },
@@ -357,7 +374,37 @@ const models: TsoaRoute.Models = {
             "city": {"dataType":"string","required":true},
             "country": {"dataType":"string","required":true},
             "currency": {"dataType":"string"},
+            "timeZone": {"dataType":"string"},
+            "openingHours": {"ref":"OpeningHours"},
             "pricePerHourMinor": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SlotStatus": {
+        "dataType": "refEnum",
+        "enums": ["FREE","BOOKED","BLOCKED","CLOSED"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AvailabilitySlot": {
+        "dataType": "refObject",
+        "properties": {
+            "startsAt": {"dataType":"string","required":true},
+            "endsAt": {"dataType":"string","required":true},
+            "localTime": {"dataType":"string","required":true},
+            "status": {"ref":"SlotStatus","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AvailabilityResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "courtId": {"dataType":"string","required":true},
+            "date": {"dataType":"string","required":true},
+            "timeZone": {"dataType":"string","required":true},
+            "pricePerHour": {"dataType":"union","subSchemas":[{"ref":"Money"},{"dataType":"enum","enums":[null]}],"required":true},
+            "slots": {"dataType":"array","array":{"dataType":"refObject","ref":"AvailabilitySlot"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -383,6 +430,10 @@ const models: TsoaRoute.Models = {
             "city": {"dataType":"string"},
             "country": {"dataType":"string"},
             "currency": {"dataType":"string"},
+            "timeZone": {"dataType":"string"},
+            "active": {"dataType":"boolean"},
+            "openingHours": {"ref":"OpeningHours"},
+            "followClubHours": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -411,6 +462,10 @@ const models: TsoaRoute.Models = {
             "country": {"dataType":"string","required":true},
             "currency": {"dataType":"string","required":true},
             "courtCount": {"dataType":"double","required":true},
+            "timeZone": {"dataType":"string","required":true},
+            "openingHours": {"ref":"OpeningHours","required":true},
+            "cancelCutoffHours": {"dataType":"double","required":true},
+            "seasonEndsOn": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -433,6 +488,10 @@ const models: TsoaRoute.Models = {
             "city": {"dataType":"string","required":true},
             "country": {"dataType":"string","required":true},
             "currency": {"dataType":"string"},
+            "timeZone": {"dataType":"string"},
+            "openingHours": {"ref":"OpeningHours"},
+            "cancelCutoffHours": {"dataType":"double"},
+            "seasonEndsOn": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -448,6 +507,10 @@ const models: TsoaRoute.Models = {
             "country": {"dataType":"string","required":true},
             "currency": {"dataType":"string","required":true},
             "courtCount": {"dataType":"double","required":true},
+            "timeZone": {"dataType":"string","required":true},
+            "openingHours": {"ref":"OpeningHours","required":true},
+            "cancelCutoffHours": {"dataType":"double","required":true},
+            "seasonEndsOn": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "courts": {"dataType":"array","array":{"dataType":"refObject","ref":"CourtResponse"},"required":true},
         },
         "additionalProperties": false,
@@ -462,6 +525,10 @@ const models: TsoaRoute.Models = {
             "city": {"dataType":"string"},
             "country": {"dataType":"string"},
             "currency": {"dataType":"string"},
+            "timeZone": {"dataType":"string"},
+            "openingHours": {"ref":"OpeningHours"},
+            "cancelCutoffHours": {"dataType":"double"},
+            "seasonEndsOn": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -469,6 +536,11 @@ const models: TsoaRoute.Models = {
     "BookingType": {
         "dataType": "refEnum",
         "enums": ["ONE_TIME","MONTH","SEASON"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BookingStatus": {
+        "dataType": "refEnum",
+        "enums": ["PENDING","CONFIRMED","CANCELLED"],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "BookingResponse": {
@@ -482,6 +554,17 @@ const models: TsoaRoute.Models = {
             "player": {"ref":"PlayerSummary","required":true},
             "totalPrice": {"dataType":"union","subSchemas":[{"ref":"Money"},{"dataType":"enum","enums":[null]}],"required":true},
             "bookingType": {"ref":"BookingType","required":true},
+            "status": {"ref":"BookingStatus","required":true},
+            "seriesId": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "paidAt": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BookingPartnerRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "playersNeeded": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -493,6 +576,7 @@ const models: TsoaRoute.Models = {
             "startsAt": {"dataType":"string","required":true},
             "endsAt": {"dataType":"string","required":true},
             "bookingType": {"ref":"BookingType","required":true},
+            "partnerRequest": {"ref":"BookingPartnerRequest"},
         },
         "additionalProperties": false,
     },
@@ -1443,6 +1527,38 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCourtController_getAvailability: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                date: {"in":"query","name":"date","required":true,"dataType":"string"},
+        };
+        app.get('/v1/courts/:id/availability',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CourtController)),
+            ...(fetchMiddlewares<RequestHandler>(CourtController.prototype.getAvailability)),
+
+            async function CourtController_getAvailability(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCourtController_getAvailability, request, response });
+
+                const controller = new CourtController();
+
+              await templateService.apiHandler({
+                methodName: 'getAvailability',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsCourtController_getCourt: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
         };
@@ -1834,6 +1950,8 @@ export function RegisterRoutes(app: Router) {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
                 courtId: {"in":"query","name":"courtId","dataType":"string"},
                 playerId: {"in":"query","name":"playerId","dataType":"string"},
+                seriesId: {"in":"query","name":"seriesId","dataType":"string"},
+                status: {"in":"query","name":"status","ref":"BookingStatus"},
                 from: {"in":"query","name":"from","dataType":"datetime"},
                 to: {"in":"query","name":"to","dataType":"datetime"},
                 limit: {"in":"query","name":"limit","dataType":"double"},
@@ -1921,6 +2039,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'updateBooking',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBookingController_cancelBooking: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                series: {"in":"query","name":"series","dataType":"boolean"},
+        };
+        app.post('/v1/bookings/:id/cancel',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(BookingController)),
+            ...(fetchMiddlewares<RequestHandler>(BookingController.prototype.cancelBooking)),
+
+            async function BookingController_cancelBooking(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBookingController_cancelBooking, request, response });
+
+                const controller = new BookingController();
+
+              await templateService.apiHandler({
+                methodName: 'cancelBooking',
                 controller,
                 response,
                 next,

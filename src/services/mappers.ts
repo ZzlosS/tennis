@@ -21,6 +21,9 @@ import MatchResponse from "../responses/matchResponse";
 import PartnerRequestResponse from "../responses/partnerRequestResponse";
 import PlayerResponse from "../responses/playerResponse";
 import RacketResponse from "../responses/racketResponse";
+import BookingStatus from "../enums/bookingStatus";
+import { DEFAULT_CANCEL_CUTOFF_HOURS, scheduleOf } from "./courtSchedule";
+import { DEFAULT_TIME_ZONE } from "./time";
 import { AuthUser } from "./tokenService";
 import { isAdmin } from "./access";
 
@@ -58,6 +61,7 @@ export default class Mapper {
 
   async court(court: Court): Promise<CourtResponse> {
     const club = await this.clubOf(court);
+    const schedule = scheduleOf(court, club);
     return {
       id: court.entityId,
       name: court.name,
@@ -72,6 +76,9 @@ export default class Mapper {
       city: court.city ?? "",
       country: court.country ?? "",
       pricePerHour: toMoney(court.pricePerHourMinor, court.currency),
+      active: schedule.active,
+      timeZone: schedule.timeZone,
+      openingHours: schedule.openingHours,
     };
   }
 
@@ -85,6 +92,10 @@ export default class Mapper {
       country: club.country,
       currency: club.currency,
       courtCount: await this.courts.countClubCourts(club.entityId),
+      timeZone: club.timeZone || DEFAULT_TIME_ZONE,
+      openingHours: scheduleOf({} as Court, club).openingHours,
+      cancelCutoffHours: club.cancelCutoffHours ?? DEFAULT_CANCEL_CUTOFF_HOURS,
+      seasonEndsOn: club.seasonEndsOn || null,
     };
   }
 
@@ -130,6 +141,9 @@ export default class Mapper {
       player: await this.playerSummary(booking.player),
       totalPrice: toMoney(booking.totalPriceMinor, booking.currency),
       bookingType: booking.bookingType,
+      status: booking.status ?? BookingStatus.CONFIRMED,
+      seriesId: booking.seriesId || null,
+      paidAt: booking.paidAt ? new Date(booking.paidAt).toISOString() : null,
     };
   }
 

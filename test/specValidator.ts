@@ -106,3 +106,34 @@ export function checkResponse(method: string, url: string, status: number, body:
     violations.push(`${label}: response does not match the spec: ${problems.join("; ")}`);
   }
 }
+
+// Every example in the spec (they are what `npm run mock` serves) must match the schema it sits beside.
+export let examplesChecked = 0;
+
+export function badExamples(): string[] {
+  const problems: string[] = [];
+  for (const [template, operations] of Object.entries(spec.paths)) {
+    for (const [method, operation] of Object.entries(operations)) {
+      for (const [status, response] of Object.entries(operation.responses)) {
+        const content = (
+          response.content as Record<string, { examples?: Record<string, { value: unknown }> }> | undefined
+        )?.["application/json"];
+        if (!content?.examples) {
+          continue;
+        }
+        const pointer = ["paths", template, method, "responses", status, "content", "application/json", "schema"]
+          .map(encode)
+          .join("/");
+        const validate = ajv.compile({ $ref: `spec#/${pointer}` });
+        for (const [name, example] of Object.entries(content.examples)) {
+          examplesChecked += 1;
+          if (!validate(example.value)) {
+            const errors = (validate.errors ?? []).map((error) => `${error.instancePath || "/"} ${error.message}`);
+            problems.push(`${method.toUpperCase()} ${template} -> ${status} (${name}): ${errors.join("; ")}`);
+          }
+        }
+      }
+    }
+  }
+  return problems;
+}

@@ -9,11 +9,11 @@ import CourtKind from "../enums/courtKind";
 import CourtSurface from "../enums/courtSurface";
 import PlayerLevel from "../enums/playerLevel";
 import RacketLevels from "../enums/racketLevels";
-import BookingRepository from "../repositories/bookingRepository";
 import ClubRepository from "../repositories/clubRepository";
 import CourtRepository from "../repositories/courtRepository";
 import PlayerRepository from "../repositories/playerRepository";
 import RacketRepository from "../repositories/racketRepository";
+import BookingService from "../services/bookingService";
 import { hashPassword } from "../services/passwordService";
 import RedisClient from "../services/redisClient";
 
@@ -57,7 +57,7 @@ export async function seed() {
   const courtRepository = new CourtRepository();
   const playerRepository = new PlayerRepository();
   const racketRepository = new RacketRepository();
-  const bookingRepository = new BookingRepository();
+  const bookingService = new BookingService();
 
   for (const racket of rackets) {
     await racketRepository.createRacket({
@@ -136,12 +136,12 @@ export async function seed() {
   day.setUTCHours(16, 0, 0, 0);
   const startsAt = day.toISOString();
   const endsAt = new Date(day.getTime() + 2 * 3_600_000).toISOString();
-  await bookingRepository.createBooking(
-    { courtId: courtIds[0], startsAt, endsAt, bookingType: BookingType.ONE_TIME },
-    playerIds[0],
-    300000,
-    "RSD"
-  );
+  await bookingService.create(playerIds[0], {
+    courtId: courtIds[0],
+    startsAt,
+    endsAt,
+    bookingType: BookingType.ONE_TIME,
+  });
 
   console.log(
     `Seeded ${clubs.length} clubs, ${courtIds.length + 1} courts, ${playerIds.length} players (password123).`

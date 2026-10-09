@@ -25,6 +25,7 @@ export const createBookingBody = z
     startsAt: hourlyTime,
     endsAt: hourlyTime,
     bookingType: z.nativeEnum(BookingType),
+    partnerRequest: z.object({ playersNeeded: z.number().int().min(1).max(3) }).optional(),
   })
   .superRefine(checkBookingTimes);
 
