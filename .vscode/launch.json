@@ -1,53 +1,42 @@
 {
   "version": "0.2.0",
   "configurations": [
-      {
-          "command": "npm run watch",
-          "name": "Run npm watch",
-          "request": "launch",
-          "type": "node-terminal"
-      },
-      {
-        "name": "Debug Program",
-        "type": "node",
-        "request": "launch",
-        "runtimeExecutable": "node",
-        "runtimeArgs": [
-          "--nolazy",
-          "-r",
-          "ts-node/register/transpile-only"
-        ],
-        "args": [
-          "src/app.ts"
-        ],
-        "cwd": "${workspaceRoot}",
-        "internalConsoleOptions": "openOnSessionStart",
-        "skipFiles": [
-          "<node_internals>/**",
-          "node_modules/**"
-        ],
-        "env": {}
-      },
-      {
-        "name": "Insert",
-        "type": "node",
-        "request": "launch",
-        "runtimeExecutable": "node",
-        "runtimeArgs": [
-          "--nolazy",
-          "-r",
-          "ts-node/register/transpile-only"
-        ],
-        "args": [
-          "src/examples/insertData.ts"
-        ],
-        "cwd": "${workspaceRoot}",
-        "internalConsoleOptions": "openOnSessionStart",
-        "skipFiles": [
-          "<node_internals>/**",
-          "node_modules/**"
-        ],
-        "env": {}
-      },
+    {
+      // Start `npm run dev:debug` first; this attaches and reattaches after every nodemon restart.
+      "name": "Attach to API",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
+    },
+    {
+      "name": "Debug API",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
+      "args": ["src/server.ts"],
+      "cwd": "${workspaceFolder}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
+    },
+    {
+      "name": "Run npm watch",
+      "command": "npm run watch",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "name": "Seed sample data",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
+      "args": ["src/examples/insertData.ts"],
+      "cwd": "${workspaceFolder}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
+    }
   ]
 }
