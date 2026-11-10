@@ -5,7 +5,6 @@
   "main": "./build/server.js",
   "scripts": {
     "watch": "nodemon src/server.ts",
-    "devv": "nodemon src/server.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
@@ -16,6 +15,8 @@
     "prebuild": "npm run spec",
     "build": "tsc",
     "dev": "concurrently \"nodemon src/server.ts\" \"nodemon -x tsoa spec-and-routes\"",
+    "predev:debug": "npm run spec",
+    "dev:debug": "nodemon --exec \"node --inspect=9229 -r ts-node/register src/server.ts\"",
     "grant-role": "ts-node src/scripts/grantRole.ts",
     "rebuild-stats": "ts-node src/scripts/rebuildStats.ts",
     "spec": "tsoa spec-and-routes",

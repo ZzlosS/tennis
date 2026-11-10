@@ -69,6 +69,7 @@ The server listens on <http://localhost:8787>. `GET /health` answers `{ "status"
 | --- | --- |
 | `npm run watch` | Run the app from source with nodemon. |
 | `npm run dev` | Regenerate the spec and routes, then run nodemon for the app and for tsoa side by side. |
+| `npm run dev:debug` | Regenerate the spec and routes once, then run the app with nodemon and the Node debugger on port 9229. In VS Code, start the "Attach to API" launch config. |
 | `npm run spec` | Generate `openapi/v1.json` and `src/generated/routes.ts` from the controllers. Commit the result. |
 | `npm run mock` | Serve the sample responses from the spec on <http://localhost:4010> with Prism (no Redis or login needed; routes have no `/v1` prefix there). |
 | `npm run seed` | Fill Redis with sample players, clubs, courts and bookings. |
