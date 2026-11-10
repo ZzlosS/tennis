@@ -13,7 +13,7 @@ const define = (body: string): Script => ({ body, sha: crypto.createHash("sha1")
 // Claims and releases the hours of day hashes in one step.
 // KEYS: the day hashes, "slots:{court}:YYYY-MM-DD".
 // ARGV: nClaims, nReleases, then nClaims triples (key number, hour field, holder), then nReleases triples,
-//       then one expiry (unix seconds) per key.
+//       then one time to live (seconds) per key.
 // A claim fails when the hour is held by someone else, and then nothing at all is written: the reply lists
 // "key|field|holder" for every hour that is taken. A release only removes an hour that still has that holder.
 export const claimSlots = define(`
@@ -46,7 +46,7 @@ for i = 1, nReleases do
   pos = pos + 3
 end
 for i = 1, #KEYS do
-  redis.call('EXPIREAT', KEYS[i], tonumber(ARGV[pos]))
+  redis.call('EXPIRE', KEYS[i], tonumber(ARGV[pos]))
   pos = pos + 1
 end
 return taken

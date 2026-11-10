@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { claimSlots, runScript } from "../src/redis/scripts";
 import SlotRepository, { makeHolder, parseHolder } from "../src/repositories/slotRepository";
 import RedisClient from "../src/services/redisClient";
+import { now } from "../src/services/clock";
 
 const repository = new SlotRepository();
 const hour = (h: number, day = "2026-11-01") => new Date(`${day}T${String(h).padStart(2, "0")}:00:00Z`);
@@ -82,8 +83,11 @@ describe("slot claims", () => {
 
   it("lets the day hash expire a week after its day", async () => {
     await repository.claim([{ courtId: "c1", hour: hour(8), holder: makeHolder("b", "x") }], [], always);
-    const ttlAt = Number(await RedisClient.execute("EXPIRETIME", "slots:{c1}:2026-11-01"));
-    expect(new Date(ttlAt * 1000).toISOString()).toBe("2026-11-09T00:00:00.000Z");
+    // Measured from the app's clock (fixed by the test setup), not from Redis's own clock, which is the real time.
+    const ttl = Number(await RedisClient.execute("TTL", "slots:{c1}:2026-11-01"));
+    const expected = (Date.parse("2026-11-09T00:00:00Z") - now().getTime()) / 1000;
+    expect(ttl).toBeGreaterThan(expected - 5);
+    expect(ttl).toBeLessThanOrEqual(expected);
   });
 
   it("parses holders", () => {
@@ -92,11 +96,7 @@ describe("slot claims", () => {
 
   it("reloads a script that Redis forgot", async () => {
     await RedisClient.execute("SCRIPT", "FLUSH");
-    const reply = await runScript(
-      claimSlots,
-      ["slots:{c9}:2026-11-01"],
-      [1, 0, 1, "08", "h", Math.floor(Date.now() / 1000) + 100]
-    );
+    const reply = await runScript(claimSlots, ["slots:{c9}:2026-11-01"], [1, 0, 1, "08", "h", 100]);
     expect(reply).toEqual([]);
   });
 });

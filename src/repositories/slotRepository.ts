@@ -1,5 +1,6 @@
 import { claimSlots, runScript } from "../redis/scripts";
 import RedisClient from "../services/redisClient";
+import { now } from "../services/clock";
 import { DAY_MS } from "../services/time";
 
 // Which hours of which courts are taken. Each court has one hash per UTC day: the field is the hour ("00" to "23")
@@ -30,8 +31,10 @@ export function parseHolder(holder: string): ParsedHolder {
 
 const dayKey = (courtId: string, hour: Date) => `slots:{${courtId}}:${hour.toISOString().slice(0, 10)}`;
 const hourField = (hour: Date) => String(hour.getUTCHours()).padStart(2, "0");
-// Day hashes are kept a week after their day, then Redis removes them.
-const expiresAt = (key: string) => Math.floor((Date.parse(key.slice(-10)) + DAY_MS + 7 * DAY_MS) / 1000);
+// Day hashes are kept a week after their day, then Redis removes them. Sent as seconds from the app's clock
+// rather than a moment on Redis's clock, so the app's idea of "now" decides (tests fix it with setClock).
+const expiresIn = (key: string) =>
+  Math.ceil((Date.parse(key.slice(-10)) + DAY_MS + 7 * DAY_MS - now().getTime()) / 1000);
 
 function parseKey(key: string, field: string): { courtId: string; hour: Date } {
   const match = /^slots:\{(.+)\}:(\d{4}-\d{2}-\d{2})$/.exec(key)!;
@@ -56,7 +59,7 @@ export default class SlotRepository {
       releases.length,
       ...claims.flatMap(triple),
       ...releases.flatMap(triple),
-      ...keys.map(expiresAt),
+      ...keys.map(expiresIn),
     ])) as string[];
 
     return reply.map((entry) => {
